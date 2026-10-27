@@ -276,6 +276,14 @@ export function PublicNavbar() {
           </button>
         </div>
 
+        {/* Mobile Language Switcher Section */}
+        <div className="mobile-drawer-lang-strip">
+          <span className="mobile-drawer-lang-label">
+            {isNe ? 'भाषा चयन:' : 'Language:'}
+          </span>
+          <LanguageSwitcher size="sm" />
+        </div>
+
         {/* Mobile Navigation Links */}
         <nav className="mobile-nav-links-list" aria-label={isNe ? 'मोबाइल मेनु' : 'Mobile Menu'}>
           <Link 

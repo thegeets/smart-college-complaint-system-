@@ -135,6 +135,7 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  max-width: 100%;
 }
 
 body {
@@ -144,6 +145,19 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+input, select, textarea, button {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Bilingual Typography Rules & Devanagari Script Protection */
@@ -2099,9 +2113,10 @@ button, input, select, textarea {
   margin: 0 auto;
   padding: 0 1.25rem;
   display: grid;
-  grid-template-columns: minmax(360px, 1.2fr) minmax(380px, 1fr);
-  gap: 48px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+  gap: 40px;
   align-items: center;
+  min-width: 0;
 }
 
 .hero-trust-tag {
@@ -2481,8 +2496,8 @@ button, input, select, textarea {
 
 .gateways-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 20px;
 }
 
 .gateway-card {
@@ -2629,8 +2644,8 @@ button, input, select, textarea {
 
 .categories-rich-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 20px;
 }
 
 .category-rich-card {
@@ -2764,8 +2779,8 @@ button, input, select, textarea {
 
 .process-steps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 20px;
 }
 
 .process-step-card {
@@ -3246,24 +3261,11 @@ button, input, select, textarea {
   color: #334155;
 }
 
-/* Responsive Overrides */
-@media (max-width: 1024px) {
-  .hero-master-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
+/* ==========================================================================
+   18. COMPREHENSIVE RESPONSIVE DESIGN SYSTEM (320px - 1440px)
+   ========================================================================== */
 
-  .privacy-card-banner {
-    grid-template-columns: 1fr;
-    padding: 28px;
-  }
-
-  .footer-container {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Switch to mobile navigation before header becomes crowded (1100px) */
+/* Large Tablets & Small Laptops (1024px - 1100px) */
 @media (max-width: 1100px) {
   .desktop-nav-menu,
   .desktop-nav-actions {
@@ -3288,9 +3290,44 @@ button, input, select, textarea {
   }
 }
 
+@media (max-width: 1024px) {
+  .hero-master-container {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .privacy-card-banner {
+    grid-template-columns: 1fr;
+    padding: 32px;
+    gap: 28px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+}
+
+/* Medium Tablets & Phones in Landscape (768px - 900px) */
+@media (max-width: 900px) {
+  .admin-sidebar {
+    display: none !important;
+  }
+
+  .admin-mobile-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-content {
+    padding: 20px 16px;
+  }
+}
+
 @media (max-width: 768px) {
   .top-strip-right .top-strip-hours {
-    display: none;
+    display: none !important;
   }
 
   .hero-master-section {
@@ -3298,16 +3335,333 @@ button, input, select, textarea {
   }
 
   .hero-main-title {
-    font-size: 1.875rem;
+    font-size: clamp(1.625rem, 4vw + 0.5rem, 2rem);
   }
 
   .contact-banner-box {
-    padding: 28px 20px;
+    padding: 32px 20px;
+  }
+
+  .contact-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .footer-container {
     grid-template-columns: 1fr;
     gap: 32px;
+  }
+
+  .complaint-table-desktop {
+    display: none !important;
+  }
+
+  .complaint-table-mobile {
+    display: flex !important;
+  }
+}
+
+/* Standard Mobile Screens (640px and below) */
+@media (max-width: 640px) {
+  .top-strip-inner {
+    padding: 0 1rem;
+    gap: 8px;
+  }
+
+  .top-strip-divider {
+    display: none !important;
+  }
+
+  .top-strip-text {
+    font-size: 0.6875rem;
+  }
+
+  .top-strip-phone {
+    font-size: 0.6875rem;
+  }
+
+  .admin-topbar {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .admin-topbar-title {
+    max-width: 180px;
+    font-size: 0.8125rem;
+  }
+
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-input-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .filter-controls-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .contact-banner-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .contact-footer-text {
+    justify-content: center;
+  }
+}
+
+/* Small Mobile Screens (480px and below, e.g. 375px - 430px) */
+@media (max-width: 480px) {
+  .container {
+    width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .main-navbar-inner {
+    min-height: 60px;
+    padding: 0 12px;
+  }
+
+  .brand-subtitle {
+    display: none !important;
+  }
+
+  .mobile-bar-actions .lang-switcher-wrap {
+    display: none !important; /* Managed cleanly inside mobile drawer */
+  }
+
+  .hero-master-section {
+    padding: 24px 0 32px;
+  }
+
+  .hero-master-container {
+    padding: 0 12px;
+    gap: 24px;
+  }
+
+  .hero-trust-tag {
+    font-size: 0.6875rem;
+    padding: 3px 10px;
+    margin-bottom: 12px;
+  }
+
+  .hero-main-title {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    margin-bottom: 12px;
+  }
+
+  .hero-lead-description {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .hero-action-cluster {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    width: 100%;
+    justify-content: center;
+    height: 46px;
+    padding: 0 16px;
+  }
+
+  .hero-features-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-top: 14px;
+  }
+
+  .hero-console-content {
+    padding: 14px 12px;
+  }
+
+  .hero-console-pipeline {
+    padding: 8px 6px;
+    gap: 2px;
+  }
+
+  .pipeline-node .node-marker {
+    width: 22px;
+    height: 22px;
+    font-size: 0.6875rem;
+  }
+
+  .pipeline-node .node-title {
+    font-size: 0.6875rem;
+  }
+
+  .pipeline-node .node-time {
+    display: none !important;
+  }
+
+  .pipeline-connector {
+    margin: 0 2px;
+  }
+
+  .hero-console-inputs-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-console-actions-row {
+    flex-direction: column;
+  }
+
+  .hero-console-actions-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-categories-section,
+  .home-process-section,
+  .home-faq-section,
+  .home-contact-section {
+    padding: 40px 0;
+  }
+
+  .section-main-heading {
+    font-size: 1.45rem;
+  }
+
+  .section-heading-block {
+    margin-bottom: 24px;
+  }
+
+  .gateway-card {
+    padding: 20px 14px;
+  }
+
+  .category-rich-card {
+    padding: 18px 14px;
+  }
+
+  .process-step-card {
+    padding: 20px 14px;
+  }
+
+  .quick-track-inline-form {
+    flex-direction: column;
+  }
+
+  .quick-track-btn {
+    width: 100%;
+  }
+
+  .privacy-card-banner {
+    padding: 18px 14px;
+  }
+
+  .privacy-banner-left {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .privacy-shield-icon-wrap {
+    width: 44px;
+    height: 44px;
+  }
+
+  .privacy-title {
+    font-size: 1.25rem;
+  }
+
+  .contact-banner-box {
+    padding: 24px 14px;
+  }
+
+  .contact-main-title {
+    font-size: 1.35rem;
+  }
+
+  .card {
+    padding: 16px !important;
+  }
+
+  .modal-dialog {
+    margin: 8px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .complaint-timeline-stepper {
+    gap: 3px;
+  }
+
+  .timeline-track-bg,
+  .timeline-track-progress {
+    top: 13px;
+  }
+
+  .timeline-step-circle {
+    width: 26px;
+    height: 26px;
+  }
+
+  .timeline-step-label {
+    font-size: 0.6875rem;
+  }
+
+  .timeline-step-status {
+    display: none !important;
+  }
+}
+
+/* Extra-Narrow Mobile Screens (320px - 360px, e.g. iPhone SE 1st gen / Galaxy Fold) */
+@media (max-width: 360px) {
+  .top-strip-text {
+    display: none !important;
+  }
+
+  .top-strip-inner {
+    justify-content: center;
+  }
+
+  .brand-title {
+    font-size: 0.8125rem !important;
+  }
+
+  .admin-topbar-title {
+    display: none !important;
+  }
+
+  .filter-controls-group {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-main-title {
+    font-size: 1.35rem;
+  }
+
+  .section-main-heading {
+    font-size: 1.25rem;
+  }
+
+  .gateway-title {
+    font-size: 1.05rem;
+  }
+
+  .btn {
+    font-size: 0.8125rem;
+    padding: 0 10px;
   }
 }
 

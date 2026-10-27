@@ -384,7 +384,7 @@ export function HeroVisual() {
 
             <form onSubmit={handleTrackSubmit}>
               {/* Row 1: Reference ID & Secret Inputs */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', marginBottom: '10px' }}>
+              <div className="hero-console-inputs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginBottom: '10px' }}>
                 {/* Reference Input */}
                 <div>
                   <label htmlFor="hero-ref-input" style={{ display: 'block', fontSize: '0.6875rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', marginBottom: '3px' }}>
@@ -460,7 +460,7 @@ export function HeroVisual() {
               </div>
 
               {/* Action Buttons Row */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div className="hero-console-actions-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <button
                   type="submit"
                   className="btn btn-primary"

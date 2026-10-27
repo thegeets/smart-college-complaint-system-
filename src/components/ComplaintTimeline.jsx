@@ -29,41 +29,24 @@ export function ComplaintTimeline({ currentStatus = 'Submitted', timeline = [] }
     <div style={{ margin: 'var(--space-4) 0' }}>
       
       {/* 4-Step Clean Visual Stepper */}
+      {/* 4-Step Clean Visual Stepper */}
       <div 
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: 'var(--space-2)',
-          position: 'relative',
-          marginBottom: 'var(--space-6)'
-        }}
+        className="complaint-timeline-stepper"
         role="progressbar" 
         aria-valuenow={currentIndex + 1} 
         aria-valuemin={1} 
         aria-valuemax={4}
       >
         {/* Background track line */}
-        <div style={{
-          position: 'absolute',
-          top: '15px',
-          left: '12%',
-          right: '12%',
-          height: '2px',
-          backgroundColor: '#E2E8F0',
-          zIndex: 1
-        }} />
+        <div className="timeline-track-bg" />
 
         {/* Completed track line */}
-        <div style={{
-          position: 'absolute',
-          top: '15px',
-          left: '12%',
-          width: `${Math.min(100, Math.max(0, (currentIndex / 3) * 76))}%`,
-          height: '2px',
-          backgroundColor: '#0D8178',
-          zIndex: 1,
-          transition: 'width 0.3s ease'
-        }} />
+        <div 
+          className="timeline-track-progress"
+          style={{
+            width: `${Math.min(100, Math.max(0, (currentIndex / 3) * 76))}%`,
+          }} 
+        />
         {steps.map((step, idx) => {
           const isCompleted = idx < currentIndex || (idx === currentIndex && currentStatus === 'Resolved');
           const isActive = idx === currentIndex && currentStatus !== 'Resolved';
@@ -73,34 +56,11 @@ export function ComplaintTimeline({ currentStatus = 'Submitted', timeline = [] }
           return (
             <div 
               key={step.key} 
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                position: 'relative'
-              }}
+              className="timeline-step-item"
             >
               {/* Stepper Node Circle */}
               <div 
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: isCompleted ? 'var(--color-primary)' : isActive ? 'var(--color-surface)' : 'var(--color-surface-subtle)',
-                  border: isCompleted 
-                    ? '2px solid var(--color-primary)' 
-                    : isActive 
-                    ? '2px solid var(--color-teal)' 
-                    : '2px solid var(--color-border)',
-                  color: isCompleted ? '#FFFFFF' : isActive ? 'var(--color-teal)' : 'var(--color-muted)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 'var(--space-1)',
-                  zIndex: 2,
-                  transition: 'all 0.15s ease'
-                }}
+                className={`timeline-step-circle ${isCompleted ? 'completed' : isActive ? 'active' : ''}`}
               >
                 {isCompleted ? (
                   <Check size={16} strokeWidth={2.5} />
@@ -110,17 +70,12 @@ export function ComplaintTimeline({ currentStatus = 'Submitted', timeline = [] }
               </div>
 
               {/* Step Label */}
-              <div style={{ 
-                fontSize: '0.8125rem', 
-                fontWeight: isActive || isCompleted ? '700' : '500',
-                color: isActive ? 'var(--color-teal)' : isCompleted ? 'var(--color-heading)' : 'var(--color-muted)',
-                lineHeight: '1.2'
-              }}>
+              <div className={`timeline-step-label ${isActive ? 'active' : isCompleted ? 'completed' : ''}`}>
                 {stepLabel}
               </div>
 
               {/* Status text */}
-              <div style={{ fontSize: '0.6875rem', color: 'var(--color-muted)', marginTop: '2px' }}>
+              <div className="timeline-step-status">
                 {isCompleted ? (isNe ? 'सम्पन्न' : 'Done') : isActive ? (isNe ? 'प्रक्रियामा' : 'Active') : (isNe ? 'बाँकी' : 'Pending')}
               </div>
             </div>

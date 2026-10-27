@@ -70,7 +70,7 @@ export function AdminSettingsPage() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-6)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-6)' }}>
         
         {/* Card 1: College Identification */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>

@@ -211,7 +211,7 @@ export function AdminComplaintDetailPage() {
           border: '1px solid #E2E8F0',
           borderRadius: '6px',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))',
           gap: '12px',
           fontSize: '0.8125rem'
         }}>
@@ -306,7 +306,7 @@ export function AdminComplaintDetailPage() {
       </div>
 
       {/* Two Column Administrative Actions Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
         
         {/* Card A: Update Status */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>

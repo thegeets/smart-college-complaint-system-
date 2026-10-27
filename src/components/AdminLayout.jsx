@@ -285,7 +285,7 @@ export function AdminLayout() {
             >
               <Menu size={18} />
             </button>
-            <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--color-heading)' }}>
+            <span className="admin-topbar-title">
               {COLLEGE_CONFIG.name} — {COLLEGE_CONFIG.deskTitle}
             </span>
           </div>

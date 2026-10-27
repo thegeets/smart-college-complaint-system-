@@ -104,17 +104,16 @@ export function BrandLogo({
       {/* College Typography */}
       {showText && (
         <div className="brand-text-block" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <div style={{ 
+          <div className="brand-title" style={{ 
             fontSize: size >= 36 ? '0.9375rem' : '0.875rem', 
             fontWeight: '800', 
             color: isLight ? '#FFFFFF' : '#0F172A',
             lineHeight: 1.2,
             letterSpacing: '-0.015em',
-            whiteSpace: 'nowrap',
           }}>
             {collegeName}
           </div>
-          <div style={{ 
+          <div className="brand-subtitle" style={{ 
             fontSize: size >= 36 ? '0.75rem' : '0.6875rem', 
             color: isLight ? '#94A3B8' : '#0F766E',
             fontWeight: '600',
