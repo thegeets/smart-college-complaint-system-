@@ -9,13 +9,12 @@ import {
   Clock,
   CheckCircle2,
   KeyRound,
-  ShieldCheck,
   AlertCircle,
   GraduationCap
 } from 'lucide-react';
 
 export function AdminSettingsPage() {
-  const { categories, changeAdminPassword, language, showToast } = useApp();
+  const { categories, changeAdminPassword, language } = useApp();
   const isNe = language === 'ne';
 
   // Change Password Form State

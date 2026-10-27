@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  Download,
   Printer,
   RefreshCw,
   AlertCircle,
-  BarChart3,
-  PieChart
+  BarChart3
 } from 'lucide-react';
 
 export function ReportsAnalyticsPage() {
@@ -31,8 +29,28 @@ export function ReportsAnalyticsPage() {
   }, [fetchReportsSummary]);
 
   useEffect(() => {
-    loadReports();
-  }, [loadReports]);
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await fetchReportsSummary();
+        if (isMounted) {
+          setSummary(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Failed to load reports from database.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchReportsSummary]);
 
   const total = summary?.total || 0;
   const resolved = summary?.resolved || 0;

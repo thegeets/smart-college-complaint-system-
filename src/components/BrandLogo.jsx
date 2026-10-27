@@ -41,10 +41,10 @@ export function BrandLogo({
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: '8px',
-          backgroundColor: isLight ? '#FFFFFF' : '#15365D',
+          backgroundColor: isLight ? '#FFFFFF' : '#15365B',
           border: isLight ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid #0F2847',
           boxShadow: isLight ? '0 1px 3px rgba(0,0,0,0.12)' : '0 1px 2px rgba(15,23,42,0.15)',
-          color: isLight ? '#15365D' : '#FFFFFF',
+          color: isLight ? '#15365B' : '#FFFFFF',
           flexShrink: 0,
           position: 'relative',
           overflow: 'hidden',
@@ -77,7 +77,7 @@ export function BrandLogo({
             {/* Open Book / Pages */}
             <path 
               d="M7.5 14.5C9 13.8 10.5 13.8 12 14.5C13.5 13.8 15 13.8 16.5 14.5V9.5C15 8.8 13.5 8.8 12 9.5C10.5 8.8 9 8.8 7.5 9.5V14.5Z" 
-              stroke={isLight ? '#15365D' : '#E2E8F0'} 
+              stroke={isLight ? '#15365B' : '#E2E8F0'} 
               strokeWidth="1.2" 
               strokeLinejoin="round"
             />
@@ -86,13 +86,13 @@ export function BrandLogo({
               y1="9.5" 
               x2="12" 
               y2="14.5" 
-              stroke={isLight ? '#15365D' : '#E2E8F0'} 
+              stroke={isLight ? '#15365B' : '#E2E8F0'} 
               strokeWidth="1.2" 
             />
             {/* Computing Tech / Resolution Checkpoint */}
             <path 
               d="M9.5 6.8L12 8.5L14.5 6.8" 
-              stroke="#0F766E" 
+              stroke="#0D8178" 
               strokeWidth="1.8" 
               strokeLinecap="round" 
               strokeLinejoin="round"

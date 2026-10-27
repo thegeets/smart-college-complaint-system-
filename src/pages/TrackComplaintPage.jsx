@@ -15,17 +15,24 @@ import {
   MessageSquare,
   Lock,
   ArrowLeft,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Printer,
+  Copy,
+  Check
 } from 'lucide-react';
 
 export function TrackComplaintPage() {
-  const { trackComplaint, language, getCategoryLabel } = useApp();
+  const { trackComplaint, language, getCategoryLabel, showToast } = useApp();
   const isNe = language === 'ne';
   const [searchParams] = useSearchParams();
 
   // Pre-fill reference and secret if passed from submission handover
   const [reference, setReference] = useState(searchParams.get('ref') || '');
   const [trackingSecret, setTrackingSecret] = useState(searchParams.get('secret') || '');
+  const [showSecret, setShowSecret] = useState(false);
+  const [copiedRef, setCopiedRef] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [trackedComplaint, setTrackedComplaint] = useState(null);
@@ -108,8 +115,8 @@ export function TrackComplaintPage() {
           {trackedComplaint ? (
             /* TRACKED COMPLAINT RESULT VIEW - ONLY REAL RETRIEVED COMPLAINTS */
             <div>
-              {/* Back to Search Button */}
-              <div style={{ marginBottom: 'var(--space-4)' }}>
+              {/* Action Buttons Strip */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={handleResetSearch}
@@ -119,16 +126,40 @@ export function TrackComplaintPage() {
                   <ArrowLeft size={14} />
                   <span>{isNe ? 'अर्को उजुरी खोजी गर्नुहोस्' : 'Search Another Complaint'}</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  title={isNe ? 'यो उजुरी प्रतिवेदन प्रिन्ट गर्नुहोस्' : 'Print Docket'}
+                >
+                  <Printer size={14} />
+                  <span>{isNe ? 'प्रिन्ट गर्नुहोस्' : 'Print Docket'}</span>
+                </button>
               </div>
 
               {/* Complaint Header Card */}
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--space-3)', flexWrap: 'wrap', marginBottom: 'var(--space-3)' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)', flexWrap: 'wrap' }}>
                       <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-primary)' }}>
                         {trackedComplaint.reference}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(trackedComplaint.reference);
+                          setCopiedRef(true);
+                          setTimeout(() => setCopiedRef(false), 2000);
+                          showToast(isNe ? 'सन्दर्भ कोड कपी भयो!' : 'Reference ID copied!', 'success');
+                        }}
+                        style={{ background: 'none', border: 'none', padding: '2px 4px', cursor: 'pointer', color: '#64748B', display: 'inline-flex', alignItems: 'center' }}
+                        title="Copy Reference"
+                      >
+                        {copiedRef ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+                      </button>
                       <StatusBadge status={trackedComplaint.status} />
                     </div>
                     <h1 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-heading)', margin: 0 }}>
@@ -327,24 +358,37 @@ export function TrackComplaintPage() {
 
                   {/* Private Tracking Secret */}
                   <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
-                    <label htmlFor="tracking-secret" className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <KeyRound size={14} color="#0F766E" />
-                      <span>{isNe ? 'गोप्य ट्र्याकिङ कोड (Private Tracking Secret)' : 'Private Tracking Secret'}</span>
-                      <span className="required">*</span>
-                    </label>
-                    <input
-                      id="tracking-secret"
-                      type="password"
-                      className="form-input"
-                      placeholder="trk_..."
-                      value={trackingSecret}
-                      onChange={(e) => {
-                        setTrackingSecret(e.target.value);
-                        if (errorMsg) setErrorMsg('');
-                      }}
-                      style={{ fontFamily: 'monospace', fontSize: '0.9375rem' }}
-                      disabled={isLoading}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <label htmlFor="tracking-secret" className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                        <KeyRound size={14} color="#0D8178" />
+                        <span>{isNe ? 'गोप्य ट्र्याकिङ कोड (Private Tracking Secret)' : 'Private Tracking Secret'}</span>
+                        <span className="required">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowSecret(!showSecret)}
+                        style={{ background: 'none', border: 'none', padding: 0, color: '#0D8178', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: '600' }}
+                        tabIndex={-1}
+                      >
+                        {showSecret ? <EyeOff size={13} /> : <Eye size={13} />}
+                        <span>{showSecret ? (isNe ? 'लुकाउनुहोस्' : 'Hide') : (isNe ? 'देखाउनुहोस्' : 'Show')}</span>
+                      </button>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        id="tracking-secret"
+                        type={showSecret ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="trk_..."
+                        value={trackingSecret}
+                        onChange={(e) => {
+                          setTrackingSecret(e.target.value);
+                          if (errorMsg) setErrorMsg('');
+                        }}
+                        style={{ fontFamily: 'monospace', fontSize: '0.9375rem' }}
+                        disabled={isLoading}
+                      />
+                    </div>
                   </div>
 
                   {errorMsg && (

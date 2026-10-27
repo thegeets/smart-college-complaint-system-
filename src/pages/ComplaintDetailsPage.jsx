@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
@@ -14,7 +14,6 @@ import { Lock, ArrowRight, KeyRound } from 'lucide-react';
  */
 export function ComplaintDetailsPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { language } = useApp();
   const isNe = language === 'ne';
 

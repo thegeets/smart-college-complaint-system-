@@ -11,14 +11,25 @@ export function ComplaintTable({
   showStudentInfo = true,
   onActionClick,
   actionButtonLabel,
+  defaultStatus = 'ALL',
+  defaultCategory = 'ALL',
 }) {
   const { t, getStatusLabel, getCategoryLabel, getPriorityLabel, language, categories, priorities, statusList } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState(defaultStatus);
+  const [categoryFilter, setCategoryFilter] = useState(defaultCategory);
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('newest');
+
+  // Sync if default props change
+  React.useEffect(() => {
+    if (defaultStatus) setStatusFilter(defaultStatus);
+  }, [defaultStatus]);
+
+  React.useEffect(() => {
+    if (defaultCategory) setCategoryFilter(defaultCategory);
+  }, [defaultCategory]);
 
   // Filter & sort logic
   const filteredComplaints = useMemo(() => {

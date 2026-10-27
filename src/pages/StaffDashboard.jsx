@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { StatCard } from '../components/StatCard';
 import { ComplaintTable } from '../components/ComplaintTable';
@@ -16,10 +15,8 @@ export function StaffDashboard() {
   const { 
     currentUser, 
     complaints, 
-    updateComplaintStatus, 
     resolveComplaintWithNote,
-    t,
-    getStatusLabel
+    t
   } = useApp();
 
   // Filter complaints assigned to this staff member or their department
@@ -32,14 +29,10 @@ export function StaffDashboard() {
   const pendingReview = assignedComplaints.filter((c) => c.status === 'Submitted' || c.status === 'Under Review').length;
   const resolved = assignedComplaints.filter((c) => c.status === 'Resolved').length;
 
-  // Modals for staff resolution and status change
+  // Modals for staff resolution
   const [selectedComp, setSelectedComp] = useState(null);
   const [resolutionModalOpen, setResolutionModalOpen] = useState(false);
   const [resolutionNote, setResolutionNote] = useState('');
-
-  const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [targetStatus, setTargetStatus] = useState('In Progress');
-  const [statusNote, setStatusNote] = useState('');
 
   const handleOpenResolve = (comp) => {
     setSelectedComp(comp);
@@ -51,21 +44,6 @@ export function StaffDashboard() {
     if (selectedComp) {
       resolveComplaintWithNote(selectedComp.id, resolutionNote, true);
       setResolutionModalOpen(false);
-      setSelectedComp(null);
-    }
-  };
-
-  const handleOpenStatus = (comp, status) => {
-    setSelectedComp(comp);
-    setTargetStatus(status);
-    setStatusNote('');
-    setStatusModalOpen(true);
-  };
-
-  const handleConfirmStatus = () => {
-    if (selectedComp) {
-      updateComplaintStatus(selectedComp.id, targetStatus, statusNote, currentUser.name);
-      setStatusModalOpen(false);
       setSelectedComp(null);
     }
   };

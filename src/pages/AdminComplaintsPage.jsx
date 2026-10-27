@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ComplaintTable } from '../components/ComplaintTable';
 import { ConfirmationModal } from '../components/ConfirmationModal';
@@ -21,7 +21,11 @@ export function AdminComplaintsPage() {
     language
   } = useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isNe = language === 'ne';
+
+  const urlStatus = searchParams.get('status') || 'ALL';
+  const urlCategory = searchParams.get('category') || 'ALL';
 
   const [complaints, setComplaints] = useState([]);
   const [summary, setSummary] = useState({ total: 0, pendingReview: 0, inProgress: 0, resolved: 0 });
@@ -153,6 +157,8 @@ export function AdminComplaintsPage() {
           complaints={complaints}
           role="admin"
           showStudentInfo={true}
+          defaultStatus={urlStatus}
+          defaultCategory={urlCategory}
           onActionClick={(item) => navigate(`/admin/complaints/${item._id || item.id}`)}
           actionButtonLabel={isNe ? 'समीक्षा' : 'Inspect'}
         />

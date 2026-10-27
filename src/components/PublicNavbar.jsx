@@ -147,12 +147,12 @@ export function PublicNavbar() {
           </div>
           <div className="top-strip-right">
             <span className="top-strip-hours">
-              {isNe ? 'सहायता कक्ष: सोमबारदेखि शुक्रबार, बिहान ६ बजेदेखि अपराह्न ४ बजेसम्म' : 'Desk: Monday–Friday, 6:00 AM – 4:00 PM'}
+              {isNe ? COLLEGE_CONFIG.contact.officeHoursNe : COLLEGE_CONFIG.contact.officeHours}
             </span>
             <span className="top-strip-divider" aria-hidden="true">•</span>
-            <a href="tel:061-574096" className="top-strip-phone" aria-label="Campus IT Phone 061-574096">
+            <a href={`tel:${COLLEGE_CONFIG.contact.phone}`} className="top-strip-phone" aria-label={`Campus IT Phone ${COLLEGE_CONFIG.contact.phone}`}>
               <Phone size={12} style={{ display: 'inline', marginRight: '4px' }} aria-hidden="true" />
-              061-574096
+              {COLLEGE_CONFIG.contact.phone}
             </a>
           </div>
         </div>

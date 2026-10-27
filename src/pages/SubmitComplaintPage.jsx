@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
@@ -17,7 +17,9 @@ import {
   X,
   FileText,
   KeyRound,
-  ShieldAlert,
+  User,
+  Layers,
+  Search
 } from 'lucide-react';
 
 export function SubmitComplaintPage() {
@@ -30,7 +32,6 @@ export function SubmitComplaintPage() {
     getPriorityLabel,
     showToast
   } = useApp();
-  const navigate = useNavigate();
   const isNe = language === 'ne';
 
   // Ensure only authorized IT categories appear
@@ -54,6 +55,7 @@ export function SubmitComplaintPage() {
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,27 +166,51 @@ export function SubmitComplaintPage() {
     showToast(isNe ? 'कपी भयो!' : 'Copied to clipboard!', 'success');
   };
 
+  const processUploadedFile = (file) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(
+        isNe ? 'फाइलको आकार ५ MB भन्दा बढी हुनुहुँदैन।' : 'File size cannot exceed 5 MB.',
+        'error'
+      );
+      return;
+    }
+
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.pdf'];
+    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+    if (!allowedExts.includes(fileExt)) {
+      showToast(
+        isNe ? 'केवल JPG, PNG वा PDF फाइलहरू मात्र स्वीकार गरिन्छ।' : 'Only JPG, PNG, and PDF files are allowed.',
+        'error'
+      );
+      return;
+    }
+
+    setSelectedFile(file);
+    showToast(isNe ? 'फाइल संलग्न गरियो।' : 'File attached successfully.', 'info');
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        showToast(
-          isNe ? 'फाइलको आकार ५ MB भन्दा बढी हुनुहुँदैन।' : 'File size cannot exceed 5 MB.',
-          'error'
-        );
-        return;
-      }
-      const allowedExts = ['.jpg', '.jpeg', '.png', '.pdf'];
-      const fileExt = '.' + file.name.split('.').pop().toLowerCase();
-      if (!allowedExts.includes(fileExt)) {
-        showToast(
-          isNe ? 'केवल JPG, PNG वा PDF फाइलहरू मात्र स्वीकार गरिन्छ।' : 'Only JPG, PNG, and PDF files are allowed.',
-          'error'
-        );
-        return;
-      }
-      setSelectedFile(file);
-    }
+    processUploadedFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    processUploadedFile(file);
   };
 
   const handleRemoveFile = () => {
@@ -196,22 +222,22 @@ export function SubmitComplaintPage() {
       <PublicNavbar />
 
       <main style={{ flex: 1, padding: 'var(--space-8) var(--space-4)' }}>
-        <div className="container" style={{ maxWidth: '780px' }}>
+        <div className="container" style={{ maxWidth: '800px' }}>
           
           {/* Back link */}
           <div style={{ marginBottom: 'var(--space-4)' }}>
             <Link 
               to="/" 
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.8125rem', color: 'var(--color-muted)', fontWeight: '600', textDecoration: 'none' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: 'var(--color-muted)', fontWeight: '600', textDecoration: 'none' }}
             >
               <ArrowLeft size={14} />
               <span>{isNe ? 'गृहपृष्ठमा फर्कनुहोस्' : 'Back to Home'}</span>
             </Link>
           </div>
 
-          {/* Success Confirmation Card */}
+          {/* SUCCESS CONFIRMATION CARD */}
           {successData ? (
-            <div className="card" style={{ padding: 'var(--space-8)', border: '1px solid #10B981' }}>
+            <div className="card" style={{ padding: 'var(--space-8)', border: '1px solid #10B981', boxShadow: '0 8px 20px -4px rgba(16, 185, 129, 0.12)' }}>
               <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
                 <div style={{
                   width: '56px',
@@ -231,8 +257,8 @@ export function SubmitComplaintPage() {
                 </h1>
                 <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
                   {isNe
-                    ? 'तपाईंको उजुरी सोध कलेज अफ आईटीको डाटाबेसमा सुरक्षित भइसकेको छ।'
-                    : 'Your grievance has been permanently saved to the college complaint database.'}
+                    ? 'तपाईंको उजुरी सोध कलेज अफ आईटीको केन्द्रीय डाटाबेसमा सुरक्षित भइसकेको छ।'
+                    : 'Your grievance has been permanently saved to the Soch College IT database.'}
                 </p>
               </div>
 
@@ -245,7 +271,7 @@ export function SubmitComplaintPage() {
                 marginBottom: 'var(--space-6)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 'var(--space-4)', color: '#0F172A' }}>
-                  <KeyRound size={18} color="#0F766E" />
+                  <KeyRound size={18} color="#0D8178" />
                   <strong style={{ fontSize: '0.9375rem' }}>
                     {isNe ? 'उजुरी ट्र्याकिङ विवरण (तुरुन्तै सुरक्षित राख्नुहोस्)' : 'Complaint Tracking Credentials (Save Now)'}
                   </strong>
@@ -266,7 +292,8 @@ export function SubmitComplaintPage() {
                       fontFamily: 'monospace',
                       fontSize: '1.125rem',
                       fontWeight: '800',
-                      color: '#15365D'
+                      color: '#15365B',
+                      overflowX: 'auto'
                     }}>
                       {successData.reference}
                     </div>
@@ -275,6 +302,7 @@ export function SubmitComplaintPage() {
                       onClick={() => handleCopy(successData.reference, 'ref')}
                       className="btn btn-secondary btn-md"
                       title="Copy Reference"
+                      style={{ height: '42px', padding: '0 14px' }}
                     >
                       {copiedRef ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
                       <span>{copiedRef ? (isNe ? 'कपी भयो' : 'Copied') : (isNe ? 'कपी' : 'Copy')}</span>
@@ -297,7 +325,7 @@ export function SubmitComplaintPage() {
                       fontFamily: 'monospace',
                       fontSize: '0.875rem',
                       fontWeight: '700',
-                      color: '#0F766E',
+                      color: '#0D8178',
                       overflowX: 'auto',
                       whiteSpace: 'nowrap'
                     }}>
@@ -308,6 +336,7 @@ export function SubmitComplaintPage() {
                       onClick={() => handleCopy(successData.trackingSecret, 'secret')}
                       className="btn btn-secondary btn-md"
                       title="Copy Secret"
+                      style={{ height: '42px', padding: '0 14px' }}
                     >
                       {copiedSecret ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
                       <span>{copiedSecret ? (isNe ? 'कपी भयो' : 'Copied') : (isNe ? 'कपी' : 'Copy')}</span>
@@ -317,7 +346,7 @@ export function SubmitComplaintPage() {
 
                 {/* Important Notice */}
                 <div style={{
-                  padding: '10px 12px',
+                  padding: '12px 14px',
                   backgroundColor: '#FEF3C7',
                   border: '1px solid #FDE68A',
                   borderRadius: '6px',
@@ -328,17 +357,19 @@ export function SubmitComplaintPage() {
                   <strong>{isNe ? 'महत्वपूर्ण सूचना:' : 'Important:'} </strong>
                   {isNe
                     ? 'विद्यार्थीहरूले खाता बनाउनु नपर्ने भएकाले, पछि स्थिति र कलेजको जवाफ हेर्नका लागि माथिको Reference ID र Tracking Secret दुवै अनिवार्य हुन्छ। यो गोप्य कोड प्रणालीले फेरि देखाउने छैन। यदि कोड हराएमा, कलेज प्रशासनलाई info@sochcollege.edu.np मा सम्पर्क गर्नुहोस्।'
-                    : 'Because student registration is not required, both the Reference ID and Tracking Secret are strictly required to check progress and responses. This secret is shown only once and cannot be recovered automatically. If lost, contact the college desk at info@sochcollege.edu.np.'}
+                    : 'Because student accounts are not used, both your Reference ID and Tracking Secret are strictly required to check live status and read college responses. This secret is shown only once and cannot be re-generated.'}
                 </div>
               </div>
 
-              {/* Actions */}
+              {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Link 
                   to={`/track?ref=${encodeURIComponent(successData.reference)}&secret=${encodeURIComponent(successData.trackingSecret)}`} 
                   className="btn btn-primary btn-md"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span>{isNe ? 'अहिले नै उजुरी ट्र्याक गर्नुहोस्' : 'Track This Complaint'}</span>
+                  <Search size={16} />
+                  <span>{isNe ? 'अहिले नै उजुरी ट्र्याक गर्नुहोस्' : 'Track This Complaint Now'}</span>
                   <ArrowRight size={16} />
                 </Link>
                 <button
@@ -357,6 +388,7 @@ export function SubmitComplaintPage() {
                     setSelectedFile(null);
                   }}
                   className="btn btn-secondary btn-md"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
                   <PlusCircle size={16} />
                   <span>{isNe ? 'अर्को नयाँ उजुरी दर्ता गर्नुहोस्' : 'Submit Another Complaint'}</span>
@@ -369,7 +401,7 @@ export function SubmitComplaintPage() {
               
               {/* Header */}
               <div style={{ marginBottom: 'var(--space-6)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--space-4)' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0F766E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0D8178', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
                   {COLLEGE_CONFIG.name}
                 </div>
                 <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-2)' }}>
@@ -382,7 +414,7 @@ export function SubmitComplaintPage() {
                 </p>
               </div>
 
-              {/* Server Error Alert (Preserves inputs) */}
+              {/* Server Error Alert */}
               {serverError && (
                 <div style={{
                   padding: '12px 16px',
@@ -417,27 +449,36 @@ export function SubmitComplaintPage() {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                <Info size={15} color="#0F766E" style={{ flexShrink: 0 }} />
+                <Info size={15} color="#0D8178" style={{ flexShrink: 0 }} />
                 <span>
                   {isNe
-                    ? 'विद्यार्थी परिचयपत्र वा रोल नम्बर प्रविष्ट गर्नाले कलेजको सदस्यता स्वचालित रूपमा प्रमाणीकरण हुँदैन। दर्ता भएका उजुरीहरू कलेज प्रशासनद्वारा जाँचिनेछन्।'
-                    : 'Entering a student ID or roll number does not verify college membership. Submissions are triaged directly by college IT staff.'}
+                    ? 'विद्यार्थी परिचयपत्र वा रोल नम्बर प्रविष्ट गर्नाले कलेजको सदस्यता स्वचालित रूपमा प्रमाणीकरण हुँदैन। दर्ता भएका उजुरीहरू कलेज प्रशासनद्वारा प्रत्यक्ष रूपमा छानबिन हुनेछन्।'
+                    : 'Student ID or roll number is used strictly for internal triage. Submissions are reviewed directly by college IT staff.'}
                 </span>
               </div>
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} noValidate>
                 
-                {/* Fieldset 1: Student Information */}
-                <fieldset style={{ border: 'none', padding: 0, margin: '0 0 var(--space-6)' }}>
-                  <legend style={{ fontSize: '0.9375rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-3)' }}>
-                    {isNe ? '१. विद्यार्थी विवरण' : '1. Student Information'}
-                  </legend>
+                {/* SECTION 1: STUDENT IDENTIFICATION */}
+                <div style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '18px',
+                  marginBottom: 'var(--space-6)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <User size={18} color="#15365B" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0 }}>
+                      {isNe ? '१. विद्यार्थी विवरण' : '1. Student Identification'}
+                    </h2>
+                  </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)' }}>
                     {/* Student Name */}
                     <div className="form-group">
                       <label htmlFor="studentName" className="form-label">
-                        {isNe ? 'पूरा नाम' : 'Full Name'} <span className="required">*</span>
+                        {isNe ? 'विद्यार्थीको पूरा नाम' : 'Full Name'} <span className="required">*</span>
                       </label>
                       <input
                         id="studentName"
@@ -445,8 +486,12 @@ export function SubmitComplaintPage() {
                         className={`form-input ${errors.studentName ? 'error' : ''}`}
                         placeholder="e.g. Kiran Shrestha"
                         value={formData.studentName}
-                        onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, studentName: e.target.value });
+                          if (errors.studentName) setErrors({ ...errors, studentName: null });
+                        }}
                         disabled={isSubmitting}
+                        required
                       />
                       {errors.studentName && <span className="form-error-msg">{errors.studentName}</span>}
                     </div>
@@ -462,8 +507,12 @@ export function SubmitComplaintPage() {
                         className={`form-input ${errors.studentId ? 'error' : ''}`}
                         placeholder="e.g. SOCH-CSIT-2024-042"
                         value={formData.studentId}
-                        onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, studentId: e.target.value });
+                          if (errors.studentId) setErrors({ ...errors, studentId: null });
+                        }}
                         disabled={isSubmitting}
+                        required
                       />
                       {errors.studentId && <span className="form-error-msg">{errors.studentId}</span>}
                     </div>
@@ -479,8 +528,12 @@ export function SubmitComplaintPage() {
                         className={`form-input ${errors.email ? 'error' : ''}`}
                         placeholder="e.g. kiran@sochcollege.edu.np"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, email: e.target.value });
+                          if (errors.email) setErrors({ ...errors, email: null });
+                        }}
                         disabled={isSubmitting}
+                        required
                       />
                       {errors.email && <span className="form-error-msg">{errors.email}</span>}
                     </div>
@@ -502,13 +555,22 @@ export function SubmitComplaintPage() {
                       />
                     </div>
                   </div>
-                </fieldset>
+                </div>
 
-                {/* Fieldset 2: Complaint Details */}
-                <fieldset style={{ border: 'none', padding: 0, margin: '0 0 var(--space-6)' }}>
-                  <legend style={{ fontSize: '0.9375rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-3)' }}>
-                    {isNe ? '२. उजुरीको विवरण' : '2. Complaint Details'}
-                  </legend>
+                {/* SECTION 2: COMPLAINT DETAILS */}
+                <div style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '18px',
+                  marginBottom: 'var(--space-6)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <Layers size={18} color="#15365B" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0 }}>
+                      {isNe ? '२. उजुरीको वर्गीकरण तथा विवरण' : '2. Grievance Classification & Details'}
+                    </h2>
+                  </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
                     {/* Category */}
@@ -520,8 +582,12 @@ export function SubmitComplaintPage() {
                         id="complaintCategory"
                         className={`form-select ${errors.category ? 'error' : ''}`}
                         value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, category: e.target.value });
+                          if (errors.category) setErrors({ ...errors, category: null });
+                        }}
                         disabled={isSubmitting}
+                        required
                       >
                         <option value="">{isNe ? '-- विधा छनोट गर्नुहोस् --' : '-- Select IT Category --'}</option>
                         {cleanCategories.map((cat) => (
@@ -556,48 +622,77 @@ export function SubmitComplaintPage() {
 
                   {/* Title */}
                   <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                    <label htmlFor="complaintTitle" className="form-label">
-                      {isNe ? 'उजुरीको शीर्षक' : 'Subject / Title'} <span className="required">*</span>
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <label htmlFor="complaintTitle" className="form-label" style={{ margin: 0 }}>
+                        {isNe ? 'उजुरीको शीर्षक' : 'Subject / Title'} <span className="required">*</span>
+                      </label>
+                      <span style={{ fontSize: '0.6875rem', color: formData.title.length < 5 ? '#94A3B8' : '#0D8178' }}>
+                        {formData.title.length}/100
+                      </span>
+                    </div>
                     <input
                       id="complaintTitle"
                       type="text"
+                      maxLength={100}
                       className={`form-input ${errors.title ? 'error' : ''}`}
-                      placeholder={isNe ? 'जस्तै: कम्प्युटर ल्याबको मनिटर डिस्प्ले नखुलेको वा इन्टरनेट अवरुद्ध भएको' : 'e.g. Monitor display not powering on or slow network in computer lab'}
+                      placeholder={isNe ? 'जस्तै: कम्प्युटर ल्याब १ को मनिटर डिस्प्ले नखुलेको' : 'e.g. Workstation PC 08 blue screen error in Computer Lab 2'}
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, title: e.target.value });
+                        if (errors.title) setErrors({ ...errors, title: null });
+                      }}
                       disabled={isSubmitting}
+                      required
                     />
                     {errors.title && <span className="form-error-msg">{errors.title}</span>}
                   </div>
 
                   {/* Description */}
                   <div className="form-group">
-                    <label htmlFor="complaintDescription" className="form-label">
-                      {isNe ? 'समस्याको विस्तृत विवरण' : 'Detailed Description'} <span className="required">*</span>
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <label htmlFor="complaintDescription" className="form-label" style={{ margin: 0 }}>
+                        {isNe ? 'समस्याको विस्तृत विवरण' : 'Detailed Description'} <span className="required">*</span>
+                      </label>
+                      <span style={{ fontSize: '0.6875rem', color: formData.description.length < 15 ? '#94A3B8' : '#0D8178' }}>
+                        {isNe ? 'कम्तीमा १५ अक्षर' : 'Min 15 chars'} ({formData.description.length})
+                      </span>
+                    </div>
                     <textarea
                       id="complaintDescription"
                       rows={5}
                       className={`form-textarea ${errors.description ? 'error' : ''}`}
-                      placeholder={isNe ? 'कृपया समस्या, ल्याब नम्बर, र प्रयोग गरिएको सफ्टवेयरको विवरण स्पष्ट लेख्नुहोस्...' : 'Please specify the room, workstation number, symptoms, and any steps to reproduce...'}
+                      placeholder={isNe ? 'कृपया ल्याब नम्बर, कम्प्युटर आइडी, र समस्याको स्पष्ट लक्षण खुलाउनुहोस्...' : 'Please specify the lab room number, PC station ID, exact error messages, and reproducible steps...'}
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, description: e.target.value });
+                        if (errors.description) setErrors({ ...errors, description: null });
+                      }}
                       disabled={isSubmitting}
+                      required
                     />
                     {errors.description && <span className="form-error-msg">{errors.description}</span>}
                   </div>
-                </fieldset>
+                </div>
 
-                {/* Fieldset 3: Optional Attachment */}
-                <fieldset style={{ border: 'none', padding: 0, margin: '0 0 var(--space-6)' }}>
-                  <legend style={{ fontSize: '0.9375rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
-                    {isNe ? '३. ऐच्छिक प्रमाण वा तस्बिर' : '3. Optional Attachment'}
-                  </legend>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--color-muted)', margin: '0 0 var(--space-3)' }}>
+                {/* SECTION 3: SUPPORTING EVIDENCE */}
+                <div style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '18px',
+                  marginBottom: 'var(--space-6)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <Upload size={18} color="#15365B" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0 }}>
+                      {isNe ? '३. ऐच्छिक प्रमाण वा तस्बिर' : '3. Optional Photo / Log Attachment'}
+                    </h2>
+                  </div>
+
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--color-muted)', margin: '0 0 var(--space-4)' }}>
                     {isNe
-                      ? 'त्रुटिको स्क्रिनसट वा तस्बिर अपलोड गर्नुहोस् (JPG, PNG, PDF मात्र; अधिकतम ५ MB)'
-                      : 'Attach a screenshot or error log (JPG, PNG, or PDF only; max 5 MB). Uploads are stored privately and accessible only to administrators.'}
+                      ? 'त्रुटिको स्क्रिनसट वा तस्बिर अपलोड गर्नुहोस् (JPG, PNG, वा PDF मात्र; अधिकतम ५ MB)'
+                      : 'Attach a screenshot or terminal error log (JPG, PNG, or PDF only; max 5 MB). Uploads are private and accessible only to IT staff.'}
                   </p>
 
                   {selectedFile ? (
@@ -605,19 +700,21 @@ export function SubmitComplaintPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '10px 14px',
-                      backgroundColor: '#F8FAFC',
-                      border: '1px solid #CBD5E1',
+                      padding: '12px 16px',
+                      backgroundColor: '#F0FDFA',
+                      border: '1px solid #CCFBF1',
                       borderRadius: '6px'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FileText size={18} color="#0F766E" />
-                        <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0F172A' }}>
-                          {selectedFile.name}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                          ({(selectedFile.size / 1024).toFixed(0)} KB)
-                        </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <FileText size={20} color="#0D8178" />
+                        <div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#0F172A' }}>
+                            {selectedFile.name}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                            {(selectedFile.size / 1024).toFixed(0)} KB • Ready for upload
+                          </div>
+                        </div>
                       </div>
                       <button
                         type="button"
@@ -629,15 +726,22 @@ export function SubmitComplaintPage() {
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '4px'
+                          padding: '6px',
+                          borderRadius: '4px'
                         }}
-                        title="Remove file"
+                        title={isNe ? 'फाइल हटाउनुहोस्' : 'Remove file'}
+                        aria-label="Remove attached file"
                       >
-                        <X size={16} />
+                        <X size={18} />
                       </button>
                     </div>
                   ) : (
-                    <div style={{ position: 'relative' }}>
+                    <div 
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      style={{ position: 'relative' }}
+                    >
                       <input
                         id="attachmentFile"
                         type="file"
@@ -653,17 +757,18 @@ export function SubmitComplaintPage() {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          padding: '24px',
-                          border: '2px dashed #CBD5E1',
+                          padding: '24px 16px',
+                          border: isDragging ? '2px dashed #0D8178' : '2px dashed #CBD5E1',
                           borderRadius: '6px',
-                          backgroundColor: '#F8FAFC',
+                          backgroundColor: isDragging ? '#F0FDFA' : '#F8FAFC',
                           cursor: 'pointer',
-                          gap: '6px'
+                          gap: '6px',
+                          transition: 'all 0.15s ease'
                         }}
                       >
-                        <Upload size={22} color="#64748B" />
-                        <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#15365D' }}>
-                          {isNe ? 'फाइल चयन गर्नुहोस्' : 'Click to select an attachment'}
+                        <Upload size={24} color={isDragging ? '#0D8178' : '#64748B'} />
+                        <span style={{ fontSize: '0.875rem', fontWeight: '700', color: '#15365B' }}>
+                          {isNe ? 'फाइल चयन गर्न यहाँ थिच्नुहोस् वा तानेर छोड्नुहोस्' : 'Click to browse or drag and drop file here'}
                         </span>
                         <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                           JPG, PNG, or PDF up to 5 MB
@@ -671,9 +776,9 @@ export function SubmitComplaintPage() {
                       </label>
                     </div>
                   )}
-                </fieldset>
+                </div>
 
-                {/* Submit button */}
+                {/* SUBMIT BUTTON ROW */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
                   <Link to="/" className="btn btn-secondary btn-md" style={{ textDecoration: 'none' }}>
                     {isNe ? 'रद्द गर्नुहोस्' : 'Cancel'}
@@ -683,10 +788,13 @@ export function SubmitComplaintPage() {
                     type="submit"
                     className="btn btn-primary btn-md"
                     disabled={isSubmitting}
-                    style={{ minWidth: '160px' }}
+                    style={{ minWidth: '170px', height: '44px' }}
                   >
                     {isSubmitting ? (
-                      <span>{isNe ? 'दर्ता हुँदैछ...' : 'Submitting to database...'}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="animate-spin">•</span>
+                        <span>{isNe ? 'दर्ता हुँदैछ...' : 'Submitting to database...'}</span>
+                      </span>
                     ) : (
                       <>
                         <PlusCircle size={16} />
@@ -695,6 +803,7 @@ export function SubmitComplaintPage() {
                     )}
                   </button>
                 </div>
+
               </form>
             </div>
           )}

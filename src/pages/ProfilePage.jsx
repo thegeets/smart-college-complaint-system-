@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  User,
   Languages,
   Save,
-  Bell,
-  CheckCircle2
+  Bell
 } from 'lucide-react';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 

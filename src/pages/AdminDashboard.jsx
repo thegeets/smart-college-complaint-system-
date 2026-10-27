@@ -63,8 +63,32 @@ export function AdminDashboard() {
   }, [fetchReportsSummary, fetchAdminComplaints]);
 
   useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
+    let isMounted = true;
+    (async () => {
+      try {
+        const [sumData, complaintsData] = await Promise.all([
+          fetchReportsSummary(),
+          fetchAdminComplaints({ limit: 8 }),
+        ]);
+        if (isMounted) {
+          setSummary(sumData);
+          setRecentComplaints(complaintsData.complaints || []);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Failed to load dashboard data from database.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchReportsSummary, fetchAdminComplaints]);
 
   const handleConfirmStatusChange = async () => {
     if (!activeComplaint) return;
@@ -133,6 +157,7 @@ export function AdminDashboard() {
           icon={FileText}
           color="blue"
           helper={isNe ? 'डाटाबेसमा सुरक्षित' : 'Saved in MongoDB'}
+          onClick={() => navigate('/admin/complaints')}
         />
         <StatCard
           label={isNe ? 'समीक्षा बाँकी' : 'Pending Review'}
@@ -140,6 +165,7 @@ export function AdminDashboard() {
           icon={Clock}
           color="amber"
           helper={isNe ? 'जाँच तथा कार्यभार बाँकी' : 'Awaiting admin triage'}
+          onClick={() => navigate('/admin/complaints?status=Under%20Review')}
         />
         <StatCard
           label={isNe ? 'कार्यान्वयनमा' : 'In Progress'}
@@ -147,6 +173,7 @@ export function AdminDashboard() {
           icon={Wrench}
           color="teal"
           helper={isNe ? 'प्राविधिक कार्य जारी' : 'Under active resolution'}
+          onClick={() => navigate('/admin/complaints?status=In%20Progress')}
         />
         <StatCard
           label={isNe ? 'समाधान भएको' : 'Resolved'}
@@ -154,6 +181,7 @@ export function AdminDashboard() {
           icon={CheckCircle2}
           color="emerald"
           helper={isNe ? 'सम्पन्न' : 'Verified and closed'}
+          onClick={() => navigate('/admin/complaints?status=Resolved')}
         />
       </div>
 

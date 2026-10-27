@@ -42,6 +42,28 @@ export function ComplaintTimeline({ currentStatus = 'Submitted', timeline = [] }
         aria-valuemin={1} 
         aria-valuemax={4}
       >
+        {/* Background track line */}
+        <div style={{
+          position: 'absolute',
+          top: '15px',
+          left: '12%',
+          right: '12%',
+          height: '2px',
+          backgroundColor: '#E2E8F0',
+          zIndex: 1
+        }} />
+
+        {/* Completed track line */}
+        <div style={{
+          position: 'absolute',
+          top: '15px',
+          left: '12%',
+          width: `${Math.min(100, Math.max(0, (currentIndex / 3) * 76))}%`,
+          height: '2px',
+          backgroundColor: '#0D8178',
+          zIndex: 1,
+          transition: 'width 0.3s ease'
+        }} />
         {steps.map((step, idx) => {
           const isCompleted = idx < currentIndex || (idx === currentIndex && currentStatus === 'Resolved');
           const isActive = idx === currentIndex && currentStatus !== 'Resolved';

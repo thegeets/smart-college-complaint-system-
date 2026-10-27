@@ -8,11 +8,9 @@ import {
   Lock,
   ArrowRight,
   ArrowLeft,
-  ShieldCheck,
   Eye,
   EyeOff,
   AlertCircle,
-  KeyRound,
   Terminal
 } from 'lucide-react';
 

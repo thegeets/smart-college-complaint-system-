@@ -24,17 +24,15 @@ import {
   KeyRound,
   UserCheck,
   Clock,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
-  AlertCircle,
-  Layers,
   MapPin,
-  Sparkles
+  Sparkles,
+  Wrench
 } from 'lucide-react';
 
 export function LandingPage() {
-  const { categories, language, getCategoryLabel } = useApp();
+  const { language } = useApp();
   const navigate = useNavigate();
   const isNe = language === 'ne';
 
@@ -381,7 +379,7 @@ export function LandingPage() {
       </section>
 
       {/* =========================================================================
-          SECTION 3: THREE-STEP RESOLUTION PROCESS ("HOW IT WORKS")
+          SECTION 3: FOUR-STEP RESOLUTION PROCESS ("HOW IT WORKS")
           ========================================================================= */}
       <section id="process" className="home-process-section">
         <div className="container">
@@ -391,31 +389,31 @@ export function LandingPage() {
               {isNe ? 'सहज तथा पारदर्शी कार्यप्रणाली' : 'TRANSPARENT WORKFLOW'}
             </span>
             <h2 className="section-main-heading">
-              {isNe ? 'समस्या दर्तादेखि समाधानसम्मको प्रक्रिया' : 'How the System Works in 3 Steps'}
+              {isNe ? 'समस्या दर्तादेखि समाधानसम्मको ४-चरणीय प्रक्रिया' : 'How the System Works in 4 Steps'}
             </h2>
             <p className="section-lead-copy">
               {isNe
                 ? 'उजुरी दर्तादेखि कलेजको आधिकारिक समाधानसम्मका स्पष्ट चरणहरू:'
-                : 'From lodging a complaint to inspecting official college resolution:'}
+                : 'From initial complaint registration to verified technical resolution and official college response:'}
             </p>
           </div>
 
-          <div className="process-steps-grid">
+          <div className="process-steps-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
             
             {/* Step 1 */}
             <div className="process-step-card">
               <div className="step-num-badge">1</div>
               <div className="step-icon-wrap">
-                <FileText size={22} color="#15365D" />
+                <FileText size={20} color="#15365B" />
               </div>
-              <h3 className="step-title">{isNe ? '१. समस्याको विवरण दिनुहोस्' : '1. Submit Grievance Details'}</h3>
+              <h3 className="step-title">{isNe ? '१. समस्याको विवरण दिनुहोस्' : '1. Submit Details'}</h3>
               <p className="step-desc">
                 {isNe
                   ? 'सम्बन्धित आईटी विधा छनोट गर्नुहोस्, ल्याब वा कक्षाकोठा नम्बर उल्लेख गर्नुहोस् र समस्याको लक्षण खुलाउनुहोस्।'
                   : 'Select an IT category, specify the lab room or campus location, and attach an optional screenshot or error log.'}
               </p>
               <div className="step-highlight-tag">
-                <span>{isNe ? 'कुनै पासवर्ड आवश्यक पर्दैन' : 'Instant Form Submission'}</span>
+                <span>{isNe ? 'कुनै लगइन आवश्यक पर्दैन' : 'No Account Required'}</span>
               </div>
             </div>
 
@@ -423,16 +421,16 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">2</div>
               <div className="step-icon-wrap">
-                <KeyRound size={22} color="#0F766E" />
+                <KeyRound size={20} color="#0D8178" />
               </div>
-              <h3 className="step-title">{isNe ? '२. गोप्य ट्र्याकिङ कोड सुरक्षित गर्नुहोस्' : '2. Save Your Private Secret'}</h3>
+              <h3 className="step-title">{isNe ? '२. ट्र्याकिङ कोड सुरक्षित गर्नुहोस्' : '2. Save Credentials'}</h3>
               <p className="step-desc">
                 {isNe
-                  ? 'प्रणालीले स्वचालित रूपमा एक Reference ID र गोप्य Tracking Secret उत्पन्न गर्दछ। यसलाई कपी गरी सुरक्षित राख्नुहोस्।'
-                  : 'The portal generates a unique Reference ID and a private Tracking Secret shown strictly once. Save both securely.'}
+                  ? 'प्रणालीले स्वचालित रूपमा एक Reference ID र गोप्य Tracking Secret उत्पन्न गर्दछ। यसलाई सुरक्षित राख्नुहोस्।'
+                  : 'The portal generates a unique Reference ID and private Tracking Secret shown strictly once upon submission.'}
               </p>
               <div className="step-highlight-tag">
-                <span>{isNe ? 'सुरक्षित ह्यास व्यवस्थापन' : 'Hashed Secret Protection'}</span>
+                <span>{isNe ? 'सुरक्षित ह्यास व्यवस्थापन' : 'Argon2id Hashed Secret'}</span>
               </div>
             </div>
 
@@ -440,16 +438,33 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">3</div>
               <div className="step-icon-wrap">
-                <CheckCircle2 size={22} color="#15803D" />
+                <Wrench size={20} color="#15365B" />
               </div>
-              <h3 className="step-title">{isNe ? '३. प्रगति तथा कलेजको जवाफ हेर्नुहोस्' : '3. Track Status & College Response'}</h3>
+              <h3 className="step-title">{isNe ? '३. प्राविधिक समीक्षा तथा मर्मत' : '3. Desk Triage & Repair'}</h3>
               <p className="step-desc">
                 {isNe
-                  ? 'आफ्नो ट्र्याकिङ कोड प्रविष्ट गरी अडिट इतिहास र कलेजको आधिकारिक जवाफ हेर्नुहोस्।'
-                  : 'Enter your credentials at any time to monitor status changes (Submitted → Under Review → Resolved) and official college responses.'}
+                  ? 'कलेज आईटी प्राविधिकहरूले उजुरी समीक्षा गरी कार्यभार खटाउँछन् र मर्मत कार्य अघि बढाउँछन्।'
+                  : 'Soch College IT technicians triage reported hardware, network, or tools and initiate active on-campus repairs.'}
               </p>
               <div className="step-highlight-tag">
-                <span>{isNe ? 'वास्तविक कार्यप्रगति इतिहास' : 'Recorded Status History'}</span>
+                <span>{isNe ? 'सक्रिय मर्मत कार्य' : 'Active IT Triage'}</span>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="process-step-card">
+              <div className="step-num-badge">4</div>
+              <div className="step-icon-wrap">
+                <CheckCircle2 size={20} color="#15803D" />
+              </div>
+              <h3 className="step-title">{isNe ? '४. समाधान र आधिकारिक जवाफ' : '4. Verified Resolution'}</h3>
+              <p className="step-desc">
+                {isNe
+                  ? 'मर्मत सम्पन्न भएपछि कलेज प्रशासनले आधिकारिक जवाफ र समाधान मिति रेकर्ड गरी उजुरी बन्द गर्छ।'
+                  : 'Upon completion, college administration records an official documented response and marks the docket resolved.'}
+              </p>
+              <div className="step-highlight-tag">
+                <span>{isNe ? 'कलेजको आधिकारिक जवाफ' : 'Official College Response'}</span>
               </div>
             </div>
 

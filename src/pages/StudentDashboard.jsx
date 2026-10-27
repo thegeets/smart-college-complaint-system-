@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { StatCard } from '../components/StatCard';
-import { StatusBadge, PriorityBadge, CategoryBadge } from '../components/StatusBadge';
+import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
 import {
   FileText,
   Clock,
@@ -12,9 +12,7 @@ import {
   Megaphone,
   ArrowRight,
   Eye,
-  Calendar,
-  Sparkles,
-  Info
+  Sparkles
 } from 'lucide-react';
 
 export function StudentDashboard() {
