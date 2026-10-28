@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, PlusCircle, User, LogIn, UserPlus, LogOut, FileText, Phone } from 'lucide-react';
+import { Menu, X, PlusCircle, User, LogIn, UserPlus, LogOut, FileText, Phone, Search, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { BrandLogo } from './BrandLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -132,6 +132,7 @@ export function PublicNavbar() {
   const isHomeActive = location.pathname === '/' && activeSection === '#';
   const isProcessActive = location.pathname === '/' && activeSection === '#process';
   const isContactActive = location.pathname === '/' && activeSection === '#contact';
+  const isTrackActive = location.pathname === '/track';
   const isComplaintsActive = location.pathname.startsWith('/student/complaints');
   const isProfileActive = location.pathname === '/student/profile';
 
@@ -179,7 +180,7 @@ export function PublicNavbar() {
             </Link>
           </div>
 
-          {/* Center: Public Navigation (Home | How It Works | Contact) */}
+          {/* Center: Public Navigation (Home | How It Works | Contact | Track) */}
           <nav className="desktop-nav-menu" aria-label={isNe ? 'मुख्य क्याम्पस नेभिगेसन' : 'Main College Navigation'}>
             <Link 
               to="/" 
@@ -206,6 +207,15 @@ export function PublicNavbar() {
               aria-current={isContactActive ? 'page' : undefined}
             >
               <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
+            </Link>
+
+            <Link 
+              to="/track" 
+              className={`nav-menu-link ${isTrackActive ? 'active' : ''}`}
+              onClick={closeMenu}
+              aria-current={isTrackActive ? 'page' : undefined}
+            >
+              <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Status'}</span>
             </Link>
 
             {/* If logged in, show direct dashboard link */}
@@ -368,6 +378,17 @@ export function PublicNavbar() {
             <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
           </Link>
 
+          <Link 
+            to="/track" 
+            className={`mobile-nav-link-item ${isTrackActive ? 'active' : ''}`} 
+            onClick={closeMenu}
+            aria-current={isTrackActive ? 'page' : undefined}
+            tabIndex={mobileMenuOpen ? 0 : -1}
+          >
+            <Search size={16} aria-hidden="true" />
+            <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Complaint'}</span>
+          </Link>
+
           {isStudentLoggedIn ? (
             <>
               <Link 
@@ -423,6 +444,18 @@ export function PublicNavbar() {
               </Link>
             </>
           )}
+
+          <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '6px 8px' }} />
+          <Link 
+            to="/admin/login" 
+            className="mobile-nav-link-item" 
+            onClick={closeMenu}
+            tabIndex={mobileMenuOpen ? 0 : -1}
+            style={{ fontSize: '0.8125rem', color: '#64748B' }}
+          >
+            <Lock size={15} aria-hidden="true" />
+            <span>{isNe ? 'कलेज प्रशासनिक लगइन' : 'Admin Operations Login'}</span>
+          </Link>
         </nav>
 
         {/* Mobile Drawer Complaint CTA */}

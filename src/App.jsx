@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext';
 // Public & Student Portal Pages
 import { LandingPage } from './pages/LandingPage';
 import { SubmitComplaintPage } from './pages/SubmitComplaintPage';
+import { TrackComplaintPage } from './pages/TrackComplaintPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
@@ -31,7 +32,7 @@ export default function App() {
           {/* Public Top-Level Pages */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/submit" element={<SubmitComplaintPage />} />
-          <Route path="/track" element={<Navigate to="/student/complaints" replace />} />
+          <Route path="/track" element={<TrackComplaintPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />

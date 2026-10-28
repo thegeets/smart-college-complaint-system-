@@ -361,14 +361,30 @@ export function AppProvider({ children }) {
 
   // Real Admin Login
   const loginAdmin = useCallback(async (email, password) => {
-    const res = await fetch('/api/v1/admin/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
+    let res;
+    try {
+      res = await fetch('/api/v1/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (networkErr) {
+      throw new Error(
+        'Unable to connect to the authentication server. Please ensure the backend server is running and accessible.',
+        { cause: networkErr }
+      );
+    }
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error(
+        `Server returned an invalid response (${res.status} ${res.statusText}). If deployed, please check backend proxy routing.`
+      );
+    }
+
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Login failed. Please check your credentials.');
     }

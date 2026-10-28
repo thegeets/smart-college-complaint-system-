@@ -205,12 +205,12 @@ router.get('/:id', async (req, res, next) => {
       });
     }
 
-    // Authorization check: student can only view their own complaint
+    // Authorization check: student can only view their own complaint (return 404 to avoid enumerating IDs)
     if (!complaint.studentId || !complaint.studentId.equals(req.student._id)) {
-      return res.status(403).json({
+      return res.status(404).json({
         success: false,
-        code: 'FORBIDDEN',
-        message: 'You are not authorized to view this complaint.',
+        code: 'COMPLAINT_NOT_FOUND',
+        message: 'Complaint record not found.',
       });
     }
 
@@ -242,12 +242,12 @@ router.get('/:id/attachment', async (req, res, next) => {
       });
     }
 
-    // Ownership check
+    // Ownership check (return 404 to avoid leaking existence of private attachments)
     if (!complaint.studentId || !complaint.studentId.equals(req.student._id)) {
-      return res.status(403).json({
+      return res.status(404).json({
         success: false,
-        code: 'FORBIDDEN',
-        message: 'You are not authorized to access this attachment.',
+        code: 'COMPLAINT_NOT_FOUND',
+        message: 'Complaint not found.',
       });
     }
 
