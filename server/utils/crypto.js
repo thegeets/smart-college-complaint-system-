@@ -79,6 +79,21 @@ export function generateComplaintReference() {
 }
 
 /**
+ * Generate a cryptographically secure random token (e.g. for email verification and password reset)
+ */
+export function generateRandomToken(bytes = 32) {
+  return crypto.randomBytes(bytes).toString('hex');
+}
+
+/**
+ * Generate a 6-digit numeric verification code
+ */
+export function generateNumericToken() {
+  const num = crypto.randomInt(100000, 999999);
+  return num.toString();
+}
+
+/**
  * Generate a random CSRF token.
  */
 export function generateCsrfToken() {

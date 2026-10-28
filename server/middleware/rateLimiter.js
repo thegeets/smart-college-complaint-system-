@@ -10,6 +10,7 @@ export const submissionRateLimiter = rateLimit({
   max: ENV.RATE_LIMIT_MAX_SUBMISSIONS,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
   message: {
     success: false,
     code: 'RATE_LIMIT_EXCEEDED',
@@ -26,6 +27,7 @@ export const trackingRateLimiter = rateLimit({
   max: ENV.RATE_LIMIT_MAX_TRACKING,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
   message: {
     success: false,
     code: 'RATE_LIMIT_EXCEEDED',
@@ -42,6 +44,7 @@ export const loginRateLimiter = rateLimit({
   max: ENV.RATE_LIMIT_MAX_LOGINS,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
   message: {
     success: false,
     code: 'RATE_LIMIT_EXCEEDED',
@@ -57,6 +60,7 @@ export const generalApiLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
   message: {
     success: false,
     code: 'RATE_LIMIT_EXCEEDED',

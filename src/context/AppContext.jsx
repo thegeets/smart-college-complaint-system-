@@ -73,7 +73,7 @@ export function AppProvider({ children }) {
   const [csrfToken, setCsrfToken] = useState(null);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  // Check existing session on mount
+  // Check admin session on mount
   const checkAdminSession = useCallback(async () => {
     try {
       const res = await fetch('/api/v1/admin/auth/me', {
@@ -101,9 +101,263 @@ export function AppProvider({ children }) {
     }
   }, []);
 
+  // 4. Student Authentication Session State
+  const [isStudentLoggedIn, setIsStudentLoggedIn] = useState(false);
+  const [studentUser, setStudentUser] = useState(null);
+  const [isCheckingStudentSession, setIsCheckingStudentSession] = useState(true);
+
+  // Check student session on mount
+  const checkStudentSession = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/student/auth/me', {
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.student) {
+          setIsStudentLoggedIn(true);
+          setStudentUser(data.student);
+          if (data.csrfToken) setCsrfToken(data.csrfToken);
+        } else {
+          setIsStudentLoggedIn(false);
+          setStudentUser(null);
+        }
+      } else {
+        setIsStudentLoggedIn(false);
+        setStudentUser(null);
+      }
+    } catch (err) {
+      setIsStudentLoggedIn(false);
+      setStudentUser(null);
+    } finally {
+      setIsCheckingStudentSession(false);
+    }
+  }, []);
+
   useEffect(() => {
     checkAdminSession();
-  }, [checkAdminSession]);
+    checkStudentSession();
+  }, [checkAdminSession, checkStudentSession]);
+
+  // Real Student Registration
+  const registerStudent = useCallback(async (formData) => {
+    const res = await fetch('/api/v1/student/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      const err = new Error(data.message || 'Registration failed.');
+      err.errors = data.errors;
+      throw err;
+    }
+
+    showToast(data.message || 'Student account created.', 'success');
+    return data;
+  }, [showToast]);
+
+  // Real Student Email Verification
+  const verifyStudentEmail = useCallback(async (email, token) => {
+    const res = await fetch('/api/v1/student/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, token }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Verification failed. Please check the code.');
+    }
+
+    setIsStudentLoggedIn(true);
+    setStudentUser(data.student);
+    if (data.csrfToken) setCsrfToken(data.csrfToken);
+    showToast(data.message || 'Email verified successfully.', 'success');
+    return data;
+  }, [showToast]);
+
+  // Resend Student Verification Code
+  const resendStudentVerification = useCallback(async (email) => {
+    const res = await fetch('/api/v1/student/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to resend code.');
+    }
+
+    showToast(data.message || 'Verification code resent.', 'info');
+    return data;
+  }, [showToast]);
+
+  // Real Student Login
+  const loginStudent = useCallback(async (email, password) => {
+    const res = await fetch('/api/v1/student/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Invalid email or password.');
+    }
+
+    setIsStudentLoggedIn(true);
+    setStudentUser(data.student);
+    if (data.csrfToken) setCsrfToken(data.csrfToken);
+    showToast(data.message || 'Welcome back to your dashboard.', 'success');
+    return data;
+  }, [showToast]);
+
+  // Real Student Logout
+  const logoutStudent = useCallback(async () => {
+    try {
+      await fetch('/api/v1/student/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (e) {
+      console.warn('Student logout request failed', e);
+    } finally {
+      setIsStudentLoggedIn(false);
+      setStudentUser(null);
+      showToast('Logged out of student session.', 'info');
+    }
+  }, [showToast]);
+
+  // Real Student Profile Update
+  const updateStudentProfile = useCallback(async (profileData) => {
+    const res = await fetch('/api/v1/student/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(profileData),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to update profile.');
+    }
+
+    setStudentUser(data.student);
+    showToast(data.message || 'Profile updated.', 'success');
+    return data;
+  }, [showToast]);
+
+  // Forgot / Reset Password
+  const forgotStudentPassword = useCallback(async (email) => {
+    const res = await fetch('/api/v1/student/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Request failed.');
+    }
+    return data;
+  }, []);
+
+  const resetStudentPassword = useCallback(async (email, token, newPassword) => {
+    const res = await fetch('/api/v1/student/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, token, newPassword }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to reset password.');
+    }
+    showToast(data.message || 'Password reset successfully.', 'success');
+    return data;
+  }, [showToast]);
+
+  // 5. Authenticated Student Complaints Operations
+  const fetchStudentComplaints = useCallback(async (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.status && params.status !== 'All') query.set('status', params.status);
+    if (params.category && params.category !== 'All') query.set('category', params.category);
+    if (params.search) query.set('search', params.search);
+
+    const res = await fetch(`/api/v1/student/complaints?${query.toString()}`, {
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to load complaints.');
+    }
+
+    return data.complaints;
+  }, []);
+
+  const fetchStudentComplaintById = useCallback(async (id) => {
+    const res = await fetch(`/api/v1/student/complaints/${id}`, {
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to load complaint details.');
+    }
+
+    return data.complaint;
+  }, []);
+
+  const submitStudentComplaint = useCallback(async (formData, file) => {
+    const body = new FormData();
+    body.append('category', formData.category);
+    body.append('title', formData.title);
+    body.append('description', formData.description);
+    body.append('priority', formData.priority || 'Medium');
+
+    if (file) {
+      body.append('attachment', file);
+    }
+
+    const res = await fetch('/api/v1/student/complaints', {
+      method: 'POST',
+      credentials: 'include',
+      body,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      const err = new Error(data.message || 'Failed to submit complaint.');
+      err.errors = data.errors;
+      throw err;
+    }
+
+    showToast('Complaint lodged successfully.', 'success');
+    return data; // { success: true, message, complaint }
+  }, [showToast]);
+
+  const claimLegacyComplaint = useCallback(async (reference, trackingSecret) => {
+    const res = await fetch('/api/v1/student/complaints/claim-legacy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ reference, trackingSecret }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to claim legacy complaint.');
+    }
+
+    showToast(data.message || 'Complaint linked to your dashboard.', 'success');
+    return data;
+  }, [showToast]);
 
   // Real Admin Login
   const loginAdmin = useCallback(async (email, password) => {
@@ -167,7 +421,7 @@ export function AppProvider({ children }) {
     return data;
   }, [csrfToken, showToast]);
 
-  // 4. Public Complaint Submission
+  // Legacy Public Complaint Submission (preserved)
   const submitComplaint = useCallback(async (formData, file) => {
     const body = new FormData();
     body.append('studentName', formData.studentName);
@@ -195,10 +449,10 @@ export function AppProvider({ children }) {
       throw err;
     }
 
-    return data; // { success: true, reference, trackingSecret, message, submittedAt }
+    return data;
   }, []);
 
-  // 5. Private Complaint Tracking
+  // Legacy Private Complaint Tracking (preserved)
   const trackComplaint = useCallback(async (reference, trackingSecret) => {
     const res = await fetch('/api/v1/complaints/track', {
       method: 'POST',
@@ -214,17 +468,15 @@ export function AppProvider({ children }) {
     return data.complaint;
   }, []);
 
-  // 6. Admin Complaint Management Methods
+  // Admin Complaint Management Methods
   const fetchAdminComplaints = useCallback(async (params = {}) => {
     const query = new URLSearchParams();
     if (params.page) query.set('page', params.page);
     if (params.limit) query.set('limit', params.limit);
-    if (params.status) query.set('status', params.status);
-    if (params.category) query.set('category', params.category);
-    if (params.priority) query.set('priority', params.priority);
+    if (params.status && params.status !== 'All') query.set('status', params.status);
+    if (params.category && params.category !== 'All') query.set('category', params.category);
+    if (params.program && params.program !== 'All') query.set('program', params.program);
     if (params.search) query.set('search', params.search);
-    if (params.startDate) query.set('startDate', params.startDate);
-    if (params.endDate) query.set('endDate', params.endDate);
 
     const res = await fetch(`/api/v1/admin/complaints?${query.toString()}`, {
       credentials: 'include',
@@ -232,10 +484,10 @@ export function AppProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Failed to load complaints.');
+      throw new Error(data.message || 'Failed to fetch complaints list.');
     }
 
-    return data; // { complaints, pagination }
+    return data;
   }, []);
 
   const fetchAdminComplaintById = useCallback(async (id) => {
@@ -245,13 +497,13 @@ export function AppProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Failed to load complaint details.');
+      throw new Error(data.message || 'Failed to retrieve complaint detail.');
     }
 
     return data.complaint;
   }, []);
 
-  const updateComplaintStatus = useCallback(async (id, status, note) => {
+  const updateComplaintStatus = useCallback(async (id, newStatus, reason = '') => {
     const res = await fetch(`/api/v1/admin/complaints/${id}/status`, {
       method: 'PATCH',
       headers: {
@@ -259,15 +511,19 @@ export function AppProvider({ children }) {
         'x-csrf-token': csrfToken || '',
       },
       credentials: 'include',
-      body: JSON.stringify({ status, note }),
+      body: JSON.stringify({ status: newStatus, reason }),
     });
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Failed to update complaint status.');
+      throw new Error(data.message || 'Failed to update status.');
     }
 
-    showToast(data.message || `Status changed to ${status}.`, 'success');
+    if (data.csrfToken) {
+      setCsrfToken(data.csrfToken);
+    }
+
+    showToast(`Status updated to "${newStatus}"`, 'success');
     return data.complaint;
   }, [csrfToken, showToast]);
 
@@ -284,15 +540,19 @@ export function AppProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Failed to save official response.');
+      throw new Error(data.message || 'Failed to post official response.');
     }
 
-    showToast(data.message || 'Official response recorded.', 'success');
-    return data.complaint;
+    if (data.csrfToken) {
+      setCsrfToken(data.csrfToken);
+    }
+
+    showToast('Official response recorded and dispatched to student view.', 'success');
+    return data.responses;
   }, [csrfToken, showToast]);
 
   const addInternalNote = useCallback(async (id, note) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}/notes`, {
+    const res = await fetch(`/api/v1/admin/complaints/${id}/internal-notes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -304,11 +564,15 @@ export function AppProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Failed to record internal note.');
+      throw new Error(data.message || 'Failed to save internal note.');
     }
 
-    showToast(data.message || 'Internal note saved.', 'success');
-    return data.complaint;
+    if (data.csrfToken) {
+      setCsrfToken(data.csrfToken);
+    }
+
+    showToast('Internal administrative note saved.', 'info');
+    return data.internalNotes;
   }, [csrfToken, showToast]);
 
   const fetchReportsSummary = useCallback(async () => {
@@ -318,53 +582,36 @@ export function AppProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Failed to load report summary.');
+      throw new Error(data.message || 'Failed to load reports summary.');
     }
 
     return data.summary;
   }, []);
 
-  // 7. Translation helper
   const t = useCallback(
     (keyPath, fallback = '') => {
-      if (!keyPath) return '';
-      const currentDict = TRANSLATIONS[language] || TRANSLATIONS.en;
-      const enDict = TRANSLATIONS.en;
-
-      if (currentDict[keyPath] !== undefined) {
-        return currentDict[keyPath];
-      }
-
-      const parts = keyPath.split('.');
-      let val = currentDict;
-      for (const p of parts) {
-        if (val && typeof val === 'object' && p in val) {
-          val = val[p];
-        } else {
-          val = undefined;
+      const keys = keyPath.split('.');
+      let current = TRANSLATIONS[language] || TRANSLATIONS.en;
+      for (const k of keys) {
+        if (!current || typeof current !== 'object') {
+          current = undefined;
           break;
         }
+        current = current[k];
       }
 
-      if (val !== undefined && typeof val !== 'object') {
-        return val;
-      }
+      if (current !== undefined) return current;
 
-      let enVal = enDict;
-      for (const p of parts) {
-        if (enVal && typeof enVal === 'object' && p in enVal) {
-          enVal = enVal[p];
-        } else {
-          enVal = undefined;
+      let fb = TRANSLATIONS.en;
+      for (const k of keys) {
+        if (!fb || typeof fb !== 'object') {
+          fb = undefined;
           break;
         }
+        fb = fb[k];
       }
 
-      if (enVal !== undefined && typeof enVal !== 'object') {
-        return enVal;
-      }
-
-      return fallback || keyPath;
+      return fb !== undefined ? fb : fallback;
     },
     [language]
   );
@@ -407,7 +654,24 @@ export function AppProvider({ children }) {
     toasts,
     showToast,
     removeToast,
-    // Admin Auth
+    // Student Auth & Session
+    isStudentLoggedIn,
+    studentUser,
+    isCheckingStudentSession,
+    registerStudent,
+    verifyStudentEmail,
+    resendStudentVerification,
+    loginStudent,
+    logoutStudent,
+    updateStudentProfile,
+    forgotStudentPassword,
+    resetStudentPassword,
+    // Student Complaints Flow
+    fetchStudentComplaints,
+    fetchStudentComplaintById,
+    submitStudentComplaint,
+    claimLegacyComplaint,
+    // Admin Auth & Session
     isAdminLoggedIn,
     adminUser,
     csrfToken,
@@ -415,7 +679,7 @@ export function AppProvider({ children }) {
     loginAdmin,
     logoutAdmin,
     changeAdminPassword,
-    // Public Complaints Flow
+    // Legacy Complaints Flow
     submitComplaint,
     trackComplaint,
     // Admin Management Flow

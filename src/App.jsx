@@ -2,13 +2,19 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 
-// Public & Student-facing Pages (No login required)
+// Public & Student Portal Pages
 import { LandingPage } from './pages/LandingPage';
 import { SubmitComplaintPage } from './pages/SubmitComplaintPage';
-import { TrackComplaintPage } from './pages/TrackComplaintPage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { MyComplaintsPage } from './pages/MyComplaintsPage';
 import { ComplaintDetailsPage } from './pages/ComplaintDetailsPage';
+import { ProfilePage } from './pages/ProfilePage';
 
-// Admin Portal Pages (Protected by AdminLayout & Simulated Login)
+// Admin Portal Pages (Protected by AdminLayout)
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminLayout } from './components/AdminLayout';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -25,8 +31,20 @@ export default function App() {
           {/* Public Top-Level Pages */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/submit" element={<SubmitComplaintPage />} />
-          <Route path="/track" element={<TrackComplaintPage />} />
-          <Route path="/complaint/:id" element={<ComplaintDetailsPage />} />
+          <Route path="/track" element={<Navigate to="/student/complaints" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          {/* Authenticated Student Portal Routes */}
+          <Route path="/student/complaints" element={<MyComplaintsPage />} />
+          <Route path="/student/complaints/:id" element={<ComplaintDetailsPage />} />
+          <Route path="/student/dashboard" element={<Navigate to="/student/complaints" replace />} />
+          <Route path="/student/profile" element={<ProfilePage />} />
+          <Route path="/student" element={<Navigate to="/student/complaints" replace />} />
+          <Route path="/student/submit" element={<Navigate to="/submit" replace />} />
 
           {/* Dedicated Admin Portal Access */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -39,19 +57,10 @@ export default function App() {
             <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
 
-          {/* Graceful redirects for removed student demo login & legacy routes */}
-          <Route path="/login" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/student" element={<Navigate to="/submit" replace />} />
-          <Route path="/student/submit" element={<Navigate to="/submit" replace />} />
-          <Route path="/student/complaints" element={<Navigate to="/track" replace />} />
-          <Route path="/student/*" element={<Navigate to="/" replace />} />
-          <Route path="/staff/*" element={<Navigate to="/admin/login" replace />} />
-
-          {/* Catch-all fallback route */}
+          {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>
   );
 }
-

@@ -1,277 +1,438 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import {
-  Languages,
-  Save,
-  Bell
-} from 'lucide-react';
+import { PublicNavbar } from '../components/PublicNavbar';
+import { Footer } from '../components/Footer';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
+import {
+  User,
+  Mail,
+  BookOpen,
+  Phone,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  LogOut,
+  Link2,
+  ShieldCheck,
+  RefreshCw,
+  Info
+} from 'lucide-react';
+
+const SEMESTERS = [
+  '1st Semester',
+  '2nd Semester',
+  '3rd Semester',
+  '4th Semester',
+  '5th Semester',
+  '6th Semester',
+  '7th Semester',
+  '8th Semester',
+];
 
 export function ProfilePage() {
-  const { 
-    currentUser, 
+  const {
+    isStudentLoggedIn,
+    studentUser,
+    isCheckingStudentSession,
     updateStudentProfile,
-    language, 
-    setLanguage, 
+    logoutStudent,
+    claimLegacyComplaint,
+    language,
     showToast,
-    t 
   } = useApp();
 
   const isNe = language === 'ne';
+  const navigate = useNavigate();
 
-  // Local state for editable profile fields
-  const [name, setName] = useState(currentUser.name);
-  const [email, setEmail] = useState(currentUser.email);
-  const [phone, setPhone] = useState(currentUser.phone || '061-574096');
-  const [semester, setSemester] = useState(currentUser.semester || '4th Semester (Year 2)');
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [smsNotifs, setSmsNotifs] = useState(false);
+  useEffect(() => {
+    if (!isCheckingStudentSession && !isStudentLoggedIn) {
+      navigate('/login?redirect=/student/profile', { replace: true });
+    }
+  }, [isCheckingStudentSession, isStudentLoggedIn, navigate]);
 
-  const handleSaveProfile = (e) => {
+  const [name, setName] = useState('');
+  const [semester, setSemester] = useState('1st Semester');
+  const [phone, setPhone] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Claim legacy state
+  const [legacyRef, setLegacyRef] = useState('');
+  const [legacySecret, setLegacySecret] = useState('');
+  const [claimStatus, setClaimStatus] = useState({ error: '', success: '', loading: false });
+
+  useEffect(() => {
+    if (studentUser) {
+      setName(studentUser.name || '');
+      setSemester(studentUser.semester || '1st Semester');
+      setPhone(studentUser.phone || '');
+    }
+  }, [studentUser]);
+
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    updateStudentProfile({
-      name,
-      email,
-      phone,
-      semester,
-    });
-    showToast(isNe ? 'विद्यार्थी विवरण सफलतापूर्वक अपडेट गरियो।' : 'Student profile details updated successfully.', 'success');
+    if (!name.trim()) {
+      showToast(isNe ? 'नाम खाली हुन सक्दैन।' : 'Name cannot be empty.', 'error');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateStudentProfile({
+        name: name.trim(),
+        semester,
+        phone: phone.trim(),
+      });
+    } catch (err) {
+      showToast(err.message || 'Failed to update profile.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
+  const handleClaimLegacy = async (e) => {
+    e.preventDefault();
+    if (!legacyRef.trim() || !legacySecret.trim()) {
+      setClaimStatus({ error: isNe ? 'सन्दर्भ कोड र गोप्य ट्र्याकिङ कोड दुवै प्रविष्ट गर्नुहोस्।' : 'Please enter both Reference ID and Tracking Secret.', success: '', loading: false });
+      return;
+    }
+
+    setClaimStatus({ error: '', success: '', loading: true });
+
+    try {
+      await claimLegacyComplaint(legacyRef.trim().toUpperCase(), legacySecret.trim());
+      setClaimStatus({ error: '', success: isNe ? 'उजुरी तपाईंको खातामा सफलतापूर्वक लिंक गरियो।' : 'Complaint claimed and linked to your dashboard successfully.', loading: false });
+      setLegacyRef('');
+      setLegacySecret('');
+    } catch (err) {
+      setClaimStatus({ error: err.message || 'Failed to link complaint.', success: '', loading: false });
+    }
+  };
+
+  const handleLogout = async () => {
+    await logoutStudent();
+    navigate('/');
+  };
+
+  if (isCheckingStudentSession) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)' }}>
+        <p style={{ fontWeight: '600', color: '#15365B' }}>Loading student profile...</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-      {/* Page Title */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--navy-900)' }}>
-          {t('profile.pageTitle', 'Student Profile & Settings')}
-        </h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          {t('profile.pageSubtitle', 'Manage your student contact information, portal language preference, and notification settings.')}
-        </p>
-      </div>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
+      <PublicNavbar />
 
-      {/* Profile Overview Card */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div className="card-body" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.5rem' }}>
-          <img
-            src={currentUser.avatar}
-            alt={currentUser.name}
-            style={{
-              width: '84px',
-              height: '84px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '3px solid var(--sky-500)',
-              boxShadow: 'var(--shadow-md)',
-            }}
-          />
-
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--navy-900)' }}>
-                {currentUser.name}
-              </h3>
-              <span className="badge badge-status-submitted">
-                {isNe ? 'विद्यार्थी' : 'Student'}
-              </span>
+      <main style={{ flex: 1, padding: 'var(--space-8) var(--space-4)' }}>
+        <div style={{ maxWidth: '780px', width: '100%', margin: '0 auto' }}>
+          
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-6)', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: '#15365B', margin: '0 0 4px' }}>
+                {isNe ? 'विद्यार्थी प्रोफाइल' : 'Student Profile & Settings'}
+              </h1>
+              <p style={{ fontSize: '0.875rem', color: '#64748B', margin: 0 }}>
+                {isNe
+                  ? 'आफ्नो व्यक्तिगत जानकारी, इमेल प्रमाणीकरण र खाता सेटिङहरू व्यवस्थापन गर्नुहोस्।'
+                  : 'Manage your contact information, email verification, and account settings.'}
+              </p>
             </div>
 
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 0.25rem' }}>
-              {t('details.rollNumber', 'Roll Number')}: <strong>{currentUser.rollNumber}</strong> | {currentUser.program} ({currentUser.semester || '4th Semester'})
-            </p>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              ID: <code>{currentUser.id}</code>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Editable Profile Information Form */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div className="card-header">
-          <h3 className="card-title">{t('profile.personalDetails', 'Personal Contact Details')}</h3>
-        </div>
-
-        <form onSubmit={handleSaveProfile}>
-          <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
-              <div className="form-group">
-                <label className="form-label">{t('profile.fullName', 'Full Display Name')}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('profile.collegeEmail', 'College Email Address')}</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('profile.mobileNumber', 'Contact Phone Number')}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('login.semesterLabel', 'Current Semester:')}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={semester}
-                  onChange={(e) => setSemester(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">{t('profile.departmentBranch', 'Academic Program')}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  readOnly
-                  disabled
-                  value={COLLEGE_CONFIG.program}
-                  style={{ backgroundColor: 'var(--bg-subtle)' }}
-                />
-                <div className="form-hint">{t('profile.programNotice', 'BSc CSIT is the exclusive academic program offered at Soch College of IT.')}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="card-footer" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" className="btn btn-primary btn-sm">
-              <Save size={14} />
-              <span>{t('profile.saveBtn', 'Save Contact Details')}</span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="btn btn-secondary btn-sm"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#B91C1C', borderColor: '#FECACA' }}
+            >
+              <LogOut size={14} />
+              <span>{isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}</span>
             </button>
           </div>
-        </form>
-      </div>
 
-      {/* System Preferences & Language Toggle */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div className="card-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Languages size={18} color="var(--navy-700)" />
-            <h3 className="card-title">{t('profile.langTitle', 'Language & Localization')}</h3>
-          </div>
-        </div>
-
-        <div className="card-body">
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
-            {t('profile.langSubtitle', 'Select your preferred portal display language. The interface elements and headings will adjust automatically.')}
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <label style={{
+          {/* Email Verification Banner */}
+          {studentUser && !studentUser.isEmailVerified ? (
+            <div style={{
+              backgroundColor: '#FEF2F2',
+              border: '1px solid #FECACA',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: 'var(--space-6)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              padding: '1rem',
-              borderRadius: 'var(--radius-md)',
-              border: language === 'en' ? '2px solid var(--navy-800)' : '1px solid var(--border-medium)',
-              background: language === 'en' ? 'var(--sky-50)' : '#ffffff',
-              cursor: 'pointer',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px'
             }}>
-              <input
-                type="radio"
-                name="lang"
-                value="en"
-                checked={language === 'en'}
-                onChange={() => setLanguage('en')}
-                style={{ accentColor: 'var(--navy-800)' }}
-              />
-              <div>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--navy-900)' }}>{t('profile.langEnglish', 'English (Default)')}</strong>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{t('profile.langEnglishSub', 'Official institutional English')}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <AlertCircle size={22} color="#DC2626" />
+                <div>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#991B1B' }}>
+                    {isNe ? 'इमेल स्वामित्व प्रमाणित भएको छैन' : 'Email Ownership Not Verified'}
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: '#7F1D1D' }}>
+                    {isNe ? 'नयाँ उजुरी दर्ता गर्न इमेल प्रमाणीकरण अनिवार्य छ।' : 'Verify your email address to enable lodging grievances.'}
+                  </div>
+                </div>
               </div>
-            </label>
 
-            <label style={{
+              <Link
+                to={`/verify-email?email=${encodeURIComponent(studentUser.email)}`}
+                className="btn btn-sm"
+                style={{ backgroundColor: '#DC2626', color: '#FFFFFF', fontWeight: '700' }}
+              >
+                {isNe ? 'अहिले प्रमाणित गर्नुहोस्' : 'Verify Email'}
+              </Link>
+            </div>
+          ) : (
+            <div style={{
+              backgroundColor: '#F0FDFA',
+              border: '1px solid #CCFBF1',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: 'var(--space-6)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              padding: '1rem',
-              borderRadius: 'var(--radius-md)',
-              border: language === 'ne' ? '2px solid var(--navy-800)' : '1px solid var(--border-medium)',
-              background: language === 'ne' ? 'var(--sky-50)' : '#ffffff',
-              cursor: 'pointer',
+              gap: '10px',
+              color: '#0F766E',
+              fontSize: '0.875rem'
             }}>
-              <input
-                type="radio"
-                name="lang"
-                value="ne"
-                checked={language === 'ne'}
-                onChange={() => setLanguage('ne')}
-                style={{ accentColor: 'var(--navy-800)' }}
-              />
-              <div>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--navy-900)' }}>{t('profile.langNepali', 'नेपाली (Nepali)')}</strong>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{t('profile.langNepaliSub', 'राष्ट्रिय भाषा इन्टरफेस (National Language)')}</p>
-              </div>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Notification Preferences */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div className="card-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Bell size={18} color="var(--navy-700)" />
-            <h3 className="card-title">{t('profile.alertsTitle', 'Dispatch Alerts & Subscriptions')}</h3>
-          </div>
-        </div>
-
-        <div className="card-body">
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={emailNotifs}
-              onChange={(e) => setEmailNotifs(e.target.checked)}
-              style={{ width: '18px', height: '18px', accentColor: 'var(--navy-800)' }}
-            />
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--navy-900)' }}>
-                {t('profile.emailAlerts', 'Email Notifications for Complaint Updates')}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {t('profile.emailAlertsSub', 'Receive instant emails whenever the status of your complaint changes or staff post notes.')}
-              </div>
+              <CheckCircle2 size={18} />
+              <span>
+                {isNe
+                  ? 'इमेल स्वामित्व सफलतापूर्वक प्रमाणित भइसकेको छ।'
+                  : 'Email ownership confirmed. Your student account is fully active.'}
+              </span>
             </div>
-          </label>
+          )}
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={smsNotifs}
-              onChange={(e) => setSmsNotifs(e.target.checked)}
-              style={{ width: '18px', height: '18px', accentColor: 'var(--navy-800)' }}
-            />
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--navy-900)' }}>
-                {t('profile.smsAlerts', 'SMS Broadcast Alerts')}
+          {/* Profile Overview Card */}
+          <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#15365B', margin: '0 0 16px' }}>
+              {isNe ? 'खाता विवरण' : 'Account Details'}
+            </h2>
+
+            <form onSubmit={handleSaveProfile}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
+                {/* Full Name */}
+                <div className="form-group">
+                  <label htmlFor="profile-name" className="form-label">
+                    {isNe ? 'पूरा नाम' : 'Full Name'} <span className="required">*</span>
+                  </label>
+                  <input
+                    id="profile-name"
+                    type="text"
+                    className="form-input"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Student ID (Readonly) */}
+                <div className="form-group">
+                  <label htmlFor="profile-id" className="form-label">
+                    {isNe ? 'रोल नं / विद्यार्थी आइडी' : 'Student ID / Roll No'}
+                  </label>
+                  <input
+                    id="profile-id"
+                    type="text"
+                    className="form-input"
+                    value={studentUser?.studentId || ''}
+                    readOnly
+                    disabled
+                    style={{ backgroundColor: '#F8FAFC', color: '#64748B', cursor: 'default' }}
+                  />
+                </div>
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {t('profile.smsAlertsSub', 'Receive SMS updates on your registered mobile number for urgent notices.')}
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
+                {/* Email (Readonly) */}
+                <div className="form-group">
+                  <label htmlFor="profile-email" className="form-label">
+                    {isNe ? 'इमेल' : 'Email Address'}
+                  </label>
+                  <input
+                    id="profile-email"
+                    type="email"
+                    className="form-input"
+                    value={studentUser?.email || ''}
+                    readOnly
+                    disabled
+                    style={{ backgroundColor: '#F8FAFC', color: '#64748B', cursor: 'default' }}
+                  />
+                </div>
+
+                {/* Academic Program */}
+                <div className="form-group">
+                  <label htmlFor="profile-program" className="form-label">
+                    {isNe ? 'कार्यक्रम' : 'Academic Program'}
+                  </label>
+                  <input
+                    id="profile-program"
+                    type="text"
+                    className="form-input"
+                    value={studentUser?.program || 'BSc CSIT'}
+                    readOnly
+                    disabled
+                    style={{ backgroundColor: '#F8FAFC', color: '#64748B', cursor: 'default' }}
+                  />
+                </div>
               </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+                {/* Semester */}
+                <div className="form-group">
+                  <label htmlFor="profile-semester" className="form-label">
+                    {isNe ? 'सेमेस्टर' : 'Current Semester'} <span className="required">*</span>
+                  </label>
+                  <select
+                    id="profile-semester"
+                    className="form-select"
+                    value={semester}
+                    onChange={(e) => setSemester(e.target.value)}
+                  >
+                    {SEMESTERS.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Contact Phone */}
+                <div className="form-group">
+                  <label htmlFor="profile-phone" className="form-label">
+                    {isNe ? 'फोन नम्बर' : 'Contact Phone'}
+                  </label>
+                  <input
+                    id="profile-phone"
+                    type="tel"
+                    className="form-input"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. 9800000000"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-md"
+                  disabled={isSaving}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Save size={16} />
+                  <span>{isSaving ? (isNe ? 'सुरक्षित गरिँदैछ...' : 'Saving...') : (isNe ? 'परिवर्तन सुरक्षित गर्नुहोस्' : 'Save Changes')}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Claim Legacy Guest Complaint Section */}
+          <div className="card" style={{ padding: 'var(--space-6)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <Link2 size={18} color="#0D8178" />
+              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#15365B', margin: 0 }}>
+                {isNe ? 'पुरानो उजुरी खातामा लिंक गर्नुहोस्' : 'Link Previous Guest Complaint'}
+              </h2>
             </div>
-          </label>
+
+            <p style={{ fontSize: '0.8125rem', color: '#64748B', lineHeight: '1.5', margin: '0 0 16px' }}>
+              {isNe
+                ? 'यदि तपाईंले पहिले खाता बिना उजुरी दर्ता गर्नुभएको थियो भने, Reference ID र Tracking Secret प्रविष्ट गरी यसलाई आफ्नो ड्यासबोर्डमा सुरक्षित रूपमा जोड्नुहोस्।'
+                : 'If you submitted a complaint prior to account creation, link it here using your Complaint Reference ID and Private Tracking Secret.'}
+            </p>
+
+            {claimStatus.success && (
+              <div style={{
+                padding: '10px 14px',
+                backgroundColor: '#F0FDFA',
+                border: '1px solid #CCFBF1',
+                borderRadius: '6px',
+                color: '#0F766E',
+                fontSize: '0.8125rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '14px'
+              }}>
+                <CheckCircle2 size={16} />
+                <span>{claimStatus.success}</span>
+              </div>
+            )}
+
+            {claimStatus.error && (
+              <div style={{
+                padding: '10px 14px',
+                backgroundColor: '#FEF2F2',
+                border: '1px solid #FECACA',
+                borderRadius: '6px',
+                color: '#B91C1C',
+                fontSize: '0.8125rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '14px'
+              }}>
+                <AlertCircle size={16} />
+                <span>{claimStatus.error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleClaimLegacy}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
+                <div className="form-group">
+                  <label htmlFor="legacy-ref" className="form-label">
+                    {isNe ? 'सन्दर्भ कोड (Reference ID)' : 'Reference ID'}
+                  </label>
+                  <input
+                    id="legacy-ref"
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. CMP-2026-A8F2K"
+                    value={legacyRef}
+                    onChange={(e) => setLegacyRef(e.target.value)}
+                    style={{ fontFamily: 'monospace', fontWeight: '700' }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="legacy-secret" className="form-label">
+                    {isNe ? 'गोप्य ट्र्याकिङ कोड (Tracking Secret)' : 'Private Tracking Secret'}
+                  </label>
+                  <input
+                    id="legacy-secret"
+                    type="password"
+                    className="form-input"
+                    placeholder="trk_..."
+                    value={legacySecret}
+                    onChange={(e) => setLegacySecret(e.target.value)}
+                    style={{ fontFamily: 'monospace' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="submit"
+                  className="btn btn-secondary btn-sm"
+                  disabled={claimStatus.loading}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Link2 size={14} />
+                  <span>{claimStatus.loading ? (isNe ? 'लिंक गरिँदैछ...' : 'Linking...') : (isNe ? 'खातामा जोड्नुहोस्' : 'Link to Account')}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

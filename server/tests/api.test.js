@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
@@ -6,6 +7,7 @@ import { createApp } from '../app.js';
 import { connectDB, disconnectDB } from '../config/db.js';
 import { Admin } from '../models/Admin.js';
 import { Complaint } from '../models/Complaint.js';
+import { Student } from '../models/Student.js';
 import { hashPassword } from '../utils/crypto.js';
 
 test('Smart College Complaint System API Integration Tests', async (t) => {
@@ -29,7 +31,16 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
 
     // Clean up previous test artifacts
     await Admin.deleteMany({ email: TEST_ADMIN.email });
-    await Complaint.deleteMany({ 'student.email': 'teststudent@sochcollege.edu.np' });
+    await Student.deleteMany({
+      email: { $in: ['student.alpha@sochcollege.edu.np', 'student.beta@sochcollege.edu.np', 'unverified@sochcollege.edu.np'] },
+    });
+    await Complaint.deleteMany({
+      $or: [
+        { 'student.email': 'teststudent@sochcollege.edu.np' },
+        { 'student.email': 'student.alpha@sochcollege.edu.np' },
+        { 'student.email': 'student.beta@sochcollege.edu.np' },
+      ],
+    });
 
     // Seed test admin
     const passwordHash = await hashPassword(TEST_ADMIN.password);
@@ -46,7 +57,16 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
   t.after(async () => {
     // Cleanup test data
     await Admin.deleteMany({ email: TEST_ADMIN.email });
-    await Complaint.deleteMany({ 'student.email': 'teststudent@sochcollege.edu.np' });
+    await Student.deleteMany({
+      email: { $in: ['student.alpha@sochcollege.edu.np', 'student.beta@sochcollege.edu.np', 'unverified@sochcollege.edu.np'] },
+    });
+    await Complaint.deleteMany({
+      $or: [
+        { 'student.email': 'teststudent@sochcollege.edu.np' },
+        { 'student.email': 'student.alpha@sochcollege.edu.np' },
+        { 'student.email': 'student.beta@sochcollege.edu.np' },
+      ],
+    });
     await disconnectDB();
   });
 
@@ -455,6 +475,333 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     const afterLogout = await request(app)
       .get('/api/v1/admin/auth/me')
       .set('Cookie', adminSessionCookie);
+
+    assert.equal(afterLogout.status, 401);
+  });
+
+  // =========================================================================
+  // STUDENT AUTHENTICATION, DASHBOARD, & RBAC INTEGRATION TESTS
+  // =========================================================================
+
+  let studentASessionCookie;
+  let studentACsrfToken;
+  let studentAId;
+  let studentAComplaintId;
+  let studentAComplaintRef;
+
+  let studentBSessionCookie;
+  let studentBCsrfToken;
+  let studentBId;
+
+  // 22. Student Registration: Validation & Success
+  await t.test('POST /api/v1/student/auth/register validates fields, prevents duplicates, and creates student', async () => {
+    // 22a. Rejects missing required fields
+    const missingRes = await request(app)
+      .post('/api/v1/student/auth/register')
+      .send({
+        name: 'A',
+        email: 'invalid-email',
+      });
+    assert.equal(missingRes.status, 400);
+    assert.equal(missingRes.body.code, 'VALIDATION_ERROR');
+
+    // 22b. Successfully registers Student A
+    const regRes = await request(app)
+      .post('/api/v1/student/auth/register')
+      .send({
+        name: 'Aayush Adhikari',
+        studentId: 'SOCH-CSIT-2023-045',
+        email: 'student.alpha@sochcollege.edu.np',
+        password: 'StudentPass123!',
+        semester: '5th Semester',
+        phone: '9846012345',
+      });
+
+    assert.equal(regRes.status, 201);
+    assert.equal(regRes.body.success, true);
+    assert.equal(regRes.body.student.email, 'student.alpha@sochcollege.edu.np');
+    assert.equal(regRes.body.student.isEmailVerified, false);
+    assert.ok(regRes.body.verificationToken);
+    studentAId = regRes.body.student.id;
+
+    // 22c. Rejects duplicate email registration
+    const dupRes = await request(app)
+      .post('/api/v1/student/auth/register')
+      .send({
+        name: 'Duplicate Student',
+        studentId: 'SOCH-CSIT-2023-999',
+        email: 'student.alpha@sochcollege.edu.np',
+        password: 'AnotherPassword123!',
+        semester: '1st Semester',
+      });
+    assert.equal(dupRes.status, 409);
+    assert.equal(dupRes.body.code, 'EMAIL_ALREADY_EXISTS');
+  });
+
+  // 23. Student Email Verification
+  await t.test('POST /api/v1/student/auth/verify-email validates token and activates verified session', async () => {
+    // Fetch student from DB to get verificationToken
+    const studentDoc = await Student.findById(studentAId).select('+emailVerificationToken');
+    assert.ok(studentDoc.emailVerificationToken);
+
+    // 23a. Rejects wrong token
+    const wrongTokenRes = await request(app)
+      .post('/api/v1/student/auth/verify-email')
+      .send({
+        email: 'student.alpha@sochcollege.edu.np',
+        token: '000000',
+      });
+    assert.equal(wrongTokenRes.status, 400);
+    assert.equal(wrongTokenRes.body.code, 'INVALID_TOKEN');
+
+    // 23b. Verifies with correct token
+    const verifyRes = await request(app)
+      .post('/api/v1/student/auth/verify-email')
+      .send({
+        email: 'student.alpha@sochcollege.edu.np',
+        token: studentDoc.emailVerificationToken,
+      });
+
+    assert.equal(verifyRes.status, 200);
+    assert.equal(verifyRes.body.success, true);
+    assert.equal(verifyRes.body.student.isEmailVerified, true);
+
+    const cookies = verifyRes.headers['set-cookie'];
+    assert.ok(cookies);
+    const sidCookie = cookies.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
+    assert.ok(sidCookie);
+    studentASessionCookie = sidCookie;
+    studentACsrfToken = verifyRes.body.csrfToken;
+  });
+
+  // 24. Student Login & Session
+  await t.test('POST /api/v1/student/auth/login validates credentials and creates student session', async () => {
+    // 24a. Rejects incorrect password
+    const badPassRes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: 'student.alpha@sochcollege.edu.np',
+        password: 'WrongPassword!',
+      });
+    assert.equal(badPassRes.status, 401);
+    assert.equal(badPassRes.body.code, 'INVALID_CREDENTIALS');
+
+    // 24b. Successful login
+    const loginRes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: 'student.alpha@sochcollege.edu.np',
+        password: 'StudentPass123!',
+      });
+    assert.equal(loginRes.status, 200);
+    assert.equal(loginRes.body.success, true);
+    assert.equal(loginRes.body.student.isEmailVerified, true);
+
+    const cookies = loginRes.headers['set-cookie'];
+    assert.ok(cookies);
+    const sidCookie = cookies.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
+    assert.ok(sidCookie);
+    studentASessionCookie = sidCookie;
+    studentACsrfToken = loginRes.body.csrfToken;
+
+    // 24c. GET /api/v1/student/auth/me returns student session
+    const meRes = await request(app)
+      .get('/api/v1/student/auth/me')
+      .set('Cookie', studentASessionCookie);
+    assert.equal(meRes.status, 200);
+    assert.equal(meRes.body.student.email, 'student.alpha@sochcollege.edu.np');
+  });
+
+  // 25. Authenticated Student Complaint Submission
+  await t.test('POST /api/v1/student/complaints submits complaint tied to verified student account', async () => {
+    // 25a. Unauthenticated submission to student endpoint is rejected
+    const unauthRes = await request(app)
+      .post('/api/v1/student/complaints')
+      .send({ title: 'Unauthorized Test' });
+    assert.equal(unauthRes.status, 401);
+
+    // 25b. Authenticated submission with attachment
+    const subRes = await request(app)
+      .post('/api/v1/student/complaints')
+      .set('Cookie', studentASessionCookie)
+      .set('x-csrf-token', studentACsrfToken)
+      .field('category', 'Internet / Wi-Fi / Network')
+      .field('title', 'Lab 1 Wi-Fi Packet Loss During Practical')
+      .field('description', 'Continuous ping packet loss to gateway 192.168.1.1 on rows 3 and 4 in Lab 1.')
+      .field('priority', 'High')
+      .attach('attachment', validPngHeader, 'network_ping.png');
+
+    assert.equal(subRes.status, 201);
+    assert.equal(subRes.body.success, true);
+    assert.ok(subRes.body.reference.startsWith('CMP-'));
+    assert.equal(subRes.body.complaint.hasAttachment, true);
+
+    studentAComplaintRef = subRes.body.reference;
+    studentAComplaintId = subRes.body.complaint.id;
+  });
+
+  // 26. Student Dashboard & Complaint History
+  await t.test('GET /api/v1/student/complaints returns student complaint history and status metrics', async () => {
+    const listRes = await request(app)
+      .get('/api/v1/student/complaints')
+      .set('Cookie', studentASessionCookie);
+
+    assert.equal(listRes.status, 200);
+    assert.equal(listRes.body.success, true);
+    assert.ok(Array.isArray(listRes.body.complaints));
+    assert.ok(listRes.body.complaints.length >= 1);
+    assert.ok(listRes.body.statusCounts);
+    assert.equal(listRes.body.complaints[0].reference, studentAComplaintRef);
+
+    // 26b. Detail view
+    const detailRes = await request(app)
+      .get(`/api/v1/student/complaints/${studentAComplaintId}`)
+      .set('Cookie', studentASessionCookie);
+
+    assert.equal(detailRes.status, 200);
+    assert.equal(detailRes.body.success, true);
+    assert.equal(detailRes.body.complaint.reference, studentAComplaintRef);
+  });
+
+  // 27. Cross-Student Ownership Isolation (Student A vs Student B)
+  await t.test('Cross-Student Ownership Isolation: Student B CANNOT access Student A complaints or attachments', async () => {
+    // 27a. Register and verify Student B
+    const regB = await request(app)
+      .post('/api/v1/student/auth/register')
+      .send({
+        name: 'Bina Gurung',
+        studentId: 'SOCH-CSIT-2023-088',
+        email: 'student.beta@sochcollege.edu.np',
+        password: 'StudentBetaPass123!',
+        semester: '3rd Semester',
+      });
+    assert.equal(regB.status, 201);
+    studentBId = regB.body.student.id;
+
+    const studentBDoc = await Student.findById(studentBId).select('+emailVerificationToken');
+    const verifyB = await request(app)
+      .post('/api/v1/student/auth/verify-email')
+      .send({
+        email: 'student.beta@sochcollege.edu.np',
+        token: studentBDoc.emailVerificationToken,
+      });
+    assert.equal(verifyB.status, 200);
+    const cookiesB = verifyB.headers['set-cookie'];
+    assert.ok(cookiesB);
+    studentBSessionCookie = cookiesB.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
+    assert.ok(studentBSessionCookie);
+    studentBCsrfToken = verifyB.body.csrfToken;
+
+    // 27b. Student B attempts to read Student A complaint
+    const forbiddenDetailRes = await request(app)
+      .get(`/api/v1/student/complaints/${studentAComplaintId}`)
+      .set('Cookie', studentBSessionCookie);
+
+    assert.equal(forbiddenDetailRes.status, 404, 'Student B must not be able to locate or read Student A complaint');
+
+    // 27c. Student B attempts to download Student A attachment
+    const forbiddenAttachRes = await request(app)
+      .get(`/api/v1/student/complaints/${studentAComplaintId}/attachment`)
+      .set('Cookie', studentBSessionCookie);
+
+    assert.equal(forbiddenAttachRes.status, 404, 'Student B must not be able to access Student A attachment');
+
+    // 27d. Student A CAN download their own attachment
+    const allowedAttachRes = await request(app)
+      .get(`/api/v1/student/complaints/${studentAComplaintId}/attachment`)
+      .set('Cookie', studentASessionCookie);
+
+    assert.equal(allowedAttachRes.status, 200);
+    assert.equal(allowedAttachRes.headers['x-content-type-options'], 'nosniff');
+    assert.ok(allowedAttachRes.headers['content-disposition'].includes('network_ping.png'));
+  });
+
+  // 28. Role-Based Access Control: Student Blocked from Admin Endpoints
+  await t.test('Role-Based Access Control: Student sessions are rejected by admin endpoints', async () => {
+    // 28a. Admin complaint list
+    const adminListRes = await request(app)
+      .get('/api/v1/admin/complaints')
+      .set('Cookie', studentASessionCookie);
+
+    assert.equal(adminListRes.status, 401);
+    assert.equal(adminListRes.body.code, 'UNAUTHORIZED');
+
+    // 28b. Admin status transition
+    const adminPatchRes = await request(app)
+      .patch(`/api/v1/admin/complaints/${studentAComplaintId}/status`)
+      .set('Cookie', studentASessionCookie)
+      .send({ status: 'Resolved' });
+
+    assert.equal(adminPatchRes.status, 401);
+  });
+
+  // 29. Claim Legacy Complaint with Reference ID & Tracking Secret
+  await t.test('POST /api/v1/student/complaints/claim-legacy securely claims guest complaint to student account', async () => {
+    // 29a. Fails with invalid secret
+    const failClaim = await request(app)
+      .post('/api/v1/student/complaints/claim-legacy')
+      .set('Cookie', studentASessionCookie)
+      .set('x-csrf-token', studentACsrfToken)
+      .send({
+        reference: attachedComplaintRef,
+        trackingSecret: 'trk_wrong_secret_12345',
+      });
+
+    assert.equal(failClaim.status, 401);
+    assert.equal(failClaim.body.code, 'INVALID_SECRET');
+
+    // 29b. Succeeds with valid secret
+    const successClaim = await request(app)
+      .post('/api/v1/student/complaints/claim-legacy')
+      .set('Cookie', studentASessionCookie)
+      .set('x-csrf-token', studentACsrfToken)
+      .send({
+        reference: attachedComplaintRef,
+        trackingSecret: attachedTrackingSecret,
+      });
+
+    assert.equal(successClaim.status, 200);
+    assert.equal(successClaim.body.success, true);
+    assert.equal(successClaim.body.complaint.reference, attachedComplaintRef);
+
+    // 29c. Now Student A can view this claimed complaint in their dashboard
+    const detailClaimed = await request(app)
+      .get(`/api/v1/student/complaints/${attachedComplaintId}`)
+      .set('Cookie', studentASessionCookie);
+
+    assert.equal(detailClaimed.status, 200);
+    assert.equal(detailClaimed.body.complaint.reference, attachedComplaintRef);
+  });
+
+  // 30. Student Profile Update & Student Logout
+  await t.test('Student profile update and logout cycle', async () => {
+    // 30a. Update student profile
+    const profileRes = await request(app)
+      .put('/api/v1/student/auth/profile')
+      .set('Cookie', studentASessionCookie)
+      .set('x-csrf-token', studentACsrfToken)
+      .send({
+        semester: '6th Semester',
+        phone: '9856098765',
+      });
+
+    assert.equal(profileRes.status, 200);
+    assert.equal(profileRes.body.success, true);
+    assert.equal(profileRes.body.student.semester, '6th Semester');
+    assert.equal(profileRes.body.student.phone, '9856098765');
+
+    // 30b. Logout student
+    const logoutRes = await request(app)
+      .post('/api/v1/student/auth/logout')
+      .set('Cookie', studentASessionCookie);
+
+    assert.equal(logoutRes.status, 200);
+    assert.equal(logoutRes.body.success, true);
+
+    // 30c. Subsequent request rejected
+    const afterLogout = await request(app)
+      .get('/api/v1/student/auth/me')
+      .set('Cookie', studentASessionCookie);
 
     assert.equal(afterLogout.status, 401);
   });

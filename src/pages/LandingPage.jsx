@@ -21,38 +21,27 @@ import {
   FileText,
   ShieldCheck,
   Lock,
-  KeyRound,
   UserCheck,
   Clock,
   ChevronDown,
   ChevronUp,
   MapPin,
   Sparkles,
-  Wrench
+  Wrench,
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 
 export function LandingPage() {
-  const { language } = useApp();
+  const { language, isStudentLoggedIn, studentUser } = useApp();
   const navigate = useNavigate();
   const isNe = language === 'ne';
-
-  // Quick Tracking input state
-  const [quickReference, setQuickReference] = useState('');
 
   // FAQ Accordion State (Index of currently opened question)
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const toggleFaq = (idx) => {
     setOpenFaqIndex(openFaqIndex === idx ? null : idx);
-  };
-
-  const handleQuickTrackSubmit = (e) => {
-    e.preventDefault();
-    if (quickReference.trim()) {
-      navigate(`/track?ref=${encodeURIComponent(quickReference.trim().toUpperCase())}`);
-    } else {
-      navigate('/track');
-    }
   };
 
   // 6 Authorized IT Categories with tailored icons and descriptions
@@ -113,55 +102,55 @@ export function LandingPage() {
     },
   ];
 
-  // FAQ Items
+  // FAQ Items tailored to mandatory student authentication & dashboard
   const faqItems = [
     {
       q: isNe 
-        ? 'के उजुरी दर्ता गर्न विद्यार्थी खाता वा लगइन आवश्यक पर्छ?' 
-        : 'Do I need to create a student account or log in to submit a complaint?',
+        ? 'के उजुरी दर्ता र ट्र्याक गर्न विद्यार्थी खाता आवश्यक पर्छ?' 
+        : 'Do I need a student account to submit or track a complaint?',
       a: isNe
-        ? 'पर्दैन। सोच कलेज अफ आईटी, पोखराका सम्पूर्ण विद्यार्थीहरूले कुनै पनि खाता वा पासवर्ड नबनाई सिधै उजुरी दर्ता गर्न सक्छन्। दर्ता गरेपछि प्रणालीले एक अद्वितीय सन्दर्भ कोड (Reference ID) र गोप्य ट्र्याकिङ कोड (Tracking Secret) तुरुन्तै प्रदान गर्दछ।'
-        : 'No. To ensure maximum accessibility and privacy, students do not need accounts. You can lodge an issue immediately without logging in. Upon successful submission, you will receive a unique Reference ID and Private Tracking Secret.',
+        ? 'हो। जवाफदेहिता, सुरक्षित ड्यासबोर्ड अनुगमन र आधिकारिक सूचना आदानप्रदानका लागि विद्यार्थीहरूले आफ्नो विद्यार्थी परिचयपत्र र इमेल मार्फत दर्ता गर्नुपर्दछ। दर्ता गरेपछि इमेल स्वामित्व पुष्टि गरी उजुरी दर्ता तथा "मेरो उजुरीहरू" ड्यासबोर्डबाट अनुगमन गर्न सकिन्छ।'
+        : 'Yes. To ensure accountability, reliable progress tracking, and authenticated privacy, students must register with their name, student ID, and semester. Email verification is required before lodging complaints or accessing personal history.',
     },
     {
       q: isNe 
-        ? 'उजुरीको स्थिति कसरी जाँच गर्न सकिन्छ?' 
+        ? 'उजुरीको स्थिति कसरी जाँच गर्ने र कलेजको जवाफ कसरी हेर्ने?' 
         : 'How do I check the live status of my complaint and read college responses?',
       a: isNe
-        ? 'गृहपृष्ठ वा मेनुबाट "गुनासोको अवस्था" पृष्ठमा जानुहोस्। त्यहाँ उजुरी दर्ता गर्दा प्राप्त भएको Complaint Reference ID र Private Tracking Secret प्रविष्ट गर्नुहोस्। तपाईंले कार्यप्रगति (Submitted, Under Review, In Progress, Resolved) र कलेजको आधिकारिक जवाफ हेर्न सक्नुहुन्छ।'
-        : 'Visit the "Track Complaint" page from the navigation bar. Enter both your Complaint Reference ID and Private Tracking Secret. You will see real-time stage transitions and official college responses.',
+        ? 'विद्यार्थी खाता लगइन गरेपछि मेनु वा ड्यासबोर्डबाट "मेरो उजुरीहरू" (My Complaints) खण्डमा जानुहोस्। त्यहाँ दर्ता भएका सम्पूर्ण उजुरीहरूको चरणबद्ध प्रगति (Submitted → Under Review → In Progress → Resolved) र प्राविधिक टोलीको आधिकारिक जवाफ हेर्न सकिन्छ।'
+        : 'Sign in to your student account and navigate to "My Complaints" in your dashboard. You will see real-time stage transitions (Submitted → Under Review → In Progress → Resolved) along with documented responses and timestamps from the college IT team.',
     },
     {
       q: isNe 
-        ? 'यदि मैले मेरो गोप्य ट्र्याकिङ कोड (Tracking Secret) हराएँ भने के गर्ने?' 
-        : 'What should I do if I misplace my Private Tracking Secret?',
+        ? 'पहिला दर्ता गरिएको पुरानो उजुरी (Legacy Complaint) कसरी हेर्ने?' 
+        : 'What if I submitted a complaint previously without a student account?',
       a: isNe
-        ? 'विद्यार्थीहरूको गोपनीयता सुरक्षाका लागि ट्र्याकिङ कोड केवल दर्ता गर्दा एक पटक मात्र देखाइन्छ। यदि कोड हराएमा, कलेज प्रशासनलाई info@sochcollege.edu.np मा आफ्नो विद्यार्थी परिचयपत्र र उजुरीको विवरणसहित सम्पर्क गर्नुहोस्।'
-        : 'For student confidentiality, tracking secrets are hashed on the server and shown strictly once upon submission. If lost, self-service automated recovery is not available in this phase; please contact the campus desk at info@sochcollege.edu.np with your student details.',
+        ? 'पुरानो प्रणालीबाट दर्ता भएका उजुरीहरू सुरक्षित छन्। विद्यार्थी ड्यासबोर्डमा लगइन गरी "Claim Legacy Complaint" सुविधा मार्फत पुरानो Reference ID र गोप्य Tracking Secret प्रविष्ट गरेर त्यस उजुरीलाई आफ्नो नयाँ विद्यार्थी खातासँग जोड्न सकिन्छ।'
+        : 'Legacy complaints submitted before mandatory student accounts are preserved safely. Log in to your student dashboard and use the "Claim Legacy Complaint" feature with your original Reference ID and Tracking Secret to link it directly to your account.',
     },
     {
       q: isNe 
-        ? 'के अन्य विद्यार्थीहरूले मेरो उजुरी वा व्यक्तिगत विवरण हेर्न सक्छन्?' 
-        : 'Can other students or public visitors view my grievance?',
+        ? 'के अन्य विद्यार्थीहरू वा बाहिरी व्यक्तिहरूले मेरो उजुरी हेर्न सक्छन्?' 
+        : 'Can other students or public visitors view my complaint details or attachments?',
       a: isNe
-        ? 'सक्दैनन्। यस प्रणालीमा उजुरीहरूको कुनै सार्वजनिक सूची वा खोजी योग्य निर्देशिका हुँदैन। Reference ID र गोप्य Tracking Secret दुवै भएको व्यक्तिले मात्र सम्बन्धित उजुरी हेर्न सक्छ।'
-        : 'Strictly no. There is no public list or open directory of student complaints. A complaint can only be viewed by submitting both the matching Reference ID and private tracking secret in an encrypted POST request.',
+        ? 'सक्दैनन्। प्रत्येक विद्यार्थीको उजुरी व्यक्तिगत र प्रमाणीकृत ड्यासबोर्डमा मात्र सीमित रहन्छ। प्रणालीमा कुनै सार्वजनिक उजुरी सूची हुँदैन र केवल सम्बन्धित विद्यार्थी तथा कलेज आईटी प्रशासनले मात्र विवरण तथा संलग्न फाइलहरू हेर्न पाउँछन्।'
+        : 'Strictly no. Complaints and attachments are strictly protected by session authentication and ownership validation. There is no public directory, and students cannot access each other’s complaints, attachments, or replies.',
     },
     {
       q: isNe 
-        ? 'के म समस्याको तस्बिर वा त्रुटि लग संलग्न गर्न सक्छु?' 
+        ? 'उजुरीसँगै कुन ढाँचाका फाइलहरू संलग्न गर्न सकिन्छ?' 
         : 'What file formats can I attach with my complaint as proof?',
       a: isNe
-        ? 'सकिन्छ। तपाईंले ५ MB सम्मको अधिकतम १ फाइल (JPG, PNG वा PDF) संलग्न गर्न सक्नुहुन्छ। प्रणालीले फाइलको वास्तविक बाइनरी ढाँचा स्वचालित रूपमा प्रमाणीकरण गर्छ।'
-        : 'Yes. You can upload 1 optional file attachment up to 5 MB in JPG, PNG, or PDF format. Binary signatures are verified on the server to reject disguised executables or scripts.',
+        ? 'तपाईंले ५ MB सम्मको अधिकतम १ फाइल (JPG, PNG वा PDF) संलग्न गर्न सक्नुहुन्छ। सर्भरले फाइलको वास्तविक बाइनरी ढाँचा प्रमाणीकरण गर्छ।'
+        : 'You can attach 1 optional file up to 5 MB in JPG, PNG, or PDF format. Binary signatures and MIME types are verified on the server to prevent malicious uploads.',
     },
     {
       q: isNe 
-        ? 'दर्ता भएका उजुरीहरू कसले समीक्षा र समाधान गर्छन्?' 
-        : 'Who inspects and resolves the reported campus IT issues?',
+        ? 'दर्ता भएका क्याम्पस आईटी समस्याहरू कसले समाधान गर्छन्?' 
+        : 'Who inspects and resolves reported campus IT issues?',
       a: isNe
-        ? 'उजुरीहरू सोध कलेज अफ आईटीको केन्द्रीय आईटी डेस्क र सम्बन्धित ल्याब सहायक/प्राविधिकहरूद्वारा सिधै समीक्षा गरिन्छ र प्राथमिकताका आधारमा मर्मत सम्पन्न गरिन्छ।'
-        : 'Grievance complaints are triaged directly by authorized Soch College of IT laboratory administrators and network technicians, with oversight from the department coordinator.',
+        ? 'उजुरीहरू सोच कलेज अफ आईटीको आधिकारिक कम्प्युटर ल्याब प्रशासक तथा नेटवर्क प्राविधिकहरूद्वारा सिधै समीक्षा र प्राथमिकताका आधारमा मर्मत गरिन्छ।'
+        : 'Complaints are triaged directly by authorized Soch College of IT laboratory administrators and network technicians, with coordination from the academic IT department.',
     },
   ];
 
@@ -171,7 +160,7 @@ export function LandingPage() {
       <PublicNavbar />
 
       {/* =========================================================================
-          HERO SECTION — Two Column Master Layout
+          HERO SECTION — Balanced Two Column Layout
           ========================================================================= */}
       <section className="hero-master-section">
         <div className="hero-master-container">
@@ -184,8 +173,8 @@ export function LandingPage() {
               <ShieldCheck size={14} className="hero-trust-icon" />
               <span>
                 {isNe 
-                  ? 'सोच कलेज अफ आईटी, पोखरा — गुनासो व्यवस्थापन प्रणाली' 
-                  : 'Soch College of IT, Pokhara — Complaint Management System'}
+                  ? 'सोच कलेज अफ आईटी, पोखरा — विद्यार्थी आईटी पोर्टल' 
+                  : 'Soch College of IT, Pokhara — Student IT Portal'}
               </span>
             </div>
 
@@ -193,11 +182,11 @@ export function LandingPage() {
             <h1 className="hero-main-title">
               {isNe ? (
                 <>
-                  क्याम्पस प्रविधि तथा ल्याब समस्याहरूको <span className="text-teal-highlight">भरपर्दो समाधान।</span>
+                  क्याम्पस आईटी समस्याहरू दर्ता गर्नुहोस् र आफ्नो <span className="text-teal-highlight">विद्यार्थी ड्यासबोर्डबाट</span> प्रगति हेर्नुहोस्।
                 </>
               ) : (
                 <>
-                  Transparent, Accountable Resolution for <span className="text-teal-highlight">Campus IT & Labs.</span>
+                  Report campus IT issues and follow updates from your <span className="text-teal-highlight">student dashboard.</span>
                 </>
               )}
             </h1>
@@ -205,8 +194,8 @@ export function LandingPage() {
             {/* Supporting Copy */}
             <p className="hero-lead-description">
               {isNe 
-                ? 'कम्प्युटर ल्याब, क्याम्पस वाइफाइ, कम्पाइलर तथा कक्षाकोठा सम्बन्धी समस्याहरू कुनै खाता नबनाई सिधै दर्ता गर्नुहोस्। प्राप्त हुने गोप्य ट्र्याकिङ कोड मार्फत वास्तविक समाधान प्रगति अनुगमन गर्नुहोस्।'
-                : 'Report computer lab workstation faults, campus Wi-Fi drops, programming compiler errors, or classroom projectors directly without creating an account. Follow real-time college updates with your private tracking secret.'}
+                ? 'कम्प्युटर ल्याब, वाइफाइ, प्रोजेक्टर तथा अन्य क्याम्पस आईटी समस्याहरू दर्ता गर्न लगइन गर्नुहोस्। प्रगति र आधिकारिक जवाफहरू एकै ठाउँमा हेर्नुहोस्।'
+                : 'Sign in to report computer lab, Wi-Fi, projector, and other campus IT issues. View progress and replies in one place.'}
             </p>
 
             {/* Action Buttons */}
@@ -217,24 +206,31 @@ export function LandingPage() {
                 <ArrowRight size={16} style={{ marginLeft: '4px' }} />
               </Link>
 
-              <Link to="/track" className="btn btn-secondary btn-lg hero-btn-secondary">
-                <Search size={17} />
-                <span>{isNe ? 'गुनासोको अवस्था' : 'Track Complaint'}</span>
-              </Link>
+              {isStudentLoggedIn ? (
+                <Link to="/student/complaints" className="btn btn-secondary btn-lg hero-btn-secondary">
+                  <FileText size={17} />
+                  <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
+                </Link>
+              ) : (
+                <Link to="/login?redirect=/student/complaints" className="btn btn-secondary btn-lg hero-btn-secondary">
+                  <LogIn size={17} />
+                  <span>{isNe ? 'उजुरी ट्र्याक गर्न लगइन' : 'Login to Track Complaints'}</span>
+                </Link>
+              )}
             </div>
 
             {/* Quick Reassurance Features */}
             <div className="hero-features-strip">
               <div className="hero-feature-pill">
-                <CheckCircle2 size={14} color="#0F766E" />
-                <span>{isNe ? 'विद्यार्थी लगइन आवश्यक पर्दैन' : 'No Student Account Required'}</span>
+                <UserCheck size={14} color="#0D8178" />
+                <span>{isNe ? 'विद्यार्थी खाता आवश्यक' : 'Student Account Required'}</span>
               </div>
               <div className="hero-feature-pill">
-                <Lock size={13} color="#0F766E" />
-                <span>{isNe ? 'गोप्य ट्र्याकिङ कोड' : 'Private Tracking Secret'}</span>
+                <CheckCircle2 size={14} color="#0D8178" />
+                <span>{isNe ? 'ड्यासबोर्डमा उजुरी ट्र्याकिङ' : 'Track Complaints in Your Dashboard'}</span>
               </div>
               <div className="hero-feature-pill">
-                <UserCheck size={14} color="#0F766E" />
+                <ShieldCheck size={14} color="#0D8178" />
                 <span>{isNe ? 'कलेज प्रशासनद्वारा प्रत्यक्ष समीक्षा' : 'Direct Campus Desk Review'}</span>
               </div>
             </div>
@@ -250,7 +246,7 @@ export function LandingPage() {
       </section>
 
       {/* =========================================================================
-          SECTION 1: QUICK ACTION GATEWAYS (Submit vs Track)
+          SECTION 1: QUICK ACTION GATEWAYS (Submit vs My Complaints Dashboard)
           ========================================================================= */}
       <section className="home-quick-gateways-section">
         <div className="container">
@@ -264,54 +260,80 @@ export function LandingPage() {
                 </div>
                 <div>
                   <span className="gateway-eyebrow">{isNe ? 'नयाँ समस्या' : 'LODGE GRIEVANCE'}</span>
-                  <h3 className="gateway-title">{isNe ? 'नयाँ उजुरी दर्ता गर्नुहोस्' : 'Submit a New Complaint'}</h3>
+                  <h3 className="gateway-title">{isNe ? 'नयाँ उजुरी दर्ता गर्नुहोस्' : 'Submit a Complaint'}</h3>
                 </div>
               </div>
               <p className="gateway-desc">
                 {isNe
-                  ? 'ल्याब नम्बर, कम्प्युटर आइडी, र समस्याको विवरण लेख्नुहोस्। आवश्यक भएमा ५ MB सम्मको तस्बिर वा त्रुटि लग संलग्न गर्न सक्नुहुन्छ।'
+                  ? 'ल्याब नम्बर, कम्प्युटर आइडी, र समस्याको विवरण लेख्नुहोस्। आवश्यक भएमा ५ MB सम्मको तस्बिर वा त्रुटि प्रमाण संलग्न गर्नुहोस्।'
                   : 'Report broken lab hardware, compiler path errors, slow campus network, or projector defects with optional screenshot proof.'}
               </p>
               <div className="gateway-meta-list">
-                <span>✓ {isNe ? 'विद्यार्थी दर्ता गर्नुपर्दैन' : 'No registration required'}</span>
+                <span>✓ {isNe ? 'विद्यार्थी खाता आवश्यक' : 'Student account required'}</span>
                 <span>✓ {isNe ? 'क्याम्पस प्राविधिक क्षेत्र मात्र' : 'Campus IT focused categories'}</span>
               </div>
               <Link to="/submit" className="btn btn-primary btn-md gateway-btn">
-                <span>{isNe ? 'फारम खोल्नुहोस्' : 'Open Complaint Form'}</span>
+                <span>{isNe ? 'उजुरी फारम खोल्नुहोस्' : 'Open Complaint Form'}</span>
                 <ArrowRight size={15} />
               </Link>
             </div>
 
-            {/* Gateway Card 2: Track */}
+            {/* Gateway Card 2: Track Complaints in Your Dashboard */}
             <div className="gateway-card gateway-card-track">
               <div className="gateway-card-header">
                 <div className="gateway-icon-wrap icon-track">
-                  <Search size={22} />
+                  <FileText size={22} />
                 </div>
                 <div>
-                  <span className="gateway-eyebrow">{isNe ? 'प्रगति अनुगमन' : 'LIVE STATUS'}</span>
-                  <h3 className="gateway-title">{isNe ? 'गुनासोको अवस्था' : 'Track an Existing Complaint'}</h3>
+                  <span className="gateway-eyebrow">{isNe ? 'विद्यार्थी पोर्टल' : 'STUDENT PORTAL'}</span>
+                  <h3 className="gateway-title">{isNe ? 'मेरो उजुरीहरू ड्यासबोर्ड' : 'Track in Your Dashboard'}</h3>
                 </div>
               </div>
               <p className="gateway-desc">
                 {isNe
-                  ? 'दर्ता गर्दा प्राप्त भएको Reference ID र Private Tracking Secret प्रयोग गरी वास्तविक स्थिति र कलेजको जवाफ हेर्नुहोस्।'
-                  : 'Enter your Reference ID and private tracking secret to check real-time complaint status and documented college responses.'}
+                  ? 'आफ्नो विद्यार्थी खाताबाट दर्ता गरिएका सम्पूर्ण उजुरीहरूको वास्तविक समयमा प्रगति र कलेजको जवाफ हेर्नुहोस्।'
+                  : 'Sign in with your verified student account to inspect active stages, college replies, and your full complaint history.'}
               </p>
-              <form onSubmit={handleQuickTrackSubmit} className="quick-track-inline-form">
-                <input
-                  type="text"
-                  placeholder={isNe ? "जस्तै: CMP-2026-A8F2K" : "e.g. CMP-2026-A8F2K"}
-                  value={quickReference}
-                  onChange={(e) => setQuickReference(e.target.value)}
-                  className="quick-track-input"
-                  aria-label="Complaint Reference ID"
-                />
-                <button type="submit" className="btn btn-secondary btn-md quick-track-btn">
-                  <span>{isNe ? 'ट्र्याक' : 'Track'}</span>
-                  <Search size={14} />
-                </button>
-              </form>
+              
+              {isStudentLoggedIn ? (
+                <div>
+                  <div style={{
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(13, 129, 120, 0.08)',
+                    border: '1px solid rgba(13, 129, 120, 0.2)',
+                    fontSize: '0.8125rem',
+                    color: '#0D8178',
+                    fontWeight: '600',
+                    marginBottom: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <UserCheck size={14} />
+                    <span>
+                      {isNe ? `लगइन गरिएको: ${studentUser?.name || 'विद्यार्थी'}` : `Logged in as: ${studentUser?.name || 'Student'}`}
+                    </span>
+                  </div>
+                  <Link to="/student/complaints" className="btn btn-secondary btn-md gateway-btn">
+                    <span>{isNe ? 'मेरो उजुरीहरू हेर्नुहोस्' : 'View My Complaints'}</span>
+                    <ArrowRight size={15} />
+                  </Link>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <Link to="/login?redirect=/student/complaints" className="btn btn-secondary btn-md gateway-btn">
+                    <LogIn size={15} />
+                    <span>{isNe ? 'उजुरी ट्र्याक गर्न लगइन' : 'Login to Track Complaints'}</span>
+                  </Link>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748B', paddingTop: '4px' }}>
+                    <span>{isNe ? 'खाता छैन?' : "New student?"}</span>
+                    <Link to="/register" style={{ color: '#0D8178', fontWeight: '600', textDecoration: 'none' }}>
+                      {isNe ? 'विद्यार्थी दर्ता गर्नुहोस्' : 'Create Student Account →'}
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
@@ -393,8 +415,8 @@ export function LandingPage() {
             </h2>
             <p className="section-lead-copy">
               {isNe
-                ? 'उजुरी दर्तादेखि कलेजको आधिकारिक समाधानसम्मका स्पष्ट चरणहरू:'
-                : 'From initial complaint registration to verified technical resolution and official college response:'}
+                ? 'विद्यार्थी दर्तादेखि कलेजको आधिकारिक समाधानसम्मका स्पष्ट चरणहरू:'
+                : 'From student registration and complaint submission to desk triage and verified technical resolution:'}
             </p>
           </div>
 
@@ -404,16 +426,16 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">1</div>
               <div className="step-icon-wrap">
-                <FileText size={20} color="#15365B" />
+                <UserCheck size={20} color="#15365B" />
               </div>
-              <h3 className="step-title">{isNe ? '१. समस्याको विवरण दिनुहोस्' : '1. Submit Details'}</h3>
+              <h3 className="step-title">{isNe ? '१. दर्ता र इमेल पुष्टि' : '1. Register & Verify'}</h3>
               <p className="step-desc">
                 {isNe
-                  ? 'सम्बन्धित आईटी विधा छनोट गर्नुहोस्, ल्याब वा कक्षाकोठा नम्बर उल्लेख गर्नुहोस् र समस्याको लक्षण खुलाउनुहोस्।'
-                  : 'Select an IT category, specify the lab room or campus location, and attach an optional screenshot or error log.'}
+                  ? 'आफ्नो विद्यार्थी परिचयपत्र, सेमेस्टर, र इमेल मार्फत खाता बनाउनुहोस्। इमेलमा प्राप्त कोडबाट इमेल स्वामित्व पुष्टि गर्नुहोस्।'
+                  : 'Create your student account with your Student ID, semester, and email. Confirm email ownership via verification code.'}
               </p>
               <div className="step-highlight-tag">
-                <span>{isNe ? 'कुनै लगइन आवश्यक पर्दैन' : 'No Account Required'}</span>
+                <span>{isNe ? 'विद्यार्थी खाता आवश्यक' : 'Student Account Required'}</span>
               </div>
             </div>
 
@@ -421,16 +443,16 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">2</div>
               <div className="step-icon-wrap">
-                <KeyRound size={20} color="#0D8178" />
+                <FileText size={20} color="#0D8178" />
               </div>
-              <h3 className="step-title">{isNe ? '२. ट्र्याकिङ कोड सुरक्षित गर्नुहोस्' : '2. Save Credentials'}</h3>
+              <h3 className="step-title">{isNe ? '२. उजुरी दर्ता गर्नुहोस्' : '2. Submit Complaint'}</h3>
               <p className="step-desc">
                 {isNe
-                  ? 'प्रणालीले स्वचालित रूपमा एक Reference ID र गोप्य Tracking Secret उत्पन्न गर्दछ। यसलाई सुरक्षित राख्नुहोस्।'
-                  : 'The portal generates a unique Reference ID and private Tracking Secret shown strictly once upon submission.'}
+                  ? 'सम्बन्धित आईटी विधा छनोट गर्नुहोस्, ल्याब वा कक्षाकोठा नम्बर उल्लेख गर्नुहोस् र समस्याको विवरणसहित प्रमाण संलग्न गर्नुहोस्।'
+                  : 'Select the IT category, specify the lab room or PC number, describe the symptoms, and upload optional screenshot proof.'}
               </p>
               <div className="step-highlight-tag">
-                <span>{isNe ? 'सुरक्षित ह्यास व्यवस्थापन' : 'Argon2id Hashed Secret'}</span>
+                <span>{isNe ? 'प्रमाणीकृत उजुरी दर्ता' : 'Authenticated Submission'}</span>
               </div>
             </div>
 
@@ -443,7 +465,7 @@ export function LandingPage() {
               <h3 className="step-title">{isNe ? '३. प्राविधिक समीक्षा तथा मर्मत' : '3. Desk Triage & Repair'}</h3>
               <p className="step-desc">
                 {isNe
-                  ? 'कलेज आईटी प्राविधिकहरूले उजुरी समीक्षा गरी कार्यभार खटाउँछन् र मर्मत कार्य अघि बढाउँछन्।'
+                  ? 'कलेज आईटी प्राविधिकहरूले उजुरी समीक्षा गरी कार्यभार खटाउँछन् र क्याम्पसमै मर्मत कार्य अघि बढाउँछन्।'
                   : 'Soch College IT technicians triage reported hardware, network, or tools and initiate active on-campus repairs.'}
               </p>
               <div className="step-highlight-tag">
@@ -457,14 +479,14 @@ export function LandingPage() {
               <div className="step-icon-wrap">
                 <CheckCircle2 size={20} color="#15803D" />
               </div>
-              <h3 className="step-title">{isNe ? '४. समाधान र आधिकारिक जवाफ' : '4. Verified Resolution'}</h3>
+              <h3 className="step-title">{isNe ? '४. ड्यासबोर्डमा प्रत्यक्ष अपडेट' : '4. Dashboard Resolution'}</h3>
               <p className="step-desc">
                 {isNe
-                  ? 'मर्मत सम्पन्न भएपछि कलेज प्रशासनले आधिकारिक जवाफ र समाधान मिति रेकर्ड गरी उजुरी बन्द गर्छ।'
-                  : 'Upon completion, college administration records an official documented response and marks the docket resolved.'}
+                  ? 'मर्मत सम्पन्न भएपछि कलेज प्रशासनले आधिकारिक जवाफ रेकर्ड गर्छ। तपाईंको ड्यासबोर्डमा स्थिति अद्यावधिक हुन्छ।'
+                  : 'Follow real-time status transitions and read documented staff replies directly in your personal student dashboard.'}
               </p>
               <div className="step-highlight-tag">
-                <span>{isNe ? 'कलेजको आधिकारिक जवाफ' : 'Official College Response'}</span>
+                <span>{isNe ? 'मेरो उजुरी ड्यासबोर्ड' : 'My Complaints Dashboard'}</span>
               </div>
             </div>
 
@@ -485,21 +507,21 @@ export function LandingPage() {
                 <ShieldCheck size={32} />
               </div>
               <div>
-                <span className="privacy-badge">{isNe ? 'सुरक्षा तथा गोपनीयता' : 'CONFIDENTIALITY GUARANTEE'}</span>
+                <span className="privacy-badge">{isNe ? 'सुरक्षा तथा गोपनीयता' : 'CONFIDENTIALITY & ACCESS'}</span>
                 <h2 className="privacy-title">
-                  {isNe ? 'विद्यार्थीको व्यक्तिगत गोपनीयता पूर्ण रूपमा सुरक्षित' : 'Student Privacy by Architecture'}
+                  {isNe ? 'विद्यार्थीको व्यक्तिगत उजुरी पूर्ण रूपमा सुरक्षित' : 'Student Privacy by Architecture'}
                 </h2>
                 <p className="privacy-text">
                   {isNe
-                    ? 'हाम्रो प्रणालीमा उजुरीहरूको कुनै सार्वजनिक सूचीकरण हुँदैन। विद्यार्थी परिचयपत्र र नाम केवल कलेज प्रशासनद्वारा समस्याको वास्तविकता जाँच गर्न प्रयोग गरिन्छ र गोप्य ट्र्याकिङ कोड बिना कसैले पनि उजुरी हेर्न सक्दैन।'
-                    : 'Complaints cannot be browsed publicly or queried by student roll number alone. Your student ID is strictly used for internal administrative triage. Only holders of the private tracking secret can inspect complaint progress.'}
+                    ? 'हाम्रो प्रणालीमा उजुरीहरूको कुनै सार्वजनिक निर्देशिका हुँदैन। प्रत्येक विद्यार्थीको उजुरी, संलग्न प्रमाण, र प्राविधिक जवाफ केवल सम्बन्धित विद्यार्थी र कलेज आईटी प्रशासनले मात्र हेर्न सक्छन्।'
+                    : 'Complaints cannot be browsed publicly or accessed across accounts. Your student ID is strictly used for campus IT triage, and ownership checks enforce that only you can access your complaint details, attachments, and replies.'}
                 </p>
               </div>
             </div>
 
             <div className="privacy-pillars-list">
               <div className="privacy-pillar-item">
-                <Lock size={16} color="#0F766E" />
+                <Lock size={16} color="#0D8178" />
                 <div>
                   <strong>{isNe ? 'कुनै सार्वजनिक सूची छैन' : 'No Public Complaint Directory'}</strong>
                   <p>{isNe ? 'उजुरीहरू बाहिरी आगन्तुकहरूका लागि उपलब्ध हुँदैनन्।' : 'Grievances are never listed in open public feeds.'}</p>
@@ -507,15 +529,15 @@ export function LandingPage() {
               </div>
 
               <div className="privacy-pillar-item">
-                <KeyRound size={16} color="#0F766E" />
+                <ShieldCheck size={16} color="#0D8178" />
                 <div>
-                  <strong>{isNe ? 'गोप्य टोकन सुरक्षा' : 'Two-Factor Access Control'}</strong>
-                  <p>{isNe ? 'Reference ID र Tracking Secret दुवै अनिवार्य हुन्छ।' : 'Requires both Reference ID and private secret via POST.'}</p>
+                  <strong>{isNe ? 'प्रमाणीकृत पहुँच नियन्त्रण' : 'Role & Ownership Enforcement'}</strong>
+                  <p>{isNe ? 'केवल आफ्ना उजुरी मात्र हेर्न मिल्ने कडा सुरक्षा।' : 'Strict server-side ownership checks on every request.'}</p>
                 </div>
               </div>
 
               <div className="privacy-pillar-item">
-                <UserCheck size={16} color="#0F766E" />
+                <UserCheck size={16} color="#0D8178" />
                 <div>
                   <strong>{isNe ? 'प्रशासनिक खटन' : 'Direct Campus Triage'}</strong>
                   <p>{isNe ? 'कलेज प्रशासन तथा सम्बन्धित डेस्कद्वारा प्रत्यक्ष सम्बोधन।' : 'Handled directly by authorized college desk administration.'}</p>
@@ -542,8 +564,8 @@ export function LandingPage() {
             </h2>
             <p className="section-lead-copy">
               {isNe
-                ? 'उजुरी दर्ता, ट्र्याकिङ, तथा समाधान प्रक्रिया सम्बन्धी मुख्य प्रश्नहरू र जवाफ:'
-                : 'Clear answers regarding grievance submission, tracking, and college resolution:'}
+                ? 'उजुरी दर्ता, विद्यार्थी खाता, तथा समाधान प्रक्रिया सम्बन्धी मुख्य प्रश्नहरू र जवाफ:'
+                : 'Clear answers regarding student accounts, complaint submission, dashboard tracking, and resolution:'}
             </p>
           </div>
 
@@ -591,8 +613,8 @@ export function LandingPage() {
               </h2>
               <p className="contact-main-desc">
                 {isNe
-                  ? 'अति जरुरी ल्याब समस्या, नेटवर्क डाउन वा हराएको ट्र्याकिङ कोडका लागि कलेज प्रशासनमा सम्पर्क गर्नुहोस्:'
-                  : 'For urgent lab workstation hardware issues or lost tracking codes, reach out to the campus desk directly:'}
+                  ? 'अति जरुरी ल्याब समस्या, नेटवर्क डाउन वा खाता सहयोगका लागि कलेज प्रशासनमा सम्पर्क गर्नुहोस्:'
+                  : 'For urgent lab workstation hardware issues or account assistance, reach out to the campus desk directly:'}
               </p>
             </div>
 
@@ -653,7 +675,7 @@ export function LandingPage() {
             {/* Bottom Call to Action */}
             <div className="contact-banner-footer">
               <div className="contact-footer-text">
-                <Sparkles size={16} color="#0F766E" />
+                <Sparkles size={16} color="#0D8178" />
                 <span>{isNe ? 'नयाँ समस्या दर्ता गर्न तयार हुनुहुन्छ?' : 'Ready to report an IT problem?'}</span>
               </div>
               <Link to="/submit" className="btn btn-primary btn-md">

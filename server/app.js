@@ -15,6 +15,8 @@ import complaintsRouter from './routes/complaints.js';
 import adminAuthRouter from './routes/adminAuth.js';
 import adminComplaintsRouter from './routes/adminComplaints.js';
 import reportsRouter from './routes/reports.js';
+import studentAuthRouter from './routes/studentAuth.js';
+import studentComplaintsRouter from './routes/studentComplaints.js';
 
 export function createApp() {
   const app = express();
@@ -83,6 +85,8 @@ export function createApp() {
   // 7. Mount API Routes under /api/v1
   app.use('/api/v1', healthRouter);
   app.use('/api/v1/complaints', complaintsRouter);
+  app.use('/api/v1/student/auth', studentAuthRouter);
+  app.use('/api/v1/student/complaints', studentComplaintsRouter);
   app.use('/api/v1/admin/auth', adminAuthRouter);
   app.use('/api/v1/admin/complaints', adminComplaintsRouter);
   app.use('/api/v1/admin/reports', reportsRouter);

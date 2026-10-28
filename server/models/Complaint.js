@@ -115,9 +115,15 @@ const ComplaintSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    studentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Student',
+      index: true,
+      default: null,
+    },
     trackingSecretHash: {
       type: String,
-      required: true,
+      default: null,
       select: false, // Excluded from normal queries
     },
     student: {
@@ -228,6 +234,51 @@ ComplaintSchema.methods.toStudentTrackingView = function () {
       createdAt: r.createdAt,
     })),
     // Public timeline items only
+    timeline: (this.timeline || []).map((t) => ({
+      id: t._id,
+      action: t.action,
+      fromStatus: t.fromStatus,
+      toStatus: t.toStatus,
+      note: t.note,
+      timestamp: t.timestamp,
+    })),
+  };
+};
+
+// Method for authenticated student owner view
+ComplaintSchema.methods.toStudentOwnerView = function () {
+  return {
+    id: this._id,
+    reference: this.reference,
+    category: this.category,
+    title: this.title,
+    description: this.description,
+    status: this.status,
+    priority: this.priority,
+    program: this.program || this.student?.program || 'BSc CSIT',
+    student: {
+      name: this.student?.name,
+      studentId: this.student?.studentId,
+      email: this.student?.email,
+      program: this.student?.program || 'BSc CSIT',
+    },
+    hasAttachment: !!this.attachment,
+    attachment: this.attachment
+      ? {
+          originalName: this.attachment.originalName,
+          size: this.attachment.size,
+          mimeType: this.attachment.mimeType,
+          uploadedAt: this.attachment.uploadedAt,
+        }
+      : null,
+    submittedAt: this.createdAt,
+    updatedAt: this.updatedAt,
+    responses: (this.responses || []).map((r) => ({
+      id: r._id,
+      message: r.message,
+      responderName: r.createdBy?.name || 'College IT Desk',
+      createdAt: r.createdAt,
+    })),
     timeline: (this.timeline || []).map((t) => ({
       id: t._id,
       action: t.action,

@@ -39,9 +39,9 @@ export function Footer() {
           <ul className="footer-links">
             <li><Link to="/">{isNe ? 'गृहपृष्ठ' : 'Portal Home'}</Link></li>
             <li><Link to="/submit">{isNe ? 'नयाँ उजुरी दर्ता' : 'Submit a Complaint'}</Link></li>
-            <li><Link to="/track">{isNe ? 'गुनासोको अवस्था' : 'Track Complaint'}</Link></li>
+            <li><Link to="/student/complaints">{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</Link></li>
+            <li><Link to="/login">{isNe ? 'विद्यार्थी लगइन' : 'Student Login'}</Link></li>
             <li><Link to="/#process">{isNe ? 'समाधान प्रक्रिया' : 'How It Works'}</Link></li>
-            <li><Link to="/#privacy">{isNe ? 'गोपनीयता तथा सुरक्षा' : 'Privacy & Security'}</Link></li>
             <li><Link to="/#faqs">{isNe ? 'प्रश्नोत्तर' : 'Frequently Asked Questions'}</Link></li>
           </ul>
         </div>
