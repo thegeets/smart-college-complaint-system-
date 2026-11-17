@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { KeyRound, AlertCircle, CheckCircle2, Lock } from 'lucide-react';
+import { KeyRound, AlertCircle, Lock } from 'lucide-react';
 
 export function ResetPasswordPage() {
   const { resetStudentPassword, language } = useApp();
@@ -84,7 +84,7 @@ export function ResetPasswordPage() {
             </p>
           </div>
 
-          <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
             {errorMsg && (
               <div style={{
                 padding: '10px 14px',

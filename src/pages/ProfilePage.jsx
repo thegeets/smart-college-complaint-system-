@@ -51,23 +51,23 @@ export function ProfilePage() {
     }
   }, [isCheckingStudentSession, isStudentLoggedIn, navigate]);
 
-  const [name, setName] = useState('');
-  const [semester, setSemester] = useState('1st Semester');
-  const [phone, setPhone] = useState('');
+  const [prevUser, setPrevUser] = useState(studentUser);
+  const [name, setName] = useState(studentUser?.name || '');
+  const [semester, setSemester] = useState(studentUser?.semester || '1st Semester');
+  const [phone, setPhone] = useState(studentUser?.phone || '');
   const [isSaving, setIsSaving] = useState(false);
+
+  if (studentUser !== prevUser) {
+    setPrevUser(studentUser);
+    setName(studentUser?.name || '');
+    setSemester(studentUser?.semester || '1st Semester');
+    setPhone(studentUser?.phone || '');
+  }
 
   // Claim legacy state
   const [legacyRef, setLegacyRef] = useState('');
   const [legacySecret, setLegacySecret] = useState('');
   const [claimStatus, setClaimStatus] = useState({ error: '', success: '', loading: false });
-
-  useEffect(() => {
-    if (studentUser) {
-      setName(studentUser.name || '');
-      setSemester(studentUser.semester || '1st Semester');
-      setPhone(studentUser.phone || '');
-    }
-  }, [studentUser]);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();

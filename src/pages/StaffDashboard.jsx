@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 
 export function StaffDashboard() {
-  const { 
-    currentUser, 
-    complaints, 
+  const {
+    currentUser,
+    complaints,
     resolveComplaintWithNote,
     t
   } = useApp();
@@ -132,25 +132,11 @@ export function StaffDashboard() {
             role="staff"
             showDepartment={false}
             showStudentInfo={true}
+            onActionClick={handleOpenResolve}
+            actionButtonLabel={t('staffDashboard.resolveAction', 'Resolve')}
           />
         </div>
       </div>
-
-      {/* Confirmation Modal: Staff Status Update */}
-      <ConfirmationModal
-        isOpen={statusModalOpen}
-        onClose={() => setStatusModalOpen(false)}
-        onConfirm={handleConfirmStatus}
-        title={`${t('adminDashboard.statusChangeTitle', 'Set Status to')} "${getStatusLabel(targetStatus)}"`}
-        message={`${t('adminDashboard.statusChangeMsg', 'Confirm updating complaint')} ${selectedComp?.id} ${t('adminDashboard.statusChangeTitle', 'to')} "${getStatusLabel(targetStatus)}".`}
-        confirmText={t('adminDashboard.statusConfirmBtn', 'Update Status')}
-        confirmVariant="primary"
-        showNoteInput={true}
-        noteValue={statusNote}
-        onNoteChange={setStatusNote}
-        noteLabel={t('adminDashboard.statusRemarkLabel', 'Operational Remark / Work Update:')}
-        notePlaceholder="e.g. Technician on-site; equipment dismantled for testing."
-      />
 
       {/* Confirmation Modal: Add Resolution Note & Close */}
       <ConfirmationModal

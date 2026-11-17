@@ -11,6 +11,7 @@ export function AnimatedNumber({ value, duration = 650, className = '' }) {
   const prevValueRef = useRef(value);
 
   useEffect(() => {
+    let animFrameId;
     // Check for prefers-reduced-motion
     const prefersReducedMotion = 
       typeof window !== 'undefined' && 
@@ -18,9 +19,11 @@ export function AnimatedNumber({ value, duration = 650, className = '' }) {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (prefersReducedMotion) {
-      setDisplayValue(value);
-      prevValueRef.current = value;
-      return;
+      animFrameId = requestAnimationFrame(() => {
+        setDisplayValue(value);
+        prevValueRef.current = value;
+      });
+      return () => cancelAnimationFrame(animFrameId);
     }
 
     // Parse target number and format (e.g., "98%", "4.8", 14)
@@ -28,9 +31,11 @@ export function AnimatedNumber({ value, duration = 650, className = '' }) {
     const match = strVal.match(/^([^0-9.-]*)([0-9.-]+)(.*)$/);
 
     if (!match) {
-      setDisplayValue(value);
-      prevValueRef.current = value;
-      return;
+      animFrameId = requestAnimationFrame(() => {
+        setDisplayValue(value);
+        prevValueRef.current = value;
+      });
+      return () => cancelAnimationFrame(animFrameId);
     }
 
     const prefix = match[1] || '';
@@ -38,9 +43,11 @@ export function AnimatedNumber({ value, duration = 650, className = '' }) {
     const suffix = match[3] || '';
 
     if (isNaN(numTarget)) {
-      setDisplayValue(value);
-      prevValueRef.current = value;
-      return;
+      animFrameId = requestAnimationFrame(() => {
+        setDisplayValue(value);
+        prevValueRef.current = value;
+      });
+      return () => cancelAnimationFrame(animFrameId);
     }
 
     // Determine decimal precision if present

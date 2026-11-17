@@ -60,7 +60,7 @@ export function TrackComplaintPage() {
       };
       runAutoTrack();
     }
-  }, [searchParams]);
+  }, [searchParams, isNe, trackComplaint]);
 
   const handleTrackSubmit = async (e) => {
     e.preventDefault();

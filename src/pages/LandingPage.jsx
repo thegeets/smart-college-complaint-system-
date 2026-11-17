@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
@@ -26,15 +26,11 @@ import {
   ChevronDown,
   ChevronUp,
   MapPin,
-  Sparkles,
   Wrench,
-  LogIn,
-  UserPlus
 } from 'lucide-react';
 
 export function LandingPage() {
-  const { language, isStudentLoggedIn, studentUser } = useApp();
-  const navigate = useNavigate();
+  const { language, isStudentLoggedIn } = useApp();
   const isNe = language === 'ne';
 
   // FAQ Accordion State (Index of currently opened question)
@@ -212,9 +208,9 @@ export function LandingPage() {
                   <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
                 </Link>
               ) : (
-                <Link to="/login?redirect=/student/complaints" className="btn btn-secondary btn-lg hero-btn-secondary">
-                  <LogIn size={17} />
-                  <span>{isNe ? 'उजुरी ट्र्याक गर्न लगइन' : 'Login to Track Complaints'}</span>
+                <Link to="/track" className="btn btn-secondary btn-lg hero-btn-secondary">
+                  <Search size={17} />
+                  <span>{isNe ? 'उजुरी ट्र्याक गर्नुहोस्' : 'Track Status'}</span>
                 </Link>
               )}
             </div>
@@ -223,21 +219,21 @@ export function LandingPage() {
             <div className="hero-features-strip">
               <div className="hero-feature-pill">
                 <UserCheck size={14} color="#0D8178" />
-                <span>{isNe ? 'विद्यार्थी खाता आवश्यक' : 'Student Account Required'}</span>
+                <span>{isNe ? 'विद्यार्थी प्रमाणीकरण' : 'Student Verified'}</span>
               </div>
               <div className="hero-feature-pill">
                 <CheckCircle2 size={14} color="#0D8178" />
-                <span>{isNe ? 'ड्यासबोर्डमा उजुरी ट्र्याकिङ' : 'Track Complaints in Your Dashboard'}</span>
+                <span>{isNe ? 'ड्यासबोर्ड ट्र्याकिङ' : 'Dashboard Tracking'}</span>
               </div>
               <div className="hero-feature-pill">
                 <ShieldCheck size={14} color="#0D8178" />
-                <span>{isNe ? 'कलेज प्रशासनद्वारा प्रत्यक्ष समीक्षा' : 'Direct Campus Desk Review'}</span>
+                <span>{isNe ? 'कलेज डेस्कद्वारा प्रत्यक्ष मर्मत' : 'Campus IT Desk'}</span>
               </div>
             </div>
 
           </div>
 
-          {/* Right Column: Live Grievance Tracking Interactive Preview Console */}
+          {/* Right Column: Complaint Resolution Workflow Visual */}
           <div className="hero-visual-column">
             <HeroVisual />
           </div>
@@ -246,102 +242,7 @@ export function LandingPage() {
       </section>
 
       {/* =========================================================================
-          SECTION 1: QUICK ACTION GATEWAYS (Submit vs My Complaints Dashboard)
-          ========================================================================= */}
-      <section className="home-quick-gateways-section">
-        <div className="container">
-          <div className="gateways-grid">
-            
-            {/* Gateway Card 1: Submit */}
-            <div className="gateway-card gateway-card-submit">
-              <div className="gateway-card-header">
-                <div className="gateway-icon-wrap icon-submit">
-                  <PlusCircle size={22} />
-                </div>
-                <div>
-                  <span className="gateway-eyebrow">{isNe ? 'नयाँ समस्या' : 'LODGE GRIEVANCE'}</span>
-                  <h3 className="gateway-title">{isNe ? 'नयाँ उजुरी दर्ता गर्नुहोस्' : 'Submit a Complaint'}</h3>
-                </div>
-              </div>
-              <p className="gateway-desc">
-                {isNe
-                  ? 'ल्याब नम्बर, कम्प्युटर आइडी, र समस्याको विवरण लेख्नुहोस्। आवश्यक भएमा ५ MB सम्मको तस्बिर वा त्रुटि प्रमाण संलग्न गर्नुहोस्।'
-                  : 'Report broken lab hardware, compiler path errors, slow campus network, or projector defects with optional screenshot proof.'}
-              </p>
-              <div className="gateway-meta-list">
-                <span>✓ {isNe ? 'विद्यार्थी खाता आवश्यक' : 'Student account required'}</span>
-                <span>✓ {isNe ? 'क्याम्पस प्राविधिक क्षेत्र मात्र' : 'Campus IT focused categories'}</span>
-              </div>
-              <Link to="/submit" className="btn btn-primary btn-md gateway-btn">
-                <span>{isNe ? 'उजुरी फारम खोल्नुहोस्' : 'Open Complaint Form'}</span>
-                <ArrowRight size={15} />
-              </Link>
-            </div>
-
-            {/* Gateway Card 2: Track Complaints in Your Dashboard */}
-            <div className="gateway-card gateway-card-track">
-              <div className="gateway-card-header">
-                <div className="gateway-icon-wrap icon-track">
-                  <FileText size={22} />
-                </div>
-                <div>
-                  <span className="gateway-eyebrow">{isNe ? 'विद्यार्थी पोर्टल' : 'STUDENT PORTAL'}</span>
-                  <h3 className="gateway-title">{isNe ? 'मेरो उजुरीहरू ड्यासबोर्ड' : 'Track in Your Dashboard'}</h3>
-                </div>
-              </div>
-              <p className="gateway-desc">
-                {isNe
-                  ? 'आफ्नो विद्यार्थी खाताबाट दर्ता गरिएका सम्पूर्ण उजुरीहरूको वास्तविक समयमा प्रगति र कलेजको जवाफ हेर्नुहोस्।'
-                  : 'Sign in with your verified student account to inspect active stages, college replies, and your full complaint history.'}
-              </p>
-              
-              {isStudentLoggedIn ? (
-                <div>
-                  <div style={{
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(13, 129, 120, 0.08)',
-                    border: '1px solid rgba(13, 129, 120, 0.2)',
-                    fontSize: '0.8125rem',
-                    color: '#0D8178',
-                    fontWeight: '600',
-                    marginBottom: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    <UserCheck size={14} />
-                    <span>
-                      {isNe ? `लगइन गरिएको: ${studentUser?.name || 'विद्यार्थी'}` : `Logged in as: ${studentUser?.name || 'Student'}`}
-                    </span>
-                  </div>
-                  <Link to="/student/complaints" className="btn btn-secondary btn-md gateway-btn">
-                    <span>{isNe ? 'मेरो उजुरीहरू हेर्नुहोस्' : 'View My Complaints'}</span>
-                    <ArrowRight size={15} />
-                  </Link>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <Link to="/login?redirect=/student/complaints" className="btn btn-secondary btn-md gateway-btn">
-                    <LogIn size={15} />
-                    <span>{isNe ? 'उजुरी ट्र्याक गर्न लगइन' : 'Login to Track Complaints'}</span>
-                  </Link>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748B', paddingTop: '4px' }}>
-                    <span>{isNe ? 'खाता छैन?' : "New student?"}</span>
-                    <Link to="/register" style={{ color: '#0D8178', fontWeight: '600', textDecoration: 'none' }}>
-                      {isNe ? 'विद्यार्थी दर्ता गर्नुहोस्' : 'Create Student Account →'}
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          SECTION 2: AUTHORIZED IT CATEGORIES
+          SECTION 1: AUTHORIZED IT CATEGORIES
           ========================================================================= */}
       <section id="categories" className="home-categories-section">
         <div className="container">

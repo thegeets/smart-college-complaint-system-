@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, PlusCircle, User, LogIn, UserPlus, LogOut, FileText, Phone, Search, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -14,30 +14,71 @@ export function PublicNavbar() {
   const navigate = useNavigate();
   const isNe = language === 'ne';
 
+  const menuToggleRef = useRef(null);
+  const closeBtnRef = useRef(null);
+  const drawerRef = useRef(null);
+  const previouslyFocusedElementRef = useRef(null);
+
   // Close mobile drawer on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname, location.hash]);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll and manage focus when mobile menu opens/closes
   useEffect(() => {
     if (mobileMenuOpen) {
+      previouslyFocusedElementRef.current = document.activeElement;
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+
+      // Focus close button in drawer
+      const focusTimer = setTimeout(() => {
+        closeBtnRef.current?.focus();
+      }, 50);
+
+      return () => {
+        clearTimeout(focusTimer);
+        document.body.style.overflow = originalOverflow;
+      };
     } else {
       document.body.style.overflow = '';
+      if (previouslyFocusedElementRef.current && typeof previouslyFocusedElementRef.current.focus === 'function') {
+        previouslyFocusedElementRef.current.focus();
+      }
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [mobileMenuOpen]);
 
-  // Support Escape key to close mobile menu
+  // Support Escape key and Focus Trap within mobile drawer
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && mobileMenuOpen) {
+      if (!mobileMenuOpen) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
         setMobileMenuOpen(false);
+        menuToggleRef.current?.focus();
+        return;
+      }
+
+      if (e.key === 'Tab' && drawerRef.current) {
+        const focusableElements = drawerRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [mobileMenuOpen]);
@@ -98,7 +139,9 @@ export function PublicNavbar() {
     };
   }, [location.pathname, location.hash]);
 
-  const closeMenu = () => setMobileMenuOpen(false);
+  const closeMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
   const handleHomeClick = (e) => {
     closeMenu();
@@ -144,8 +187,8 @@ export function PublicNavbar() {
           <div className="top-strip-left">
             <span className="top-strip-text">
               {isNe 
-                ? 'सोच कलेज अफ आईटी, पोखरा — विद्यार्थी सहायता तथा गुनासो पोर्टल'
-                : 'Soch College of IT, Pokhara — Student Grievance & Help Desk'}
+                ? 'सोच कलेज अफ आईटी — विद्यार्थी सहायता तथा गुनासो पोर्टल'
+                : 'Soch College of IT, Pokhara — Student IT Grievance Portal'}
             </span>
           </div>
           <div className="top-strip-right">
@@ -155,7 +198,7 @@ export function PublicNavbar() {
             <span className="top-strip-divider" aria-hidden="true">•</span>
             <a href={`tel:${COLLEGE_CONFIG.contact.phone}`} className="top-strip-phone" aria-label={`Campus IT Phone ${COLLEGE_CONFIG.contact.phone}`}>
               <Phone size={12} style={{ display: 'inline', marginRight: '4px' }} aria-hidden="true" />
-              {COLLEGE_CONFIG.contact.phone}
+              <span>{COLLEGE_CONFIG.contact.phone}</span>
             </a>
           </div>
         </div>
@@ -231,12 +274,12 @@ export function PublicNavbar() {
           </nav>
 
           {/* Right Action Cluster (Desktop) */}
-          <div className="desktop-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="desktop-nav-actions">
             <LanguageSwitcher size="sm" />
 
             {isStudentLoggedIn ? (
               /* Logged In Actions: Profile/Logout */
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="logged-in-user-actions">
                 <Link
                   to="/student/profile"
                   className={`btn btn-secondary btn-sm ${isProfileActive ? 'active' : ''}`}
@@ -244,7 +287,7 @@ export function PublicNavbar() {
                   title={studentUser?.name}
                 >
                   <User size={14} />
-                  <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {studentUser?.name ? studentUser.name.split(' ')[0] : 'Profile'}
                   </span>
                 </Link>
@@ -261,41 +304,41 @@ export function PublicNavbar() {
               </div>
             ) : (
               /* Logged Out Actions: Login | Register */
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="auth-nav-links">
                 <Link
                   to="/login"
                   className="btn btn-secondary btn-sm"
-                  style={{ height: '36px', fontSize: '0.8125rem', padding: '0 12px' }}
+                  style={{ height: '36px', fontSize: '0.8125rem', padding: '0 10px' }}
                 >
-                  <LogIn size={14} />
+                  <LogIn size={13} />
                   <span>{isNe ? 'लगइन' : 'Login'}</span>
                 </Link>
 
                 <Link
                   to="/register"
                   className="btn btn-secondary btn-sm"
-                  style={{ height: '36px', fontSize: '0.8125rem', padding: '0 12px' }}
+                  style={{ height: '36px', fontSize: '0.8125rem', padding: '0 10px' }}
                 >
-                  <UserPlus size={14} />
+                  <UserPlus size={13} />
                   <span>{isNe ? 'दर्ता' : 'Register'}</span>
                 </Link>
               </div>
             )}
 
-            {/* Clear Primary CTA: Submit a Complaint */}
+            {/* Clear Primary CTA: Submit a Complaint (Never clipped) */}
             <Link 
               to="/submit" 
               className="btn-nav-cta"
             >
               <PlusCircle size={15} aria-hidden="true" />
-              <span>{isNe ? 'उजुरी दर्ता गर्नुहोस्' : 'Submit a Complaint'}</span>
+              <span>{isNe ? 'उजुरी दर्ता' : 'Submit a Complaint'}</span>
             </Link>
           </div>
 
           {/* Mobile Bar Right Cluster: Menu Toggle Button */}
           <div className="mobile-bar-actions">
-            <LanguageSwitcher size="sm" />
             <button
+              ref={menuToggleRef}
               type="button"
               className="mobile-nav-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -316,6 +359,7 @@ export function PublicNavbar() {
 
       {/* Mobile Navigation Drawer */}
       <div 
+        ref={drawerRef}
         id="mobile-nav-drawer"
         className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}
         role="dialog"
@@ -330,6 +374,7 @@ export function PublicNavbar() {
             subtitle={isNe ? 'गुनासो व्यवस्थापन' : 'Complaint Portal'} 
           />
           <button
+            ref={closeBtnRef}
             type="button"
             className="mobile-drawer-close-btn"
             onClick={closeMenu}
@@ -409,7 +454,7 @@ export function PublicNavbar() {
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
                 <User size={16} aria-hidden="true" />
-                <span>{isNe ? 'प्रोफाइल' : 'Profile'}</span>
+                <span>{isNe ? 'विद्यार्थी प्रोफाइल' : 'Student Profile'}</span>
               </Link>
               <button
                 type="button"
@@ -445,7 +490,7 @@ export function PublicNavbar() {
             </>
           )}
 
-          <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '6px 8px' }} />
+          <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '8px 4px' }} />
           <Link 
             to="/admin/login" 
             className="mobile-nav-link-item" 

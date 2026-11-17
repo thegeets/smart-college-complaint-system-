@@ -1,25 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
+import { StatusBadge } from '../components/StatusBadge';
 import {
   PlusCircle,
   FileText,
-  Clock,
-  Wrench,
-  CheckCircle2,
   Search,
   RefreshCw,
   ExternalLink,
   AlertCircle,
   Sparkles,
   Link2,
-  KeyRound,
-  Eye,
-  Check,
-  User
+  X
 } from 'lucide-react';
 
 export function MyComplaintsPage() {
@@ -29,11 +23,8 @@ export function MyComplaintsPage() {
     isCheckingStudentSession,
     fetchStudentComplaints,
     claimLegacyComplaint,
-    categories,
     language,
     getCategoryLabel,
-    t,
-    showToast,
   } = useApp();
 
   const isNe = language === 'ne';
@@ -61,6 +52,27 @@ export function MyComplaintsPage() {
   const [claimSecret, setClaimSecret] = useState('');
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimError, setClaimError] = useState('');
+  const claimInputRef = useRef(null);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showClaimModal) {
+        setShowClaimModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showClaimModal]);
+
+  // Focus modal input on open
+  useEffect(() => {
+    if (showClaimModal) {
+      setTimeout(() => {
+        claimInputRef.current?.focus();
+      }, 50);
+    }
+  }, [showClaimModal]);
 
   const loadComplaints = useCallback(async () => {
     setIsLoading(true);
@@ -437,36 +449,43 @@ export function MyComplaintsPage() {
               </div>
 
               {/* Mobile Card View (<= 768px) */}
-              <div className="complaint-table-mobile" style={{ display: 'none', flexDirection: 'column', gap: '12px' }}>
+              <div className="complaint-table-mobile">
                 {complaints.map((c) => (
-                  <div key={c.id || c.reference} className="card" style={{ padding: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ fontFamily: 'monospace', fontWeight: '800', color: '#15365B', fontSize: '0.875rem' }}>
+                  <div key={c.id || c.reference} className="complaint-mobile-card">
+                    <div className="complaint-card-topbar">
+                      <span className="table-complaint-id">
                         {c.reference}
                       </span>
                       <StatusBadge status={c.status} />
                     </div>
 
-                    <h4 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#0F172A', margin: '0 0 6px', lineHeight: '1.35' }}>
-                      {c.title}
+                    <h4 className="complaint-card-title">
+                      <Link 
+                        to={`/student/complaints/${encodeURIComponent(c.reference)}`}
+                        className="complaint-card-title-link"
+                      >
+                        {c.title}
+                      </Link>
                     </h4>
 
-                    <div style={{ fontSize: '0.8125rem', color: '#64748B', marginBottom: '10px' }}>
-                      {getCategoryLabel(c.category)}
+                    <div className="complaint-card-category-row">
+                      <span style={{ fontSize: '0.8125rem', color: '#475569' }}>
+                        {getCategoryLabel(c.category)}
+                      </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
+                    <div className="complaint-card-footer">
+                      <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
                         {new Date(c.submittedAt).toLocaleDateString(isNe ? 'ne-NP' : 'en-US', { dateStyle: 'medium' })}
                       </span>
 
                       <Link
                         to={`/student/complaints/${encodeURIComponent(c.reference)}`}
                         className="btn btn-primary btn-sm"
-                        style={{ height: '32px', padding: '0 12px', fontSize: '0.75rem' }}
+                        style={{ height: '36px', padding: '0 14px', fontSize: '0.8125rem' }}
                       >
                         <span>{isNe ? 'विवरण हेर्नुहोस्' : 'View Details'}</span>
-                        <ExternalLink size={12} />
+                        <ExternalLink size={13} />
                       </Link>
                     </div>
                   </div>
@@ -477,25 +496,35 @@ export function MyComplaintsPage() {
 
           {/* Claim Legacy Complaint Modal */}
           {showClaimModal && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(15, 23, 42, 0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 100,
-              padding: '16px'
-            }}>
-              <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Link2 size={20} color="#0D8178" />
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: '#15365B' }}>
-                    {isNe ? 'पुरानो उजुरी खातामा लिंक गर्नुहोस्' : 'Link Previous Guest Complaint'}
-                  </h3>
+            <div 
+              className="modal-backdrop"
+              onClick={() => setShowClaimModal(false)}
+              aria-hidden="true"
+            >
+              <div 
+                className="card modal-dialog" 
+                style={{ maxWidth: '480px', width: '100%', padding: '24px', position: 'relative' }}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="claim-modal-title"
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Link2 size={20} color="#0D8178" />
+                    <h3 id="claim-modal-title" style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: '#15365B' }}>
+                      {isNe ? 'पुरानो उजुरी खातामा लिंक गर्नुहोस्' : 'Link Previous Guest Complaint'}
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowClaimModal(false)}
+                    className="modal-close-btn"
+                    aria-label={isNe ? 'मोडाल बन्द गर्नुहोस्' : 'Close dialog'}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#64748B' }}
+                  >
+                    <X size={18} />
+                  </button>
                 </div>
 
                 <p style={{ fontSize: '0.8125rem', color: '#64748B', lineHeight: '1.5', margin: '0 0 16px' }}>
@@ -524,6 +553,7 @@ export function MyComplaintsPage() {
                       {isNe ? 'सन्दर्भ कोड (Reference ID)' : 'Complaint Reference ID'} *
                     </label>
                     <input
+                      ref={claimInputRef}
                       type="text"
                       className="form-input"
                       placeholder="e.g. CMP-2026-A8F2K"
@@ -556,6 +586,20 @@ export function MyComplaintsPage() {
                       className="btn btn-secondary btn-sm"
                       disabled={isClaiming}
                     >
+                      {isNe ? 'रद्द गर्नुहोस्' : 'Cancel'}
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-sm"
+                      disabled={isClaiming}
+                    >
+                      {isClaiming ? (isNe ? 'लिंक गरिँदैछ...' : 'Linking...') : (isNe ? 'खातामा जोड्नुहोस्' : 'Link to Account')}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
                       {isNe ? 'रद्द गर्नुहोस्' : 'Cancel'}
                     </button>
                     <button

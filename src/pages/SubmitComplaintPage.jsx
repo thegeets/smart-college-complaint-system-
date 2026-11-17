@@ -14,9 +14,7 @@ import {
   Layers,
   ArrowLeft,
   X,
-  ExternalLink,
-  ShieldCheck,
-  Info
+  ExternalLink
 } from 'lucide-react';
 
 export function SubmitComplaintPage() {

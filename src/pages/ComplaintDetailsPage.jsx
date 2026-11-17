@@ -14,9 +14,7 @@ import {
   Download,
   AlertCircle,
   RefreshCw,
-  Printer,
-  ShieldCheck,
-  CheckCircle2
+  Printer
 } from 'lucide-react';
 
 export function ComplaintDetailsPage() {

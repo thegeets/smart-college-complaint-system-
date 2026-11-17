@@ -3,10 +3,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { MailCheck, AlertCircle, CheckCircle2, RotateCcw, ArrowRight, ShieldCheck, Info } from 'lucide-react';
+import { MailCheck, AlertCircle, CheckCircle2, Info } from 'lucide-react';
 
 export function VerifyEmailPage() {
-  const { verifyStudentEmail, resendStudentVerification, language, showToast } = useApp();
+  const { verifyStudentEmail, resendStudentVerification, language } = useApp();
   const isNe = language === 'ne';
   const navigate = useNavigate();
   const location = useLocation();
@@ -102,7 +102,7 @@ export function VerifyEmailPage() {
           </div>
 
           {/* Verification Card */}
-          <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
             
             {/* Ownership confirmation policy note */}
             <div style={{

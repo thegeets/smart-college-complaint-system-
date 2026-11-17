@@ -3,11 +3,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { COLLEGE_CONFIG } from '../config/collegeConfig';
-import { LogIn, AlertCircle, ArrowRight, UserPlus, KeyRound, CheckCircle2 } from 'lucide-react';
+import { LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export function LoginPage() {
-  const { loginStudent, language, showToast } = useApp();
+  const { loginStudent, language } = useApp();
   const isNe = language === 'ne';
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,7 +75,7 @@ export function LoginPage() {
           </div>
 
           {/* Form Card */}
-          <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
             {redirectTarget === '/submit' && (
               <div style={{
                 padding: '10px 14px',
