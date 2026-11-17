@@ -192,7 +192,7 @@ export function SubmitComplaintPage() {
                 <CheckCircle2 size={32} />
               </div>
 
-              <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#065F46', margin: '0 0 8px' }}>
+              <h2 style={{ fontSize: '1.45rem', fontWeight: '700', color: '#065F46', margin: '0 0 8px' }}>
                 {isNe ? 'उजुरी सफलतापूर्वक दर्ता भयो!' : 'Complaint Submitted Successfully!'}
               </h2>
               <p style={{ fontSize: '0.9375rem', color: '#475569', maxWidth: '520px', margin: '0 auto 20px', lineHeight: '1.5' }}>
@@ -215,7 +215,7 @@ export function SubmitComplaintPage() {
                 <span style={{ fontSize: '0.8125rem', color: '#64748B', fontWeight: '600' }}>
                   {isNe ? 'सन्दर्भ कोड:' : 'Complaint Reference:'}
                 </span>
-                <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '1.1rem', color: '#15365B' }}>
+                <span style={{ fontFamily: 'monospace', fontWeight: '700', fontSize: '1.1rem', color: '#15365B' }}>
                   {submittedComplaint.reference}
                 </span>
               </div>
@@ -251,7 +251,7 @@ export function SubmitComplaintPage() {
                 <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0D8178', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
                   {COLLEGE_CONFIG.name}
                 </div>
-                <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 6px' }}>
+                <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 6px' }}>
                   {isNe ? 'आईटी उजुरी दर्ता फारम' : 'Lodge a Campus IT Complaint'}
                 </h1>
                 <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0, lineHeight: '1.5' }}>

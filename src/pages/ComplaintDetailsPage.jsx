@@ -99,7 +99,7 @@ export function ComplaintDetailsPage() {
           {errorMsg ? (
             <div className="card" style={{ padding: '36px 20px', textAlign: 'center' }}>
               <AlertCircle size={36} color="#DC2626" style={{ margin: '0 auto 12px' }} />
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#991B1B', margin: '0 0 8px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#991B1B', margin: '0 0 8px' }}>
                 {isNe ? 'उजुरी लोड हुन सकेन' : 'Unable to Access Complaint'}
               </h2>
               <p style={{ fontSize: '0.875rem', color: '#64748B', maxWidth: '440px', margin: '0 auto 16px', lineHeight: '1.5' }}>
@@ -116,13 +116,13 @@ export function ComplaintDetailsPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '800', color: '#15365B' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '700', color: '#15365B' }}>
                         {complaint.reference}
                       </span>
                       <StatusBadge status={complaint.status} />
                       <PriorityBadge priority={complaint.priority} />
                     </div>
-                    <h1 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#0F172A', margin: '0 0 6px', lineHeight: '1.3' }}>
+                    <h1 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#0F172A', margin: '0 0 6px', lineHeight: '1.3' }}>
                       {complaint.title}
                     </h1>
                   </div>
@@ -154,7 +154,7 @@ export function ComplaintDetailsPage() {
 
               {/* 4-Stage Resolution Process Card */}
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#15365B', margin: '0 0 16px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#15365B', margin: '0 0 16px' }}>
                   {isNe ? 'समाधान प्रगति चरणहरू' : '4-Stage Resolution Process'}
                 </h3>
                 <ComplaintTimeline currentStatus={complaint.status} timeline={complaint.timeline} />
@@ -162,7 +162,7 @@ export function ComplaintDetailsPage() {
 
               {/* Full Description & Attached Evidence */}
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#15365B', margin: '0 0 12px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#15365B', margin: '0 0 12px' }}>
                   {isNe ? 'समस्याको विस्तृत विवरण' : 'Reported Description'}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.9375rem', color: '#334155', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
@@ -212,7 +212,7 @@ export function ComplaintDetailsPage() {
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                   <MessageSquare size={18} color="#0D8178" />
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#15365B', margin: 0 }}>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
                     {isNe ? 'कलेज प्रशासनको आधिकारिक जवाफ' : 'College Administration Replies'}
                   </h3>
                 </div>
@@ -260,7 +260,7 @@ export function ComplaintDetailsPage() {
                 <div className="card" style={{ padding: 'var(--space-6)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                     <Clock size={18} color="#15365B" />
-                    <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#15365B', margin: 0 }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
                       {isNe ? 'अवस्था परिवर्तन इतिहास' : 'Status History & Audit Trail'}
                     </h3>
                   </div>

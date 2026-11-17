@@ -56,7 +56,7 @@ export function StudentDashboard() {
             <Sparkles size={12} />
             <span>{t('studentDashboard.deskTag', 'STUDENT GRIEVANCE REDRESSAL DESK')}</span>
           </div>
-          <h2 style={{ color: '#ffffff', fontSize: '1.4rem', fontWeight: '800' }}>
+          <h2 style={{ color: '#ffffff', fontSize: '1.4rem', fontWeight: '700' }}>
             {t('studentDashboard.welcome', 'Welcome,')} {currentUser.name}
           </h2>
           <p style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>
@@ -235,7 +235,7 @@ export function StudentDashboard() {
           {/* Quick IT Help Desk Info Card */}
           <div className="card" style={{ background: '#f8fafc' }}>
             <div className="card-body" style={{ padding: '1.25rem' }}>
-              <h4 style={{ fontSize: '0.925rem', fontWeight: '800', color: 'var(--navy-900)', marginBottom: '0.4rem' }}>
+              <h4 style={{ fontSize: '0.925rem', fontWeight: '700', color: 'var(--navy-900)', marginBottom: '0.4rem' }}>
                 {isNe ? 'सोच कलेज आईटी सहयोग डेस्क' : 'Soch College IT Help Desk'}
               </h4>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.4' }}>

@@ -106,7 +106,7 @@ export function BrandLogo({
         <div className="brand-text-block" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <div className="brand-title" style={{ 
             fontSize: size >= 36 ? '0.9375rem' : '0.875rem', 
-            fontWeight: '800', 
+            fontWeight: '700', 
             color: isLight ? '#FFFFFF' : '#0F172A',
             lineHeight: 1.2,
             letterSpacing: '-0.015em',

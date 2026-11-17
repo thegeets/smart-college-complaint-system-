@@ -4,9 +4,9 @@ import {
   Clock,
   MapPin,
   Mail,
+  Phone,
   ShieldCheck,
-  CheckCircle2,
-  PhoneCall
+  Building2
 } from 'lucide-react';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 
@@ -15,73 +15,75 @@ export function HeroVisual() {
   const isNe = language === 'ne';
 
   return (
-    <div className="hero-desk-card" aria-label={isNe ? 'कलेज आईटी सेवा जानकारी' : 'Campus IT Service Information'}>
+    <div className="hero-desk-card" aria-label={isNe ? 'कलेज सम्पर्क तथा सहायता' : 'College Contact and Support'}>
       {/* Top Header */}
       <div className="hero-desk-header">
         <div className="hero-desk-badge">
-          <span className="desk-status-indicator" aria-hidden="true" />
-          <span>{isNe ? 'सेवा सञ्चालनमा छ' : 'Service Active'}</span>
+          <Building2 size={13} aria-hidden="true" />
+          <span>{isNe ? 'कलेज सहायता विवरण' : 'Campus Support Desk'}</span>
         </div>
         <h2 className="hero-desk-title">
-          {isNe ? 'केन्द्रीय आईटी सेवा डेस्क' : 'Central IT Support Desk'}
+          {isNe ? 'आधिकारिक सम्पर्क तथा सहायता' : 'Official Contact & Support'}
         </h2>
         <p className="hero-desk-subtitle">
-          {isNe
-            ? 'सोच कलेज अफ आईटी — मुख्य शैक्षिक भवन'
-            : `${COLLEGE_CONFIG.name} — Main Academic Facility`}
+          {COLLEGE_CONFIG.name}
         </p>
       </div>
 
-      {/* Desk Operating Facts */}
+      {/* Desk Operating Facts from collegeConfig.js */}
       <div className="hero-desk-body">
-        <div className="hero-desk-row">
-          <Clock size={16} className="hero-desk-icon" aria-hidden="true" />
-          <div>
-            <div className="hero-desk-row-label">
-              {isNe ? 'सञ्चालन समय' : 'Operating Hours'}
-            </div>
-            <div className="hero-desk-row-val">
-              {isNe ? 'आइतबार – शुक्रबार: बिहान ७:०० – साँझ ५:००' : 'Sunday – Friday: 7:00 AM – 5:00 PM'}
-            </div>
-          </div>
-        </div>
-
+        {/* Campus Address */}
         <div className="hero-desk-row">
           <MapPin size={16} className="hero-desk-icon" aria-hidden="true" />
           <div>
             <div className="hero-desk-row-label">
-              {isNe ? 'स्थान' : 'Physical Location'}
+              {isNe ? 'कलेज ठेगाना' : 'Campus Address'}
             </div>
             <div className="hero-desk-row-val">
-              {isNe ? 'ब्लक ए, दोस्रो तला (कम्प्युटर ल्याब २ नजिक)' : 'Block A, 2nd Floor (Adjacent to Computer Lab 2)'}
+              {COLLEGE_CONFIG.contact.campusAddress}
             </div>
           </div>
         </div>
 
+        {/* Operating Hours */}
+        <div className="hero-desk-row">
+          <Clock size={16} className="hero-desk-icon" aria-hidden="true" />
+          <div>
+            <div className="hero-desk-row-label">
+              {isNe ? 'कार्यालय समय' : 'Office Hours'}
+            </div>
+            <div className="hero-desk-row-val">
+              {isNe ? COLLEGE_CONFIG.contact.officeHoursNe : COLLEGE_CONFIG.contact.officeHours}
+            </div>
+          </div>
+        </div>
+
+        {/* Official Email */}
         <div className="hero-desk-row">
           <Mail size={16} className="hero-desk-icon" aria-hidden="true" />
           <div>
             <div className="hero-desk-row-label">
-              {isNe ? 'सहयोग इमेल' : 'Desk Email'}
+              {isNe ? 'इमेल सम्पर्क' : 'Configured Email'}
             </div>
             <div className="hero-desk-row-val">
-              <a href="mailto:itdesk@sochcollege.edu.np" className="hero-desk-link">
-                itdesk@sochcollege.edu.np
+              <a href={`mailto:${COLLEGE_CONFIG.contact.email}`} className="hero-desk-link">
+                {COLLEGE_CONFIG.contact.email}
               </a>
             </div>
           </div>
         </div>
 
+        {/* Direct Telephone */}
         <div className="hero-desk-row">
-          <CheckCircle2 size={16} className="hero-desk-icon text-teal" aria-hidden="true" />
+          <Phone size={16} className="hero-desk-icon" aria-hidden="true" />
           <div>
             <div className="hero-desk-row-label">
-              {isNe ? 'प्रक्रिया प्रतिबद्धता' : 'Resolution Commitment'}
+              {isNe ? 'कलेज फोन' : 'Direct Telephone'}
             </div>
             <div className="hero-desk-row-val">
-              {isNe
-                ? '२४ कार्यघन्टाभित्र प्रारम्भिक समीक्षा र प्राविधिक असाइनमेन्ट'
-                : 'Initial triage & technical review within 24 working hours'}
+              <a href={`tel:${COLLEGE_CONFIG.contact.phone}`} className="hero-desk-link">
+                {COLLEGE_CONFIG.contact.phone}
+              </a>
             </div>
           </div>
         </div>

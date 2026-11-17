@@ -74,7 +74,7 @@ export function ResetPasswordPage() {
               <Lock size={26} />
             </div>
 
-            <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
               {isNe ? 'नयाँ पासवर्ड सेट गर्नुहोस्' : 'Set New Password'}
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>

@@ -82,7 +82,7 @@ export function AdminComplaintsPage() {
       {/* Page Title & Stats Strip */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
             {isNe ? 'कलेज उजुरी व्यवस्थापन सूची' : 'Complaints Management Queue'}
           </h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>

@@ -39,7 +39,7 @@ export function NotificationsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--navy-900)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--navy-900)' }}>
             {t('notificationsPage.pageTitle', 'System Notifications & Alerts')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>

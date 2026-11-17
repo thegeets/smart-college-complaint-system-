@@ -69,7 +69,7 @@ export function StaffDashboard() {
             <Briefcase size={14} />
             <span>{t('staffDashboard.deskTag', 'DEPARTMENT RESOLUTION DESK')}</span>
           </div>
-          <h2 style={{ color: '#ffffff', fontSize: '1.4rem', fontWeight: '800' }}>
+          <h2 style={{ color: '#ffffff', fontSize: '1.4rem', fontWeight: '700' }}>
             {currentUser.name}
           </h2>
           <p style={{ color: '#e0f2fe', fontSize: '0.85rem' }}>

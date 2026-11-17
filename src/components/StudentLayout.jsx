@@ -121,7 +121,7 @@ export function StudentLayout() {
                       background: 'var(--sky-600)',
                       color: '#fff',
                       fontSize: '0.7rem',
-                      fontWeight: '800',
+                      fontWeight: '700',
                       borderRadius: '10px',
                       padding: '0.1rem 0.4rem',
                       marginLeft: '0.2rem'
@@ -159,7 +159,7 @@ export function StudentLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '0.7rem',
-                fontWeight: '800'
+                fontWeight: '700'
               }}>
                 {currentUser?.name ? currentUser.name.charAt(0) : 'S'}
               </div>

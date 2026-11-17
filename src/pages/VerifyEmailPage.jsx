@@ -93,7 +93,7 @@ export function VerifyEmailPage() {
               <MailCheck size={28} />
             </div>
 
-            <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
               {isNe ? 'इमेल स्वामित्व प्रमाणीकरण' : 'Verify Email Ownership'}
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>

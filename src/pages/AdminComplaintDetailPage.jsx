@@ -135,7 +135,7 @@ export function AdminComplaintDetailPage() {
     return (
       <div className="card" style={{ textAlign: 'center', padding: 'var(--space-12) var(--space-6)' }}>
         <AlertCircle size={40} color="var(--color-warning)" style={{ margin: '0 auto var(--space-3)' }} />
-        <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
           {isNe ? 'उजुरी फेला परेन' : 'Complaint Record Not Found'}
         </h2>
         <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem', marginBottom: 'var(--space-4)' }}>
@@ -174,14 +174,14 @@ export function AdminComplaintDetailPage() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--space-4)', flexWrap: 'wrap', marginBottom: 'var(--space-3)' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
-              <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '1.25rem', color: 'var(--color-primary)' }}>
+              <span style={{ fontFamily: 'monospace', fontWeight: '700', fontSize: '1.25rem', color: 'var(--color-primary)' }}>
                 {refCode}
               </span>
               <StatusBadge status={complaint.status} />
               <PriorityBadge priority={complaint.priority} />
             </div>
 
-            <h1 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-2)' }}>
+            <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-2)' }}>
               {complaint.title}
             </h1>
 
@@ -303,7 +303,7 @@ export function AdminComplaintDetailPage() {
         
         {/* Card A: Update Status */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Clock size={16} color="#15365D" />
             <span>{isNe ? 'स्थिति अद्यावधिक (Status Transition)' : 'Transition Complaint Status'}</span>
           </h2>
@@ -360,7 +360,7 @@ export function AdminComplaintDetailPage() {
 
         {/* Card B: Post Official Student-Visible Response */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <MessageSquare size={16} color="#0F766E" />
             <span>{isNe ? 'विद्यार्थीका लागि आधिकारिक जवाफ' : 'Official Student-Visible Response'}</span>
           </h2>
@@ -401,7 +401,7 @@ export function AdminComplaintDetailPage() {
 
         {/* Card C: Add Private Internal Note (Admin Only) */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Lock size={16} color="#B45309" />
             <span>{isNe ? 'आन्तरिक टिप्पणी (प्रशासक मात्र)' : 'Private Internal Note (Admins Only)'}</span>
           </h2>
@@ -485,7 +485,7 @@ export function AdminComplaintDetailPage() {
 
       {/* Audit History Timeline */}
       <div className="card" style={{ padding: 'var(--space-6)' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Clock size={16} color="#15365D" />
           <span>{isNe ? 'सम्पूर्ण कार्यप्रगति अडिट इतिहास' : 'Complete Audit Timeline'}</span>
         </h3>

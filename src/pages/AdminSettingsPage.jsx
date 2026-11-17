@@ -102,7 +102,7 @@ export function AdminSettingsPage() {
     <div>
       {/* Title */}
       <div style={{ marginBottom: 'var(--space-6)' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
           {isNe ? 'प्रणाली सेटिङ्स तथा सुरक्षा' : 'Portal Parameters & Security Settings'}
         </h1>
         <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>

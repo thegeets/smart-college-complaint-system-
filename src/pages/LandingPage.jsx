@@ -304,7 +304,7 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="process-steps-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 'var(--space-5)' }}>
+          <div className="process-steps-grid">
 
             {/* Step 1 */}
             <div className="process-step-card">
@@ -312,7 +312,7 @@ export function LandingPage() {
               <div className="step-icon-wrap">
                 <FileText size={20} color="#15365B" />
               </div>
-              <div style={{ backgroundColor: '#EEF2FF', color: '#4338CA', border: '1px solid #C7D2FE', display: 'inline-block', fontSize: '0.6875rem', fontWeight: '700', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div className="step-status-chip status-submitted">
                 {isNe ? 'चरण १: दर्ता' : 'Status: Submitted'}
               </div>
               <h3 className="step-title">{isNe ? '१. प्रमाणीकृत दर्ता' : '1. Authenticated Submission'}</h3>
@@ -329,7 +329,7 @@ export function LandingPage() {
               <div className="step-icon-wrap">
                 <Search size={20} color="#D97706" />
               </div>
-              <div style={{ backgroundColor: '#FFFBEB', color: '#B45309', border: '1px solid #FDE68A', display: 'inline-block', fontSize: '0.6875rem', fontWeight: '700', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div className="step-status-chip status-review">
                 {isNe ? 'चरण २: समीक्षा' : 'Status: Under Review'}
               </div>
               <h3 className="step-title">{isNe ? '२. प्रशासनिक समीक्षा' : '2. Desk Review & Triage'}</h3>
@@ -346,7 +346,7 @@ export function LandingPage() {
               <div className="step-icon-wrap">
                 <Wrench size={20} color="#0284C7" />
               </div>
-              <div style={{ backgroundColor: '#F0F9FF', color: '#0369A1', border: '1px solid #BAE6FD', display: 'inline-block', fontSize: '0.6875rem', fontWeight: '700', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div className="step-status-chip status-progress">
                 {isNe ? 'चरण ३: प्रगतिमा' : 'Status: In Progress'}
               </div>
               <h3 className="step-title">{isNe ? '३. प्राविधिक मर्मत कार्य' : '3. On-Site Inspection & Repair'}</h3>
@@ -363,7 +363,7 @@ export function LandingPage() {
               <div className="step-icon-wrap">
                 <CheckCircle2 size={20} color="#15803D" />
               </div>
-              <div style={{ backgroundColor: '#F0FDF4', color: '#15803D', border: '1px solid #BBF7D0', display: 'inline-block', fontSize: '0.6875rem', fontWeight: '700', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div className="step-status-chip status-resolved">
                 {isNe ? 'चरण ४: समाधान' : 'Status: Resolved'}
               </div>
               <h3 className="step-title">{isNe ? '४. समाधान तथा जवाफ' : '4. Resolution & Official Reply'}</h3>

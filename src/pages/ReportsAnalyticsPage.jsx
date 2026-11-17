@@ -63,7 +63,7 @@ export function ReportsAnalyticsPage() {
       {/* Top Header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
             {isNe ? 'उजुरी प्रतिवेदन तथा तथ्याङ्क' : 'Grievance Reports & Analytics'}
           </h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
@@ -117,7 +117,7 @@ export function ReportsAnalyticsPage() {
           <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
             {isNe ? 'कुल दर्ता उजुरी' : 'Total Filed'}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-heading)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-heading)' }}>
             {total}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -129,7 +129,7 @@ export function ReportsAnalyticsPage() {
           <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
             {isNe ? 'समीक्षा बाँकी' : 'Pending Review'}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-warning)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-warning)' }}>
             {pending}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -141,7 +141,7 @@ export function ReportsAnalyticsPage() {
           <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
             {isNe ? 'कार्यान्वयनमा' : 'In Progress'}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-teal)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-teal)' }}>
             {inProgress}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -153,7 +153,7 @@ export function ReportsAnalyticsPage() {
           <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
             {isNe ? 'समाधान दर' : 'Resolution Rate'}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-success)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-success)' }}>
             {resolutionRate}%
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -164,7 +164,7 @@ export function ReportsAnalyticsPage() {
 
       {/* Category Breakdown Table */}
       <div className="card" style={{ padding: 'var(--space-6)' }}>
-        <h2 style={{ fontSize: '1.125rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h2 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <BarChart3 size={18} color="#0F766E" />
           <span>{isNe ? 'आईटी विधागत तथ्याङ्क' : 'Complaints by IT Category'}</span>
         </h2>

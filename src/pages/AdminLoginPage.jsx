@@ -125,7 +125,7 @@ export function AdminLoginPage() {
               }}>
                 <Lock size={22} />
               </div>
-              <h1 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
+              <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
                 {isNe ? 'प्रशासनिक साइन इन' : 'Administration sign in'}
               </h1>
               <p style={{ fontSize: '0.8125rem', color: 'var(--color-muted)', margin: 0 }}>

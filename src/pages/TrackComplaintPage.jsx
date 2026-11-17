@@ -144,7 +144,7 @@ export function TrackComplaintPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--space-3)', flexWrap: 'wrap', marginBottom: 'var(--space-3)' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)', flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-primary)' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-primary)' }}>
                         {trackedComplaint.reference}
                       </span>
                       <button
@@ -162,7 +162,7 @@ export function TrackComplaintPage() {
                       </button>
                       <StatusBadge status={trackedComplaint.status} />
                     </div>
-                    <h1 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-heading)', margin: 0 }}>
+                    <h1 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0 }}>
                       {trackedComplaint.title}
                     </h1>
 
@@ -321,7 +321,7 @@ export function TrackComplaintPage() {
                   <Search size={24} />
                 </div>
 
-                <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
+                <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
                   {isNe ? 'गुनासोको अवस्था' : 'Track Complaint Status'}
                 </h1>
 

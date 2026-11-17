@@ -168,25 +168,26 @@ export function MyComplaintsPage() {
 
           {/* Welcome Header */}
           <div style={{
-            background: 'linear-gradient(135deg, #15365B 0%, #0F2844 100%)',
-            color: '#FFFFFF',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid var(--color-border)',
+            borderRadius: '8px',
             padding: '24px 28px',
-            borderRadius: '12px',
             marginBottom: 'var(--space-6)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '16px',
-            boxShadow: '0 4px 12px rgba(21, 54, 91, 0.12)'
+            boxShadow: 'var(--shadow-xs)'
           }}>
             <div>
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                backgroundColor: 'rgba(13, 129, 120, 0.25)',
-                color: '#5EEAD4',
+                backgroundColor: 'var(--color-teal-subtle)',
+                color: 'var(--color-teal)',
+                border: '1px solid var(--color-teal-border)',
                 padding: '3px 10px',
                 borderRadius: '4px',
                 fontSize: '0.75rem',
@@ -197,11 +198,11 @@ export function MyComplaintsPage() {
                 <FileText size={12} />
                 <span>{isNe ? 'विद्यार्थी गुनासो व्यवस्थापन' : 'STUDENT COMPLAINT DASHBOARD'}</span>
               </div>
-              <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px' }}>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)', margin: '0 0 4px' }}>
                 {isNe ? 'नमस्ते,' : 'Welcome back,'} {studentUser?.name}
               </h1>
-              <p style={{ fontSize: '0.875rem', color: '#CBD5E1', margin: 0 }}>
-                {isNe ? 'रोल नं:' : 'Student ID:'} <strong>{studentUser?.studentId}</strong> • {studentUser?.program || 'BSc CSIT'} ({studentUser?.semester})
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
+                {isNe ? 'रोल नं:' : 'Student ID:'} <strong style={{ color: 'var(--color-heading)' }}>{studentUser?.studentId}</strong> • {studentUser?.program || 'BSc CSIT'} ({studentUser?.semester})
               </p>
             </div>
 
@@ -210,14 +211,13 @@ export function MyComplaintsPage() {
                 type="button"
                 onClick={() => setShowClaimModal(true)}
                 className="btn btn-secondary btn-md"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#FFFFFF', borderColor: 'rgba(255, 255, 255, 0.2)' }}
                 title="Claim previous guest complaint with secret"
               >
                 <Link2 size={16} />
                 <span>{isNe ? 'पुरानो उजुरी लिंक गर्नुहोस्' : 'Link Old Complaint'}</span>
               </button>
 
-              <Link to="/submit" className="btn btn-primary btn-md" style={{ backgroundColor: '#0D8178', borderColor: '#0D8178' }}>
+              <Link to="/submit" className="btn btn-primary btn-md">
                 <PlusCircle size={16} />
                 <span>{isNe ? 'नयाँ उजुरी दर्ता गर्नुहोस्' : 'Submit a Complaint'}</span>
               </Link>
@@ -262,7 +262,7 @@ export function MyComplaintsPage() {
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'कुल दर्ता उजुरी' : 'Total Complaints'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '800', color: '#15365B' }}>
+              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#15365B' }}>
                 {total}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -274,7 +274,7 @@ export function MyComplaintsPage() {
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'समीक्षा बाँकी' : 'Pending Review'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '800', color: '#D97706' }}>
+              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#D97706' }}>
                 {pendingCount}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -286,7 +286,7 @@ export function MyComplaintsPage() {
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'कार्यप्रगतिमा' : 'In Progress'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '800', color: '#0D8178' }}>
+              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#0D8178' }}>
                 {inProgressCount}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -298,7 +298,7 @@ export function MyComplaintsPage() {
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'समाधान सम्पन्न' : 'Resolved'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '800', color: '#059669' }}>
+              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#059669' }}>
                 {resolvedCount}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -409,7 +409,7 @@ export function MyComplaintsPage() {
               }}>
                 <FileText size={28} />
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 6px' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 6px' }}>
                 {isNe ? 'कुनै उजुरी फेला परेन' : 'No Complaints Found'}
               </h3>
               <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', maxWidth: '420px', margin: '0 auto 20px', lineHeight: '1.5' }}>
@@ -549,7 +549,7 @@ export function MyComplaintsPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Link2 size={20} color="#0D8178" />
-                    <h3 id="claim-modal-title" style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: '#15365B' }}>
+                    <h3 id="claim-modal-title" style={{ margin: 0, fontSize: '1.15rem', fontWeight: '700', color: '#15365B' }}>
                       {isNe ? 'पुरानो उजुरी खातामा लिंक गर्नुहोस्' : 'Link Previous Guest Complaint'}
                     </h3>
                   </div>
