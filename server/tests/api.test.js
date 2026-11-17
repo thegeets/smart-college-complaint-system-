@@ -9,6 +9,8 @@ import { Admin } from '../models/Admin.js';
 import { Complaint } from '../models/Complaint.js';
 import { Student } from '../models/Student.js';
 import { hashPassword } from '../utils/crypto.js';
+import { getSafeRedirectUrl } from '../../src/utils/url.js';
+import { setEmailTransporter } from '../utils/emailService.js';
 
 test('Smart College Complaint System API Integration Tests', async (t) => {
   let app;
@@ -490,7 +492,6 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
   let studentAComplaintRef;
 
   let studentBSessionCookie;
-  let studentBCsrfToken;
   let studentBId;
 
   // 22. Student Registration: Validation & Success
@@ -690,7 +691,6 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.ok(cookiesB);
     studentBSessionCookie = cookiesB.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
     assert.ok(studentBSessionCookie);
-    studentBCsrfToken = verifyB.body.csrfToken;
 
     // 27b. Student B attempts to read Student A complaint
     const forbiddenDetailRes = await request(app)
@@ -804,5 +804,236 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
       .set('Cookie', studentASessionCookie);
 
     assert.equal(afterLogout.status, 401);
+  });
+
+  // 31. Administrator Profile Management & Email Rotation
+  await t.test('PATCH /api/v1/admin/auth/profile updates administrator name and email with validation', async () => {
+    // 31a. Re-login as administrator with updated password
+    const loginAdminRes = await request(app)
+      .post('/api/v1/admin/auth/login')
+      .send({
+        email: TEST_ADMIN.email,
+        password: 'BrandNewSecurePass123!',
+      });
+
+    assert.equal(loginAdminRes.status, 200);
+    assert.equal(loginAdminRes.body.success, true);
+    const adminCookie = loginAdminRes.headers['set-cookie'].find((c) => c.startsWith('sccs_admin_sid'));
+    const adminCsrf = loginAdminRes.body.csrfToken;
+
+    // 31b. Update profile name and email
+    const updatedEmail = 'updated.admin@sochcollege.edu.np';
+    const profileRes = await request(app)
+      .patch('/api/v1/admin/auth/profile')
+      .set('Cookie', adminCookie)
+      .set('x-csrf-token', adminCsrf)
+      .send({
+        name: 'Er. Pradeep Karki, Head of IT',
+        email: updatedEmail,
+        title: 'Chief IT Administrator',
+      });
+
+    assert.equal(profileRes.status, 200);
+    assert.equal(profileRes.body.success, true);
+    assert.equal(profileRes.body.admin.email, updatedEmail);
+    assert.equal(profileRes.body.admin.name, 'Er. Pradeep Karki, Head of IT');
+
+    // 31c. Verify in session
+    const meRes = await request(app)
+      .get('/api/v1/admin/auth/me')
+      .set('Cookie', adminCookie);
+    assert.equal(meRes.status, 200);
+    assert.equal(meRes.body.admin.email, updatedEmail);
+
+    // Clean up updated admin email
+    await Admin.deleteMany({ email: updatedEmail });
+  });
+
+  // 32. Preservation of Intended Submission Route and Category Query Parameters
+  await t.test('Preservation of intended submission route and category after student login', () => {
+    const rawTarget = '/submit?category=Computer%20Lab%20%2F%20Hardware&priority=High';
+    const safeUrl = getSafeRedirectUrl(rawTarget, '/dashboard');
+    assert.equal(safeUrl, '/submit?category=Computer%20Lab%20%2F%20Hardware&priority=High');
+
+    const detailTarget = '/dashboard/complaints/CMP-2024-001';
+    const safeDetail = getSafeRedirectUrl(detailTarget, '/dashboard');
+    assert.equal(safeDetail, '/dashboard/complaints/CMP-2024-001');
+  });
+
+  // 33. Safe Rejection of External Return Destinations (Open Redirect Protection)
+  await t.test('Safe rejection of external return destinations and malicious schemes', () => {
+    // 33a. External absolute URLs
+    assert.equal(getSafeRedirectUrl('https://evil-hacker.com/steal-creds', '/dashboard'), '/dashboard');
+    assert.equal(getSafeRedirectUrl('http://attacker.example.org', '/dashboard'), '/dashboard');
+
+    // 33b. Protocol-relative URLs
+    assert.equal(getSafeRedirectUrl('//evil-hacker.com', '/dashboard'), '/dashboard');
+
+    // 33c. Backslash bypass attempts
+    assert.equal(getSafeRedirectUrl('/\\evil-hacker.com', '/dashboard'), '/dashboard');
+
+    // 33d. Javascript pseudo-protocol
+    assert.equal(getSafeRedirectUrl('javascript:alert(document.cookie)', '/dashboard'), '/dashboard');
+
+    // 33e. Empty or non-string fallbacks
+    assert.equal(getSafeRedirectUrl('', '/dashboard'), '/dashboard');
+    assert.equal(getSafeRedirectUrl(null, '/dashboard'), '/dashboard');
+    assert.equal(getSafeRedirectUrl(undefined, '/dashboard'), '/dashboard');
+  });
+
+  // 34. Production Email Safety: Token Exposure & Blocker Reporting
+  await t.test('Production Email Safety: Rejects unconfigured email dispatch and never returns verificationToken in production', async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalSmtpHost = process.env.SMTP_HOST;
+    const originalSmtpPort = process.env.SMTP_PORT;
+    const originalSmtpUser = process.env.SMTP_USER;
+    const originalSmtpPass = process.env.SMTP_PASS;
+
+    try {
+      // 34a. Under production with NO email service configured, registration reports blocker with 503
+      process.env.NODE_ENV = 'production';
+      delete process.env.SMTP_HOST;
+      delete process.env.SMTP_PORT;
+      delete process.env.SMTP_USER;
+      delete process.env.SMTP_PASS;
+      setEmailTransporter(null);
+
+      const unconfiguredRes = await request(app)
+        .post('/api/v1/student/auth/register')
+        .send({
+          name: 'Prod Student',
+          studentId: 'SOCH-CSIT-2024-PROD',
+          email: 'prod.student@sochcollege.edu.np',
+          password: 'ProdStudentPass123!',
+          semester: '1st Semester',
+        });
+
+      assert.equal(unconfiguredRes.status, 503);
+      assert.equal(unconfiguredRes.body.code, 'EMAIL_SERVICE_NOT_CONFIGURED');
+      assert.equal(unconfiguredRes.body.verificationToken, undefined, 'Verification token must NEVER be returned in production');
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      if (originalSmtpHost) process.env.SMTP_HOST = originalSmtpHost; else delete process.env.SMTP_HOST;
+      if (originalSmtpPort) process.env.SMTP_PORT = originalSmtpPort; else delete process.env.SMTP_PORT;
+      if (originalSmtpUser) process.env.SMTP_USER = originalSmtpUser; else delete process.env.SMTP_USER;
+      if (originalSmtpPass) process.env.SMTP_PASS = originalSmtpPass; else delete process.env.SMTP_PASS;
+      setEmailTransporter(null);
+    }
+  });
+
+  // 35. Outbound Email Delivery: Mock Transport Acceptance & Verification/Reset Flows
+  await t.test('Email Service: Mock transport records acceptance for verification and password reset without leaking secrets', async () => {
+    const sentMessages = [];
+    const mockTransporter = {
+      sendMail: async (mailOptions) => {
+        sentMessages.push(mailOptions);
+        return {
+          messageId: `<mock-${Date.now()}@sochcollege.edu.np>`,
+          response: '250 2.0.0 OK: message queued 12345',
+        };
+      },
+    };
+
+    setEmailTransporter(mockTransporter);
+    const testEmail = 'email.test.student@sochcollege.edu.np';
+
+    try {
+      // 35a. Registration dispatches verification email and reports ACCEPTED status
+      const regRes = await request(app)
+        .post('/api/v1/student/auth/register')
+        .send({
+          name: 'Email Test Student',
+          studentId: 'SOCH-CSIT-EMAIL-01',
+          email: testEmail,
+          password: 'Password123!',
+          semester: '2nd Semester',
+        });
+
+      assert.equal(regRes.status, 201);
+      assert.equal(regRes.body.success, true);
+      assert.equal(regRes.body.emailDelivery?.status, 'ACCEPTED');
+      assert.ok(regRes.body.emailDelivery?.messageId);
+      assert.equal(sentMessages.length, 1);
+      assert.equal(sentMessages[0].to, testEmail);
+      assert.match(sentMessages[0].subject, /Verify your email/);
+
+      // 35b. Resend verification uses transport
+      const resendRes = await request(app)
+        .post('/api/v1/student/auth/resend-verification')
+        .send({ email: testEmail });
+
+      assert.equal(resendRes.status, 200);
+      assert.equal(resendRes.body.emailDelivery?.status, 'ACCEPTED');
+      assert.equal(sentMessages.length, 2);
+
+      // 35c. Forgot password dispatches reset code via transport
+      const forgotRes = await request(app)
+        .post('/api/v1/student/auth/forgot-password')
+        .send({ email: testEmail });
+
+      assert.equal(forgotRes.status, 200);
+      assert.equal(forgotRes.body.emailDelivery?.status, 'ACCEPTED');
+      assert.equal(sentMessages.length, 3);
+      assert.match(sentMessages[2].subject, /Password Reset Code/);
+    } finally {
+      await Student.deleteMany({ email: testEmail });
+      setEmailTransporter(null);
+    }
+  });
+
+  // 36. Outbound Email Delivery: Mock Transport Failure Handling
+  await t.test('Email Service: Handles SMTP transport failure honestly without crashing', async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const failingTransporter = {
+      sendMail: async () => {
+        throw new Error('Connection refused by mail.sochcollege.edu.np:587');
+      },
+    };
+
+    setEmailTransporter(failingTransporter);
+    const failEmail = 'fail.test.student@sochcollege.edu.np';
+
+    try {
+      // 36a. Under production, sending failure returns HTTP 502 Bad Gateway and rolls back student
+      process.env.NODE_ENV = 'production';
+
+      const prodFailRes = await request(app)
+        .post('/api/v1/student/auth/register')
+        .send({
+          name: 'Fail Prod Student',
+          studentId: 'SOCH-CSIT-FAIL-PROD',
+          email: failEmail,
+          password: 'Password123!',
+          semester: '1st Semester',
+        });
+
+      assert.equal(prodFailRes.status, 502);
+      assert.equal(prodFailRes.body.code, 'EMAIL_SEND_FAILED');
+
+      // Verify orphaned unverified student was rolled back
+      const orphaned = await Student.findOne({ email: failEmail });
+      assert.equal(orphaned, null, 'Orphaned student must be cleaned up on delivery failure in production');
+
+      // 36b. Under development, failure is reported in emailDelivery status without crashing
+      process.env.NODE_ENV = 'development';
+
+      const devFailRes = await request(app)
+        .post('/api/v1/student/auth/register')
+        .send({
+          name: 'Fail Dev Student',
+          studentId: 'SOCH-CSIT-FAIL-DEV',
+          email: failEmail,
+          password: 'Password123!',
+          semester: '1st Semester',
+        });
+
+      assert.equal(devFailRes.status, 201);
+      assert.equal(devFailRes.body.emailDelivery?.status, 'SEND_FAILED');
+      assert.ok(devFailRes.body.emailDelivery?.error);
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      await Student.deleteMany({ email: failEmail });
+      setEmailTransporter(null);
+    }
   });
 });

@@ -1,9 +1,10 @@
 import express from 'express';
 import { Student, ALLOWED_SEMESTERS } from '../models/Student.js';
-import { hashPassword, verifyPassword, generateNumericToken, generateRandomToken } from '../utils/crypto.js';
+import { hashPassword, verifyPassword, generateNumericToken } from '../utils/crypto.js';
 import { requireStudentAuth } from '../middleware/auth.js';
 import { loginRateLimiter } from '../middleware/rateLimiter.js';
 import { logger } from '../utils/logger.js';
+import { isEmailConfigured, sendVerificationEmail, sendPasswordResetEmail } from '../utils/emailService.js';
 
 const router = express.Router();
 
@@ -50,6 +51,17 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const hasEmail = isEmailConfigured();
+
+    if (isProd && !hasEmail) {
+      return res.status(503).json({
+        success: false,
+        code: 'EMAIL_SERVICE_NOT_CONFIGURED',
+        message: 'Automated email delivery is not configured on this server. Registration cannot dispatch verification codes. Please contact campus IT administration.',
+      });
+    }
+
     const passwordHash = await hashPassword(password);
     const verificationToken = generateNumericToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -70,14 +82,52 @@ router.post('/register', async (req, res, next) => {
 
     await student.save();
 
-    logger.info(`[Student Registration] New student registered: ${student.email} (${student.studentId}). Verification token: ${verificationToken}`);
+    let emailDelivery = null;
+    if (hasEmail) {
+      const sendResult = await sendVerificationEmail({
+        to: cleanEmail,
+        studentName: student.name,
+        token: verificationToken,
+      });
 
-    return res.status(201).json({
+      if (!sendResult.success) {
+        if (isProd) {
+          await Student.findByIdAndDelete(student._id);
+          return res.status(502).json({
+            success: false,
+            code: 'EMAIL_SEND_FAILED',
+            message: 'Campus email service failed to accept the verification email. Please try again later or contact IT support.',
+          });
+        }
+        logger.warn(`[Student Registration] Verification email could not be sent to ${cleanEmail}: ${sendResult.error}`);
+        emailDelivery = { status: 'SEND_FAILED', error: sendResult.error };
+      } else {
+        emailDelivery = { status: 'ACCEPTED', messageId: sendResult.messageId };
+      }
+    }
+
+    if (isProd) {
+      logger.info(`[Student Registration] New student registered: ${student.email} (${student.studentId}). Verification code dispatched.`);
+    } else {
+      logger.info(`[Student Registration] New student registered: ${student.email} (${student.studentId}). Verification code generated.`);
+    }
+
+    const responsePayload = {
       success: true,
       message: 'Student account created successfully. Please verify your email to activate full complaint services.',
       student: student.toSafeObject(),
-      verificationToken, // Provided so students and automated tests can complete verification immediately
-    });
+    };
+
+    if (emailDelivery) {
+      responsePayload.emailDelivery = emailDelivery;
+    }
+
+    // In production, NEVER expose verification tokens in API response
+    if (!isProd) {
+      responsePayload.verificationToken = verificationToken;
+    }
+
+    return res.status(201).json(responsePayload);
   } catch (error) {
     next(error);
   }
@@ -167,18 +217,66 @@ router.post('/resend-verification', async (req, res, next) => {
       });
     }
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const hasEmail = isEmailConfigured();
+
+    if (isProd && !hasEmail) {
+      return res.status(503).json({
+        success: false,
+        code: 'EMAIL_SERVICE_NOT_CONFIGURED',
+        message: 'Automated email delivery is not configured on this server. Verification codes cannot be dispatched. Please contact campus IT administration.',
+      });
+    }
+
     const newToken = generateNumericToken();
     student.emailVerificationToken = newToken;
     student.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    let emailDelivery = null;
+    if (hasEmail) {
+      const sendResult = await sendVerificationEmail({
+        to: student.email,
+        studentName: student.name,
+        token: newToken,
+      });
+
+      if (!sendResult.success) {
+        if (isProd) {
+          return res.status(502).json({
+            success: false,
+            code: 'EMAIL_SEND_FAILED',
+            message: 'Campus email service failed to accept the verification email. Please try again later or contact IT support.',
+          });
+        }
+        logger.warn(`[Resend Verification] Verification email could not be sent to ${student.email}: ${sendResult.error}`);
+        emailDelivery = { status: 'SEND_FAILED', error: sendResult.error };
+      } else {
+        emailDelivery = { status: 'ACCEPTED', messageId: sendResult.messageId };
+      }
+    }
+
     await student.save();
 
-    logger.info(`[Resend Verification] Token for ${student.email}: ${newToken}`);
+    if (isProd) {
+      logger.info(`[Resend Verification] Verification code dispatched to ${student.email}`);
+    } else {
+      logger.info(`[Resend Verification] Verification code generated for ${student.email}`);
+    }
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       message: 'New verification code generated and sent.',
-      verificationToken: newToken,
-    });
+    };
+
+    if (emailDelivery) {
+      responsePayload.emailDelivery = emailDelivery;
+    }
+
+    if (!isProd) {
+      responsePayload.verificationToken = newToken;
+    }
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     next(error);
   }
@@ -338,18 +436,66 @@ router.post('/forgot-password', async (req, res, next) => {
       });
     }
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const hasEmail = isEmailConfigured();
+
+    if (isProd && !hasEmail) {
+      return res.status(503).json({
+        success: false,
+        code: 'EMAIL_SERVICE_NOT_CONFIGURED',
+        message: 'Automated email delivery is not configured on this server. Password reset codes cannot be dispatched. Please contact campus IT administration.',
+      });
+    }
+
     const resetToken = generateNumericToken();
     student.resetPasswordToken = resetToken;
     student.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    let emailDelivery = null;
+    if (hasEmail) {
+      const sendResult = await sendPasswordResetEmail({
+        to: student.email,
+        studentName: student.name,
+        token: resetToken,
+      });
+
+      if (!sendResult.success) {
+        if (isProd) {
+          return res.status(502).json({
+            success: false,
+            code: 'EMAIL_SEND_FAILED',
+            message: 'Campus email service failed to accept the password reset email. Please try again later or contact IT support.',
+          });
+        }
+        logger.warn(`[Forgot Password] Password reset email could not be sent to ${student.email}: ${sendResult.error}`);
+        emailDelivery = { status: 'SEND_FAILED', error: sendResult.error };
+      } else {
+        emailDelivery = { status: 'ACCEPTED', messageId: sendResult.messageId };
+      }
+    }
+
     await student.save();
 
-    logger.info(`[Forgot Password] Reset token for ${student.email}: ${resetToken}`);
+    if (isProd) {
+      logger.info(`[Forgot Password] Reset instructions dispatched to ${student.email}`);
+    } else {
+      logger.info(`[Forgot Password] Reset token generated for ${student.email}`);
+    }
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
-      message: 'Password reset code generated.',
-      resetToken, // Returned for dev/testing
-    });
+      message: 'Password reset code generated and dispatched.',
+    };
+
+    if (emailDelivery) {
+      responsePayload.emailDelivery = emailDelivery;
+    }
+
+    if (!isProd) {
+      responsePayload.resetToken = resetToken;
+    }
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     next(error);
   }

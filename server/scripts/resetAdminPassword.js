@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import readline from 'readline';
 import { Writable } from 'stream';
 import { connectDB, disconnectDB } from '../config/db.js';

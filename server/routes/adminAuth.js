@@ -89,7 +89,7 @@ router.post('/login', loginRateLimiter, async (req, res, next) => {
  */
 router.post('/logout', (req, res) => {
   if (req.session) {
-    req.session.destroy((err) => {
+    req.session.destroy((_err) => {
       res.clearCookie('sccs_admin_sid', {
         path: '/',
         httpOnly: true,
@@ -118,6 +118,68 @@ router.get('/me', requireAdminAuth, (req, res) => {
     admin: req.admin.toSafeObject(),
     csrfToken: req.session.csrfToken,
   });
+});
+
+/**
+ * PATCH /api/v1/admin/auth/profile
+ * Updates administrator name, email, and title.
+ */
+router.patch('/profile', requireAdminAuth, verifyCsrfToken, async (req, res, next) => {
+  try {
+    const { name, email, title } = req.body || {};
+
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_NAME',
+        message: 'Name must be at least 2 characters.',
+      });
+    }
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_EMAIL',
+        message: 'Valid email address is required.',
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_EMAIL',
+        message: 'Please provide a valid email format.',
+      });
+    }
+
+    // Check if new email is in use by another admin
+    const existing = await Admin.findOne({ email: cleanEmail, _id: { $ne: req.admin._id } });
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        code: 'EMAIL_ALREADY_EXISTS',
+        message: 'This email is already in use by another administrator.',
+      });
+    }
+
+    const admin = await Admin.findById(req.admin._id);
+    admin.name = name.trim();
+    admin.email = cleanEmail;
+    if (title && typeof title === 'string') {
+      admin.title = title.trim();
+    }
+    await admin.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Administrator profile updated successfully.',
+      admin: admin.toSafeObject(),
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
