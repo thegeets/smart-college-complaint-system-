@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { StatusBadge } from '../components/StatusBadge';
+import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
   PlusCircle,
   FileText,
@@ -11,7 +12,6 @@ import {
   RefreshCw,
   ExternalLink,
   AlertCircle,
-  Sparkles,
   Link2,
   X
 } from 'lucide-react';
@@ -33,7 +33,7 @@ export function MyComplaintsPage() {
   // Guard: if not logged in, redirect to login
   useEffect(() => {
     if (!isCheckingStudentSession && !isStudentLoggedIn) {
-      navigate('/login?redirect=/student/complaints', { replace: true });
+      navigate('/login?redirect=/dashboard', { replace: true });
     }
   }, [isCheckingStudentSession, isStudentLoggedIn, navigate]);
 
@@ -93,10 +93,31 @@ export function MyComplaintsPage() {
   }, [fetchStudentComplaints, selectedStatus, selectedCategory, searchQuery]);
 
   useEffect(() => {
+    let isMounted = true;
     if (isStudentLoggedIn) {
-      loadComplaints();
+      fetchStudentComplaints({
+        status: selectedStatus,
+        category: selectedCategory,
+        search: searchQuery,
+      })
+        .then((data) => {
+          if (isMounted) {
+            setComplaints(data);
+            setIsLoading(false);
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            console.error('Failed to load student complaints:', err);
+            setErrorMsg(err.message || 'Failed to load your complaints.');
+            setIsLoading(false);
+          }
+        });
     }
-  }, [isStudentLoggedIn, loadComplaints]);
+    return () => {
+      isMounted = false;
+    };
+  }, [isStudentLoggedIn, fetchStudentComplaints, selectedStatus, selectedCategory, searchQuery]);
 
   const handleClaimLegacy = async (e) => {
     e.preventDefault();
@@ -144,7 +165,7 @@ export function MyComplaintsPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-8) var(--space-4)' }}>
         <div className="container">
-          
+
           {/* Welcome Header */}
           <div style={{
             background: 'linear-gradient(135deg, #15365B 0%, #0F2844 100%)',
@@ -173,7 +194,7 @@ export function MyComplaintsPage() {
                 letterSpacing: '0.04em',
                 marginBottom: '8px'
               }}>
-                <Sparkles size={12} />
+                <FileText size={12} />
                 <span>{isNe ? 'विद्यार्थी गुनासो व्यवस्थापन' : 'STUDENT COMPLAINT DASHBOARD'}</span>
               </div>
               <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px' }}>
@@ -289,7 +310,7 @@ export function MyComplaintsPage() {
           {/* Filter Bar */}
           <div className="card" style={{ padding: '16px 20px', marginBottom: 'var(--space-6)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-              
+
               {/* Search input */}
               <div style={{ flex: '1 1 240px', minWidth: '0', position: 'relative' }}>
                 <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
@@ -303,13 +324,29 @@ export function MyComplaintsPage() {
                 />
               </div>
 
-              {/* Status Select */}
+              {/* Category & Status Selects */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <select
+                  className="form-select"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  style={{ width: 'auto', minWidth: '150px' }}
+                  aria-label={isNe ? 'विधा अनुसार फिल्टर गर्नुहोस्' : 'Filter by category'}
+                >
+                  <option value="All">{isNe ? 'सबै विधा' : 'All Categories'}</option>
+                  {COLLEGE_CONFIG.categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {isNe ? cat.nameNe : cat.name}
+                    </option>
+                  ))}
+                </select>
+
                 <select
                   className="form-select"
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   style={{ width: 'auto', minWidth: '130px' }}
+                  aria-label={isNe ? 'स्थिति अनुसार फिल्टर गर्नुहोस्' : 'Filter by status'}
                 >
                   <option value="All">{isNe ? 'सबै स्थिति' : 'All Statuses'}</option>
                   <option value="Submitted">{isNe ? 'दर्ता (Submitted)' : 'Submitted'}</option>
@@ -460,7 +497,7 @@ export function MyComplaintsPage() {
                     </div>
 
                     <h4 className="complaint-card-title">
-                      <Link 
+                      <Link
                         to={`/student/complaints/${encodeURIComponent(c.reference)}`}
                         className="complaint-card-title-link"
                       >
@@ -496,13 +533,13 @@ export function MyComplaintsPage() {
 
           {/* Claim Legacy Complaint Modal */}
           {showClaimModal && (
-            <div 
+            <div
               className="modal-backdrop"
               onClick={() => setShowClaimModal(false)}
               aria-hidden="true"
             >
-              <div 
-                className="card modal-dialog" 
+              <div
+                className="card modal-dialog"
                 style={{ maxWidth: '480px', width: '100%', padding: '24px', position: 'relative' }}
                 onClick={(e) => e.stopPropagation()}
                 role="dialog"
@@ -586,20 +623,6 @@ export function MyComplaintsPage() {
                       className="btn btn-secondary btn-sm"
                       disabled={isClaiming}
                     >
-                      {isNe ? 'रद्द गर्नुहोस्' : 'Cancel'}
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary btn-sm"
-                      disabled={isClaiming}
-                    >
-                      {isClaiming ? (isNe ? 'लिंक गरिँदैछ...' : 'Linking...') : (isNe ? 'खातामा जोड्नुहोस्' : 'Link to Account')}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
                       {isNe ? 'रद्द गर्नुहोस्' : 'Cancel'}
                     </button>
                     <button

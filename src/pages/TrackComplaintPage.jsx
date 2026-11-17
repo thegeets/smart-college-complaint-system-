@@ -111,7 +111,7 @@ export function TrackComplaintPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)' }}>
         <div style={{ maxWidth: '780px', width: '100%', margin: '0 auto' }}>
-          
+
           {trackedComplaint ? (
             /* TRACKED COMPLAINT RESULT VIEW - ONLY REAL RETRIEVED COMPLAINTS */
             <div>
@@ -335,7 +335,7 @@ export function TrackComplaintPage() {
               {/* Search Card */}
               <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-4)' }}>
                 <form onSubmit={handleTrackSubmit}>
-                  
+
                   {/* Reference ID */}
                   <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label htmlFor="complaint-id" className="form-label">

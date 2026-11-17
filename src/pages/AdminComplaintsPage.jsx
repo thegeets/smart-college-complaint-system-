@@ -7,7 +7,6 @@ import {
   Clock,
   Wrench,
   CheckCircle2,
-  FileText,
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
@@ -29,7 +28,7 @@ export function AdminComplaintsPage() {
 
   const [complaints, setComplaints] = useState([]);
   const [summary, setSummary] = useState({ total: 0, pendingReview: 0, inProgress: 0, resolved: 0 });
-  const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, totalPages: 1 });
+  const [, setPagination] = useState({ page: 1, limit: 25, total: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 

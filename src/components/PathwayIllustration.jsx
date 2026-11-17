@@ -13,7 +13,7 @@ import {
  * Custom UI illustration demonstrating a campus grievance moving through
  * Submitted → In Review → Resolved along connected pathway nodes.
  */
-export function PathwayIllustration({ onSelectSampleId }) {
+export function PathwayIllustration({ _onSelectSampleId }) {
   const { t } = useApp();
 
   const stages = [

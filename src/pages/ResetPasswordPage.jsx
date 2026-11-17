@@ -58,7 +58,7 @@ export function ResetPasswordPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ maxWidth: '460px', width: '100%', margin: '0 auto' }}>
-          
+
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
             <div style={{
               width: '52px',

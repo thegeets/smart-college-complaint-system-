@@ -8,17 +8,11 @@ import {
   ArrowLeft,
   Calendar,
   AlertCircle,
-  FileText,
-  ShieldCheck,
-  CheckCircle2,
   Download,
   MessageSquare,
   Lock,
   Clock,
   Send,
-  User,
-  Mail,
-  Hash,
   Paperclip
 } from 'lucide-react';
 
@@ -32,7 +26,6 @@ export function AdminComplaintDetailPage() {
     addInternalNote,
     statusList,
     language,
-    getCategoryLabel,
     showToast
   } = useApp();
 

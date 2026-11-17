@@ -3,20 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
-  User,
-  Mail,
-  BookOpen,
-  Phone,
   Save,
   CheckCircle2,
   AlertCircle,
   LogOut,
-  Link2,
-  ShieldCheck,
-  RefreshCw,
-  Info
+  Link2
 } from 'lucide-react';
 
 const SEMESTERS = [
@@ -128,7 +120,7 @@ export function ProfilePage() {
 
       <main style={{ flex: 1, padding: 'var(--space-8) var(--space-4)' }}>
         <div style={{ maxWidth: '780px', width: '100%', margin: '0 auto' }}>
-          
+
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-6)', flexWrap: 'wrap', gap: '12px' }}>
             <div>

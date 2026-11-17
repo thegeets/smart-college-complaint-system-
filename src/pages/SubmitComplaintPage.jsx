@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
@@ -33,14 +33,16 @@ export function SubmitComplaintPage() {
 
   const isNe = language === 'ne';
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  // Authentication guard: redirect unauthenticated visitor to login
+  // Authentication guard: redirect unauthenticated visitor to login preserving intended target
   useEffect(() => {
     if (!isCheckingStudentSession && !isStudentLoggedIn) {
-      navigate('/login?redirect=/submit', { replace: true });
+      const redirectUrl = location.search ? `/submit${location.search}` : '/submit';
+      navigate(`/login?redirect=${encodeURIComponent(redirectUrl)}`, { replace: true });
     }
-  }, [isCheckingStudentSession, isStudentLoggedIn, navigate]);
+  }, [isCheckingStudentSession, isStudentLoggedIn, navigate, location.search]);
 
   const initialCategory = searchParams.get('category') || '';
 
@@ -131,10 +133,10 @@ export function SubmitComplaintPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-8) var(--space-4)' }}>
         <div style={{ maxWidth: '800px', width: '100%', margin: '0 auto' }}>
-          
+
           <div style={{ marginBottom: 'var(--space-4)' }}>
             <Link
-              to="/student/complaints"
+              to="/dashboard"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: 'var(--color-muted)', fontWeight: '600' }}
             >
               <ArrowLeft size={14} />
@@ -244,7 +246,7 @@ export function SubmitComplaintPage() {
           ) : (
             /* SUBMISSION FORM */
             <div className="card" style={{ padding: 'var(--space-8)' }}>
-              
+
               <div style={{ marginBottom: 'var(--space-6)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--space-4)' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0D8178', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
                   {COLLEGE_CONFIG.name}
@@ -278,7 +280,7 @@ export function SubmitComplaintPage() {
               )}
 
               <form onSubmit={handleSubmit} noValidate>
-                
+
                 {/* 1. Student Identification (Auto-filled) */}
                 <div style={{
                   backgroundColor: '#F8FAFC',
@@ -530,7 +532,7 @@ export function SubmitComplaintPage() {
 
                 {/* Submit Row */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
-                  <Link to="/student/complaints" className="btn btn-secondary btn-md">
+                  <Link to="/dashboard" className="btn btn-secondary btn-md">
                     {isNe ? 'रद्द गर्नुहोस्' : 'Cancel'}
                   </Link>
 

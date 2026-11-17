@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, PlusCircle, User, LogIn, UserPlus, LogOut, FileText, Phone, Search, Lock } from 'lucide-react';
+import { Menu, X, PlusCircle, User, LogIn, LogOut, FileText, Search, HelpCircle, PhoneCall } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { BrandLogo } from './BrandLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -9,20 +9,23 @@ import { COLLEGE_CONFIG } from '../config/collegeConfig';
 export function PublicNavbar() {
   const { language, isStudentLoggedIn, studentUser, logoutStudent } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   const isNe = language === 'ne';
+
+  // Close mobile menu when location changes
+  const [prevLoc, setPrevLoc] = useState(location.pathname + location.hash);
+  if (prevLoc !== location.pathname + location.hash) {
+    setPrevLoc(location.pathname + location.hash);
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  }
 
   const menuToggleRef = useRef(null);
   const closeBtnRef = useRef(null);
   const drawerRef = useRef(null);
   const previouslyFocusedElementRef = useRef(null);
-
-  // Close mobile drawer on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname, location.hash]);
 
   // Lock body scroll and manage focus when mobile menu opens/closes
   useEffect(() => {
@@ -31,13 +34,12 @@ export function PublicNavbar() {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
-      // Focus close button in drawer
-      const focusTimer = setTimeout(() => {
+      const timer = setTimeout(() => {
         closeBtnRef.current?.focus();
       }, 50);
 
       return () => {
-        clearTimeout(focusTimer);
+        clearTimeout(timer);
         document.body.style.overflow = originalOverflow;
       };
     } else {
@@ -50,9 +52,9 @@ export function PublicNavbar() {
 
   // Support Escape key and Focus Trap within mobile drawer
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!mobileMenuOpen) return;
+    if (!mobileMenuOpen) return;
 
+    const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         setMobileMenuOpen(false);
@@ -83,88 +85,7 @@ export function PublicNavbar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [mobileMenuOpen]);
 
-  // Handle active indicator on homepage via scroll & hash
-  useEffect(() => {
-    if (location.pathname !== '/') {
-      setActiveSection('');
-      return;
-    }
-
-    if (location.hash) {
-      setActiveSection(location.hash);
-      const targetEl = document.getElementById(location.hash.replace('#', ''));
-      if (targetEl) {
-        const timer = setTimeout(() => {
-          targetEl.scrollIntoView({ behavior: 'smooth' });
-        }, 80);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      setActiveSection('#');
-    }
-
-    const updateActiveOnScroll = () => {
-      const scrollY = window.scrollY;
-      const processEl = document.getElementById('process');
-      const contactEl = document.getElementById('contact');
-
-      if (contactEl) {
-        const cRect = contactEl.getBoundingClientRect();
-        if (cRect.top <= 240 && cRect.bottom >= 140) {
-          setActiveSection('#contact');
-          return;
-        }
-      }
-
-      if (processEl) {
-        const pRect = processEl.getBoundingClientRect();
-        if (pRect.top <= 240 && pRect.bottom >= 140) {
-          setActiveSection('#process');
-          return;
-        }
-      }
-
-      if (scrollY < 400) {
-        setActiveSection('#');
-      } else {
-        setActiveSection('');
-      }
-    };
-
-    window.addEventListener('scroll', updateActiveOnScroll, { passive: true });
-    updateActiveOnScroll();
-
-    return () => {
-      window.removeEventListener('scroll', updateActiveOnScroll);
-    };
-  }, [location.pathname, location.hash]);
-
-  const closeMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const handleHomeClick = (e) => {
-    closeMenu();
-    if (location.pathname === '/') {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      window.history.pushState(null, '', '/');
-      setActiveSection('#');
-    }
-  };
-
-  const handleAnchorClick = (e, hash) => {
-    closeMenu();
-    if (location.pathname === '/') {
-      e.preventDefault();
-      const el = document.getElementById(hash.replace('#', ''));
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        window.history.pushState(null, '', `/${hash}`);
-        setActiveSection(hash);
-      }
-    }
-  };
+  const closeMenu = () => setMobileMenuOpen(false);
 
   const handleLogout = async () => {
     closeMenu();
@@ -172,122 +93,79 @@ export function PublicNavbar() {
     navigate('/');
   };
 
-  const isHomeActive = location.pathname === '/' && activeSection === '#';
-  const isProcessActive = location.pathname === '/' && activeSection === '#process';
-  const isContactActive = location.pathname === '/' && activeSection === '#contact';
   const isTrackActive = location.pathname === '/track';
-  const isComplaintsActive = location.pathname.startsWith('/student/complaints');
+  const isComplaintsActive = location.pathname === '/dashboard' || location.pathname.startsWith('/student/complaints');
   const isProfileActive = location.pathname === '/student/profile';
 
   return (
-    <header className="public-header-bar">
-      {/* Top Institutional Notification Strip */}
-      <div className="top-institutional-strip">
-        <div className="top-strip-inner">
-          <div className="top-strip-left">
-            <span className="top-strip-text">
-              {isNe 
-                ? 'सोच कलेज अफ आईटी — विद्यार्थी सहायता तथा गुनासो पोर्टल'
-                : 'Soch College of IT, Pokhara — Student IT Grievance Portal'}
-            </span>
-          </div>
-          <div className="top-strip-right">
-            <span className="top-strip-hours">
-              {isNe ? COLLEGE_CONFIG.contact.officeHoursNe : COLLEGE_CONFIG.contact.officeHours}
-            </span>
-            <span className="top-strip-divider" aria-hidden="true">•</span>
-            <a href={`tel:${COLLEGE_CONFIG.contact.phone}`} className="top-strip-phone" aria-label={`Campus IT Phone ${COLLEGE_CONFIG.contact.phone}`}>
-              <Phone size={12} style={{ display: 'inline', marginRight: '4px' }} aria-hidden="true" />
-              <span>{COLLEGE_CONFIG.contact.phone}</span>
-            </a>
-          </div>
-        </div>
-      </div>
+    <header className="site-header">
+      <div className="site-header-inner">
+        {/* Left: Brand Identity / Home Link */}
+        <Link 
+          to="/" 
+          className="site-brand-link" 
+          aria-label={`${COLLEGE_CONFIG.name} — Home`}
+          onClick={() => {
+            closeMenu();
+            if (location.pathname === '/') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+        >
+          <BrandLogo 
+            size={34} 
+            collegeName={COLLEGE_CONFIG.shortName} 
+            subtitle={isNe ? 'आईटी उजुरी तथा सहायता डेस्क' : 'IT Service & Grievance Desk'} 
+          />
+        </Link>
 
-      {/* Main Navigation Bar */}
-      <div className="main-navbar-container">
-        <div className="main-navbar-inner">
-          {/* Left: Compact Institutional Branding */}
-          <div className="main-navbar-brand">
-            <Link 
-              to="/" 
-              style={{ textDecoration: 'none' }} 
-              onClick={handleHomeClick}
-              aria-label={COLLEGE_CONFIG.name}
-            >
-              <BrandLogo 
-                size={34} 
-                collegeName="Soch College of IT" 
-                subtitle={isNe ? 'गुनासो व्यवस्थापन' : 'Complaint Portal'} 
-              />
-            </Link>
-          </div>
-
-          {/* Center: Public Navigation (Home | How It Works | Contact | Track) */}
-          <nav className="desktop-nav-menu" aria-label={isNe ? 'मुख्य क्याम्पस नेभिगेसन' : 'Main College Navigation'}>
-            <Link 
-              to="/" 
-              className={`nav-menu-link ${isHomeActive ? 'active' : ''}`}
-              onClick={handleHomeClick}
-              aria-current={isHomeActive ? 'page' : undefined}
-            >
-              <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
-            </Link>
-
-            <Link 
-              to="/#process" 
-              className={`nav-menu-link ${isProcessActive ? 'active' : ''}`}
-              onClick={(e) => handleAnchorClick(e, '#process')}
-              aria-current={isProcessActive ? 'page' : undefined}
-            >
-              <span>{isNe ? 'प्रक्रिया' : 'How It Works'}</span>
-            </Link>
-
-            <Link 
-              to="/#contact" 
-              className={`nav-menu-link ${isContactActive ? 'active' : ''}`}
-              onClick={(e) => handleAnchorClick(e, '#contact')}
-              aria-current={isContactActive ? 'page' : undefined}
-            >
-              <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
-            </Link>
-
-            <Link 
-              to="/track" 
-              className={`nav-menu-link ${isTrackActive ? 'active' : ''}`}
-              onClick={closeMenu}
-              aria-current={isTrackActive ? 'page' : undefined}
-            >
-              <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Status'}</span>
-            </Link>
-
-            {/* If logged in, show direct dashboard link */}
-            {isStudentLoggedIn && (
+        {/* Center / Right: Desktop Navigation */}
+        <nav className="desktop-nav-wrap" aria-label={isNe ? 'मुख्य नेभिगेसन' : 'Main Navigation'}>
+          {/* Essential Public or Authenticated Links */}
+          <div className="desktop-nav-links">
+            {isStudentLoggedIn ? (
               <Link 
-                to="/student/complaints" 
-                className={`nav-menu-link ${isComplaintsActive ? 'active' : ''}`}
+                to="/dashboard" 
+                className={`nav-link ${isComplaintsActive ? 'active' : ''}`}
                 aria-current={isComplaintsActive ? 'page' : undefined}
               >
+                <FileText size={15} aria-hidden="true" />
                 <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
               </Link>
+            ) : (
+              <>
+                <Link 
+                  to="/track" 
+                  className={`nav-link ${isTrackActive ? 'active' : ''}`}
+                  aria-current={isTrackActive ? 'page' : undefined}
+                >
+                  <Search size={15} aria-hidden="true" />
+                  <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Status'}</span>
+                </Link>
+                <a href="/#process" className="nav-link">
+                  <span>{isNe ? 'प्रक्रिया' : 'Process'}</span>
+                </a>
+                <a href="/#contact" className="nav-link">
+                  <span>{isNe ? 'सम्पर्क' : 'Support'}</span>
+                </a>
+              </>
             )}
-          </nav>
+          </div>
 
-          {/* Right Action Cluster (Desktop) */}
-          <div className="desktop-nav-actions">
+          {/* Action Cluster: Language Switcher, Account Entry, Primary CTA */}
+          <div className="desktop-actions-cluster">
             <LanguageSwitcher size="sm" />
 
             {isStudentLoggedIn ? (
-              /* Logged In Actions: Profile/Logout */
-              <div className="logged-in-user-actions">
+              /* Signed In Student Actions */
+              <div className="student-account-cluster">
                 <Link
                   to="/student/profile"
                   className={`btn btn-secondary btn-sm ${isProfileActive ? 'active' : ''}`}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '0.8125rem' }}
                   title={studentUser?.name}
                 >
-                  <User size={14} />
-                  <span style={{ maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <User size={14} aria-hidden="true" />
+                  <span className="student-profile-name">
                     {studentUser?.name ? studentUser.name.split(' ')[0] : 'Profile'}
                   </span>
                 </Link>
@@ -295,60 +173,49 @@ export function PublicNavbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="btn btn-secondary btn-sm"
-                  style={{ height: '36px', padding: '0 8px', color: '#64748B' }}
+                  className="btn btn-secondary btn-sm btn-icon-only"
                   title={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
+                  aria-label={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
                 >
-                  <LogOut size={14} />
+                  <LogOut size={14} aria-hidden="true" />
                 </button>
               </div>
             ) : (
-              /* Logged Out Actions: Login | Register */
-              <div className="auth-nav-links">
-                <Link
-                  to="/login"
-                  className="btn btn-secondary btn-sm"
-                  style={{ height: '36px', fontSize: '0.8125rem', padding: '0 10px' }}
-                >
-                  <LogIn size={13} />
-                  <span>{isNe ? 'लगइन' : 'Login'}</span>
-                </Link>
-
-                <Link
-                  to="/register"
-                  className="btn btn-secondary btn-sm"
-                  style={{ height: '36px', fontSize: '0.8125rem', padding: '0 10px' }}
-                >
-                  <UserPlus size={13} />
-                  <span>{isNe ? 'दर्ता' : 'Register'}</span>
-                </Link>
-              </div>
+              /* Signed Out: Single Clear Account Entry Point */
+              <Link
+                to="/login"
+                className="btn btn-secondary btn-sm"
+              >
+                <LogIn size={14} aria-hidden="true" />
+                <span>{isNe ? 'लगइन' : 'Sign In'}</span>
+              </Link>
             )}
 
-            {/* Clear Primary CTA: Submit a Complaint (Never clipped) */}
+            {/* Primary Action Button */}
             <Link 
-              to="/submit" 
-              className="btn-nav-cta"
+              to={isStudentLoggedIn ? '/submit' : '/login?redirect=/submit'} 
+              className="btn btn-primary btn-sm btn-nav-cta"
             >
               <PlusCircle size={15} aria-hidden="true" />
-              <span>{isNe ? 'उजुरी दर्ता' : 'Submit a Complaint'}</span>
+              <span>{isNe ? 'उजुरी दर्ता' : 'Report Issue'}</span>
             </Link>
           </div>
+        </nav>
 
-          {/* Mobile Bar Right Cluster: Menu Toggle Button */}
-          <div className="mobile-bar-actions">
-            <button
-              ref={menuToggleRef}
-              type="button"
-              className="mobile-nav-toggle-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? (isNe ? 'मेनु बन्द गर्नुहोस्' : 'Close navigation menu') : (isNe ? 'मेनु खोल्नुहोस्' : 'Open navigation menu')}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-nav-drawer"
-            >
-              {mobileMenuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
-            </button>
-          </div>
+        {/* Mobile Actions: Language Switcher & Hamburger Button */}
+        <div className="mobile-actions-bar">
+          <LanguageSwitcher size="sm" />
+          <button
+            ref={menuToggleRef}
+            type="button"
+            className="mobile-nav-toggle-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? (isNe ? 'मेनु बन्द गर्नुहोस्' : 'Close navigation menu') : (isNe ? 'मेनु खोल्नुहोस्' : 'Open navigation menu')}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-drawer"
+          >
+            {mobileMenuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+          </button>
         </div>
       </div>
 
@@ -357,7 +224,7 @@ export function PublicNavbar() {
         <div className="mobile-drawer-backdrop" onClick={closeMenu} aria-hidden="true" />
       )}
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile Slide-Over Drawer */}
       <div 
         ref={drawerRef}
         id="mobile-nav-drawer"
@@ -369,9 +236,9 @@ export function PublicNavbar() {
       >
         <div className="mobile-drawer-header">
           <BrandLogo 
-            size={30} 
-            collegeName="Soch College of IT" 
-            subtitle={isNe ? 'गुनासो व्यवस्थापन' : 'Complaint Portal'} 
+            size={28} 
+            collegeName={COLLEGE_CONFIG.shortName} 
+            subtitle={isNe ? 'आईटी उजुरी डेस्क' : 'IT Helpdesk'} 
           />
           <button
             ref={closeBtnRef}
@@ -385,82 +252,75 @@ export function PublicNavbar() {
           </button>
         </div>
 
-        {/* Mobile Language Switcher Section */}
-        <div className="mobile-drawer-lang-strip">
-          <span className="mobile-drawer-lang-label">
-            {isNe ? 'भाषा चयन:' : 'Language:'}
-          </span>
-          <LanguageSwitcher size="sm" />
-        </div>
-
         {/* Mobile Navigation Links */}
-        <nav className="mobile-nav-links-list" aria-label={isNe ? 'मोबाइल मेनु' : 'Mobile Menu'}>
+        <nav className="mobile-drawer-links" aria-label={isNe ? 'मोबाइल मेनु' : 'Mobile Menu'}>
           <Link 
             to="/" 
-            className={`mobile-nav-link-item ${isHomeActive ? 'active' : ''}`} 
-            onClick={handleHomeClick}
-            aria-current={isHomeActive ? 'page' : undefined}
+            className="mobile-drawer-link" 
+            onClick={closeMenu}
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
           </Link>
-          <Link 
-            to="/#process" 
-            className={`mobile-nav-link-item ${isProcessActive ? 'active' : ''}`} 
-            onClick={(e) => handleAnchorClick(e, '#process')}
-            aria-current={isProcessActive ? 'page' : undefined}
-            tabIndex={mobileMenuOpen ? 0 : -1}
-          >
-            <span>{isNe ? 'प्रक्रिया' : 'How It Works'}</span>
-          </Link>
-          <Link 
-            to="/#contact" 
-            className={`mobile-nav-link-item ${isContactActive ? 'active' : ''}`} 
-            onClick={(e) => handleAnchorClick(e, '#contact')}
-            aria-current={isContactActive ? 'page' : undefined}
-            tabIndex={mobileMenuOpen ? 0 : -1}
-          >
-            <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
-          </Link>
 
           <Link 
             to="/track" 
-            className={`mobile-nav-link-item ${isTrackActive ? 'active' : ''}`} 
+            className="mobile-drawer-link" 
             onClick={closeMenu}
-            aria-current={isTrackActive ? 'page' : undefined}
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <Search size={16} aria-hidden="true" />
-            <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Complaint'}</span>
+            <span>{isNe ? 'उजुरी स्थिति ट्र्याक' : 'Track Issue Status'}</span>
           </Link>
+
+          <a 
+            href="/#process" 
+            className="mobile-drawer-link" 
+            onClick={closeMenu}
+            tabIndex={mobileMenuOpen ? 0 : -1}
+          >
+            <HelpCircle size={16} aria-hidden="true" />
+            <span>{isNe ? 'समाधान प्रक्रिया' : 'Resolution Process'}</span>
+          </a>
+
+          <a 
+            href="/#contact" 
+            className="mobile-drawer-link" 
+            onClick={closeMenu}
+            tabIndex={mobileMenuOpen ? 0 : -1}
+          >
+            <PhoneCall size={16} aria-hidden="true" />
+            <span>{isNe ? 'कलेज आईटी सम्पर्क' : 'Campus IT Support'}</span>
+          </a>
+
+          <div className="mobile-drawer-divider" />
 
           {isStudentLoggedIn ? (
             <>
               <Link 
-                to="/student/complaints" 
-                className={`mobile-nav-link-item ${isComplaintsActive ? 'active' : ''}`} 
+                to="/dashboard" 
+                className="mobile-drawer-link" 
                 onClick={closeMenu}
-                aria-current={isComplaintsActive ? 'page' : undefined}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
                 <FileText size={16} aria-hidden="true" />
                 <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
               </Link>
+
               <Link 
                 to="/student/profile" 
-                className={`mobile-nav-link-item ${isProfileActive ? 'active' : ''}`} 
+                className="mobile-drawer-link" 
                 onClick={closeMenu}
-                aria-current={isProfileActive ? 'page' : undefined}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
                 <User size={16} aria-hidden="true" />
                 <span>{isNe ? 'विद्यार्थी प्रोफाइल' : 'Student Profile'}</span>
               </Link>
+
               <button
                 type="button"
-                className="mobile-nav-link-item"
+                className="mobile-drawer-link mobile-drawer-logout"
                 onClick={handleLogout}
-                style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#B91C1C' }}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
                 <LogOut size={16} aria-hidden="true" />
@@ -471,48 +331,36 @@ export function PublicNavbar() {
             <>
               <Link 
                 to="/login" 
-                className="mobile-nav-link-item" 
+                className="mobile-drawer-link" 
                 onClick={closeMenu}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
                 <LogIn size={16} aria-hidden="true" />
-                <span>{isNe ? 'विद्यार्थी लगइन' : 'Student Login'}</span>
+                <span>{isNe ? 'विद्यार्थी लगइन' : 'Sign In'}</span>
               </Link>
+
               <Link 
                 to="/register" 
-                className="mobile-nav-link-item" 
+                className="mobile-drawer-link" 
                 onClick={closeMenu}
                 tabIndex={mobileMenuOpen ? 0 : -1}
               >
-                <UserPlus size={16} aria-hidden="true" />
-                <span>{isNe ? 'विद्यार्थी दर्ता' : 'Register Account'}</span>
+                <span>{isNe ? 'नयाँ खाता दर्ता' : 'Register Account'}</span>
               </Link>
             </>
           )}
-
-          <div style={{ height: '1px', backgroundColor: '#E2E8F0', margin: '8px 4px' }} />
-          <Link 
-            to="/admin/login" 
-            className="mobile-nav-link-item" 
-            onClick={closeMenu}
-            tabIndex={mobileMenuOpen ? 0 : -1}
-            style={{ fontSize: '0.8125rem', color: '#64748B' }}
-          >
-            <Lock size={15} aria-hidden="true" />
-            <span>{isNe ? 'कलेज प्रशासनिक लगइन' : 'Admin Operations Login'}</span>
-          </Link>
         </nav>
 
-        {/* Mobile Drawer Complaint CTA */}
-        <div className="mobile-drawer-cta-wrap">
+        {/* Drawer Bottom CTA */}
+        <div className="mobile-drawer-footer">
           <Link 
-            to="/submit" 
-            className="btn btn-primary btn-md mobile-drawer-cta-btn"
+            to={isStudentLoggedIn ? '/submit' : '/login?redirect=/submit'} 
+            className="btn btn-primary btn-md mobile-drawer-cta"
             onClick={closeMenu}
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <PlusCircle size={16} aria-hidden="true" />
-            <span>{isNe ? 'उजुरी दर्ता गर्नुहोस्' : 'Submit a Complaint'}</span>
+            <span>{isNe ? 'नयाँ उजुरी दर्ता' : 'Report an Issue'}</span>
           </Link>
         </div>
       </div>

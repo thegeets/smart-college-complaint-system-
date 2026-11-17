@@ -29,7 +29,7 @@ export function ComplaintDetailsPage() {
 
   useEffect(() => {
     if (!isCheckingStudentSession && !isStudentLoggedIn) {
-      navigate(`/login?redirect=/student/complaints/${encodeURIComponent(id || '')}`, { replace: true });
+      navigate(`/login?redirect=/dashboard/complaints/${encodeURIComponent(id || '')}`, { replace: true });
     }
   }, [isCheckingStudentSession, isStudentLoggedIn, navigate, id]);
 
@@ -77,7 +77,7 @@ export function ComplaintDetailsPage() {
           {/* Back Navigation Bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: '8px' }}>
             <Link
-              to="/student/complaints"
+              to="/dashboard"
               className="btn btn-secondary btn-sm"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
@@ -105,7 +105,7 @@ export function ComplaintDetailsPage() {
               <p style={{ fontSize: '0.875rem', color: '#64748B', maxWidth: '440px', margin: '0 auto 16px', lineHeight: '1.5' }}>
                 {errorMsg}
               </p>
-              <Link to="/student/complaints" className="btn btn-primary btn-sm">
+              <Link to="/dashboard" className="btn btn-primary btn-sm">
                 <span>{isNe ? 'मेरो ड्यासबोर्डमा जानुहोस्' : 'Return to My Complaints'}</span>
               </Link>
             </div>

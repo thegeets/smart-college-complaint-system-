@@ -10,8 +10,7 @@ import {
   Wrench,
   CheckCircle2,
   AlertCircle,
-  RefreshCw,
-  PlusCircle
+  RefreshCw
 } from 'lucide-react';
 
 export function AdminDashboard() {
@@ -20,8 +19,7 @@ export function AdminDashboard() {
     fetchReportsSummary, 
     updateComplaintStatus,
     statusList,
-    language,
-    getCategoryLabel
+    language
   } = useApp();
   const navigate = useNavigate();
   const isNe = language === 'ne';

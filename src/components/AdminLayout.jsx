@@ -37,12 +37,12 @@ export function AdminLayout() {
 
   // Guard: If admin is not logged in, redirect to admin login
   if (!isAdminLoggedIn) {
-    return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/adminlogin" replace state={{ from: location.pathname }} />;
   }
 
   const handleLogout = () => {
     logoutAdmin();
-    navigate('/admin/login');
+    navigate('/adminlogin');
   };
 
   const adminNav = [

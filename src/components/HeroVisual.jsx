@@ -1,117 +1,93 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
-  FileText,
-  Search,
-  Wrench,
-  CheckCircle2,
-  ShieldCheck,
-  Clock,
-  Layers
+  Monitor,
+  Wifi,
+  Terminal,
+  Tv,
+  ArrowRight,
+  Search
 } from 'lucide-react';
 
 export function HeroVisual() {
   const { language } = useApp();
   const isNe = language === 'ne';
 
-  const stages = [
+  const commonIssues = [
     {
-      num: '01',
-      title: isNe ? 'उजुरी दर्ता' : 'Submitted',
-      icon: FileText,
-      tag: isNe ? 'पहिलो चरण' : 'Stage 1',
-      desc: isNe
-        ? 'कम्प्युटर ल्याब, वाइफाइ वा सफ्टवेयर समस्या विवरण र ऐच्छिक प्रमाणसहित दर्ता गरिन्छ।'
-        : 'Student lodges issue with lab room, workstation ID, description, and screenshot proof.',
+      category: 'Computer Lab / Hardware',
+      title: isNe ? 'कम्प्युटर ल्याब तथा हार्डवेयर' : 'Workstations & Lab Hardware',
+      desc: isNe ? 'पीसी बुट नहुने, मनिटर वा माउस खराबी' : 'PC boot failure, monitor, keyboard, or RAM issues',
+      icon: Monitor,
     },
     {
-      num: '02',
-      title: isNe ? 'छानबिन तथा खटन' : 'Under Review',
-      icon: Search,
-      tag: isNe ? 'दोस्रो चरण' : 'Stage 2',
-      desc: isNe
-        ? 'कलेज प्राविधिक डेस्कद्वारा समस्याको प्रकृति र प्राथमिकता जाँच गरी प्राविधिक खटाइन्छ।'
-        : 'Campus IT desk evaluates severity, verifies symptoms, and assigns technician.',
+      category: 'Internet / Wi-Fi / Network',
+      title: isNe ? 'इन्टरनेट तथा क्याम्पस वाइफाइ' : 'Wi-Fi & Campus Network',
+      desc: isNe ? 'ल्याब कनेक्सन ड्रप, कमजोर वाइफाइ कभरेज' : 'Signal drops, disconnected ports, slow network',
+      icon: Wifi,
     },
     {
-      num: '03',
-      title: isNe ? 'मर्मत तथा प्रगति' : 'In Progress',
-      icon: Wrench,
-      tag: isNe ? 'तेस्रो चरण' : 'Stage 3',
-      desc: isNe
-        ? 'हार्डवेयर मर्मत, केबलिङ, सफ्टवेयर कन्फिगरेसन वा नेटवर्क समस्या समाधान गरिन्छ।'
-        : 'On-campus repair, switch reconfiguration, OS patch, or hardware replacement in progress.',
+      category: 'Software / Programming Tools',
+      title: isNe ? 'प्रोग्रामिङ सफ्टवेयर तथा टुल्स' : 'Developer Tools & Compilers',
+      desc: isNe ? 'GCC, Java, Python, IDE वा लिनक्स समस्या' : 'Compiler toolchain errors, IDE bugs, DB service',
+      icon: Terminal,
     },
     {
-      num: '04',
-      title: isNe ? 'प्रमाणित समाधान' : 'Resolved',
-      icon: CheckCircle2,
-      tag: isNe ? 'अन्तिम चरण' : 'Stage 4',
-      desc: isNe
-        ? 'मर्मत सम्पन्न भएपछि आधिकारिक विवरणसहित विद्यार्थी ड्यासबोर्डमा सूचना अद्यावधिक हुन्छ।'
-        : 'Technician confirms work; documented resolution notes appear in student dashboard.',
+      category: 'Classroom Technology / Projector',
+      title: isNe ? 'कक्षाकोठा प्रोजेक्टर तथा प्रविधि' : 'Classroom Projectors & AV',
+      desc: isNe ? 'एचडीएमआई केबल, प्रोजेक्टर फ्लिकर, अडियो' : 'Flickering ceiling display, broken HDMI, audio',
+      icon: Tv,
     },
   ];
 
   return (
-    <div className="hero-workflow-card" aria-label={isNe ? 'उजुरी समाधान कार्यप्रणाली' : 'Complaint Resolution Workflow'}>
-      {/* Workflow Card Header */}
-      <div className="hero-workflow-header">
-        <div className="hero-workflow-title-group">
-          <span className="hero-workflow-badge">
-            <Layers size={13} aria-hidden="true" />
-            <span>{isNe ? 'कलेज कार्यविधि' : 'Standard College Workflow'}</span>
-          </span>
-          <h3 className="hero-workflow-title">
-            {isNe ? 'उजुरी समाधानका ४ चरणहरू' : '4-Stage Resolution Pipeline'}
-          </h3>
-          <p className="hero-workflow-subtitle">
-            {isNe
-              ? 'दर्तादेखि प्राविधिक समाधानसम्मका पारदर्शी प्रशासनिक चरणहरू'
-              : 'Transparent, accountable handling from initial lodge to verified campus fix'}
-          </p>
-        </div>
+    <div className="hero-task-card" aria-label={isNe ? 'द्रुत समस्या रिपोर्ट' : 'Quick IT Report'}>
+      <div className="hero-task-header">
+        <span className="hero-task-tag">
+          {isNe ? 'उजुरी दर्ता विधा छनोट' : 'Select Problem Area'}
+        </span>
+        <h2 className="hero-task-title">
+          {isNe ? 'कस्तो समस्या देखा परेको छ?' : 'What needs technical repair?'}
+        </h2>
+        <p className="hero-task-subtitle">
+          {isNe
+            ? 'सम्बन्धित विधा छनोट गरी सिधै उजुरी फारममा जानुहोस्:'
+            : 'Select an area to jump straight to the submission form with category pre-filled:'}
+        </p>
       </div>
 
-      {/* Workflow Steps Container (Responsive: Grid on desktop, vertical timeline on narrow screens) */}
-      <div className="hero-workflow-steps">
-        {stages.map((stage, idx) => {
-          const Icon = stage.icon;
+      <div className="hero-task-grid">
+        {commonIssues.map((item) => {
+          const Icon = item.icon;
           return (
-            <div key={stage.num} className="hero-workflow-step-item">
-              <div className="hero-step-rail">
-                <div className="hero-step-num-bubble">
-                  <Icon size={14} aria-hidden="true" />
-                </div>
-                {idx < stages.length - 1 && <div className="hero-step-connector-line" />}
+            <Link
+              key={item.category}
+              to={`/submit?category=${encodeURIComponent(item.category)}`}
+              className="hero-task-tile"
+              title={`Report ${item.title}`}
+            >
+              <div className="hero-tile-icon-box">
+                <Icon size={18} aria-hidden="true" />
               </div>
-              <div className="hero-step-body">
-                <div className="hero-step-meta">
-                  <span className="hero-step-tag">{stage.tag}</span>
-                  <span className="hero-step-order">{stage.num}</span>
+              <div className="hero-tile-content">
+                <div className="hero-tile-title-row">
+                  <span className="hero-tile-title">{item.title}</span>
+                  <ArrowRight size={14} className="hero-tile-arrow" aria-hidden="true" />
                 </div>
-                <h4 className="hero-step-heading">{stage.title}</h4>
-                <p className="hero-step-desc">{stage.desc}</p>
+                <p className="hero-tile-desc">{item.desc}</p>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
 
-      {/* Institutional Service Guarantees Footer */}
-      <div className="hero-workflow-footer">
-        <div className="hero-workflow-guarantee">
-          <ShieldCheck size={15} className="hero-guarantee-icon" aria-hidden="true" />
-          <span>
-            {isNe
-              ? 'विद्यार्थी खाताद्वारा सुरक्षित • ड्यासबोर्डमा प्रत्यक्ष अपडेट'
-              : 'Authenticated Student Access • Real-Time Dashboard Updates'}
-          </span>
-        </div>
-        <div className="hero-workflow-timeframe">
-          <Clock size={13} aria-hidden="true" />
-          <span>{isNe ? 'औसत छानबिन २४ घण्टाभित्र' : 'Standard 24h Triage'}</span>
-        </div>
+      <div className="hero-task-footer">
+        <Link to="/track" className="hero-task-track-link">
+          <Search size={14} aria-hidden="true" />
+          <span>{isNe ? 'पहिले दर्ता भएको उजुरी ट्र्याक गर्नुहोस्' : 'Looking to track a previously filed ticket?'}</span>
+          <ArrowRight size={13} aria-hidden="true" />
+        </Link>
       </div>
     </div>
   );

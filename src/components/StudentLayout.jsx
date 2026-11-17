@@ -14,12 +14,11 @@ import {
   LogOut,
   ExternalLink,
   Menu,
-  X,
-  Sparkles
+  X
 } from 'lucide-react';
 
 export function StudentLayout() {
-  const { isStudentLoggedIn, currentUser, logoutStudent, notifications, language, t } = useApp();
+  const { isStudentLoggedIn, currentUser, logoutStudent, notifications, language } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
