@@ -10,12 +10,52 @@ import {
   CheckCircle2,
   KeyRound,
   AlertCircle,
-  GraduationCap
+  GraduationCap,
+  User,
+  Save
 } from 'lucide-react';
 
 export function AdminSettingsPage() {
-  const { categories, changeAdminPassword, language } = useApp();
+  const { categories, changeAdminPassword, adminUser, updateAdminProfile, language } = useApp();
   const isNe = language === 'ne';
+
+  // Admin Profile Form State
+  const [adminName, setAdminName] = useState(adminUser?.name || '');
+  const [adminEmail, setAdminEmail] = useState(adminUser?.email || '');
+  const [adminTitle, setAdminTitle] = useState(adminUser?.title || 'IT Grievance Coordinator');
+  const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  // Sync state if adminUser changes
+  const [prevAdminUser, setPrevAdminUser] = useState(adminUser);
+  if (adminUser !== prevAdminUser) {
+    setPrevAdminUser(adminUser);
+    setAdminName(adminUser?.name || '');
+    setAdminEmail(adminUser?.email || '');
+    setAdminTitle(adminUser?.title || 'IT Grievance Coordinator');
+  }
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileMsg({ text: '', type: '' });
+    if (!adminName.trim() || !adminEmail.trim()) {
+      setProfileMsg({ text: isNe ? 'कृपया नाम र इमेल दुवै भर्नुहोस्।' : 'Please enter both name and email.', type: 'error' });
+      return;
+    }
+    setIsUpdatingProfile(true);
+    try {
+      await updateAdminProfile({
+        name: adminName.trim(),
+        email: adminEmail.trim(),
+        title: adminTitle.trim(),
+      });
+      setProfileMsg({ text: isNe ? 'प्रोफाइल सफलतापूर्वक अद्यावधिक भयो।' : 'Profile updated successfully.', type: 'success' });
+    } catch (err) {
+      setProfileMsg({ text: err.message || 'Failed to update profile.', type: 'error' });
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
 
   // Change Password Form State
   const [currentPassword, setCurrentPassword] = useState('');
@@ -240,6 +280,99 @@ export function AdminSettingsPage() {
               ) : (
                 <span>{isNe ? 'पासवर्ड सुरक्षित गर्नुहोस्' : 'Update Password'}</span>
               )}
+            </button>
+          </form>
+        </div>
+
+        {/* Card 4: Administrator Profile & Email Settings */}
+        <div className="card" style={{ padding: 'var(--space-6)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+            <User size={18} color="#0D8178" />
+            <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0 }}>
+              {isNe ? 'प्रशासक प्रोफाइल तथा इमेल' : 'Admin Profile & Email'}
+            </h2>
+          </div>
+
+          <p style={{ fontSize: '0.8125rem', color: 'var(--color-muted)', lineHeight: '1.5', marginBottom: 'var(--space-4)' }}>
+            {isNe
+              ? 'प्रारम्भिक इमेल (admin@soch.example) लाई आफ्नो वास्तविक आधिकारिक इमेलमा परिवर्तन गर्नुहोस्।'
+              : 'Update your display name and replace placeholder emails (e.g. admin@soch.example) with your real address.'}
+          </p>
+
+          {profileMsg.text && (
+            <div style={{
+              padding: '8px 12px',
+              backgroundColor: profileMsg.type === 'error' ? '#FEF2F2' : '#F0FDF4',
+              border: `1px solid ${profileMsg.type === 'error' ? '#FECACA' : '#BBF7D0'}`,
+              borderRadius: '6px',
+              color: profileMsg.type === 'error' ? '#B91C1C' : '#15803D',
+              fontSize: '0.8125rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              marginBottom: 'var(--space-3)'
+            }}>
+              {profileMsg.type === 'error' ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
+              <span>{profileMsg.text}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleUpdateProfile}>
+            <div className="form-group" style={{ marginBottom: 'var(--space-3)' }}>
+              <label htmlFor="adminName" className="form-label" style={{ fontSize: '0.75rem' }}>
+                {isNe ? 'प्रशासक पूरा नाम' : 'Administrator Full Name'} <span className="required">*</span>
+              </label>
+              <input
+                id="adminName"
+                type="text"
+                className="form-input"
+                placeholder="Er. Pradeep Karki"
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                disabled={isUpdatingProfile}
+                required
+              />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 'var(--space-3)' }}>
+              <label htmlFor="adminEmailInput" className="form-label" style={{ fontSize: '0.75rem' }}>
+                {isNe ? 'आधिकारिक प्रशासक इमेल' : 'Official Administrator Email'} <span className="required">*</span>
+              </label>
+              <input
+                id="adminEmailInput"
+                type="email"
+                className="form-input"
+                placeholder="admin@soch.example"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                disabled={isUpdatingProfile}
+                required
+              />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+              <label htmlFor="adminTitleInput" className="form-label" style={{ fontSize: '0.75rem' }}>
+                {isNe ? 'पद तथा कार्यक्षेत्र' : 'Title / Role Specification'}
+              </label>
+              <input
+                id="adminTitleInput"
+                type="text"
+                className="form-input"
+                placeholder="IT Grievance Coordinator & Dean Desk"
+                value={adminTitle}
+                onChange={(e) => setAdminTitle(e.target.value)}
+                disabled={isUpdatingProfile}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-secondary btn-sm"
+              disabled={isUpdatingProfile}
+              style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <Save size={14} />
+              <span>{isUpdatingProfile ? (isNe ? 'सुरक्षित गरिँदै...' : 'Saving...') : (isNe ? 'प्रोफाइल सुरक्षित गर्नुहोस्' : 'Save Profile Changes')}</span>
             </button>
           </form>
         </div>

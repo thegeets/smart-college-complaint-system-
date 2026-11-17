@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { MailCheck, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { getSafeRedirectUrl } from '../utils/url';
 
 export function VerifyEmailPage() {
   const { verifyStudentEmail, resendStudentVerification, language } = useApp();
@@ -14,7 +15,8 @@ export function VerifyEmailPage() {
   const searchParams = new URLSearchParams(location.search);
   const initialEmail = searchParams.get('email') || '';
   const initialToken = searchParams.get('token') || '';
-  const redirectTarget = searchParams.get('redirect') || '/student/complaints';
+  const rawTarget = searchParams.get('redirect') || location.state?.from;
+  const redirectTarget = getSafeRedirectUrl(rawTarget, '/dashboard');
 
   const [email, setEmail] = useState(initialEmail);
   const [token, setToken] = useState(initialToken);
@@ -74,7 +76,7 @@ export function VerifyEmailPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ maxWidth: '480px', width: '100%', margin: '0 auto' }}>
-          
+
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
             <div style={{
@@ -103,151 +105,151 @@ export function VerifyEmailPage() {
 
           {/* Verification Card */}
           <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
-            
-            {/* Ownership confirmation policy note */}
-            <div style={{
-              padding: '10px 14px',
-              backgroundColor: '#F8FAFC',
-              border: '1px solid #E2E8F0',
-              borderRadius: '6px',
-              fontSize: '0.8125rem',
-              color: '#475569',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '8px',
-              marginBottom: 'var(--space-4)'
-            }}>
-              <Info size={16} color="#0D8178" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <span>
-                {isNe
-                  ? 'यो चरणले तपाईंको इमेल स्वामित्व प्रमाणित गर्दछ। यसले स्वचालित रूपमा संस्थागत सदस्यता प्रमाणपत्र प्रदान गर्दैन।'
-                  : 'Email verification confirms email ownership only. It does not certify institutional status or replace college administrative triage.'}
-              </span>
-            </div>
 
-            {infoMsg && (
+              {/* Ownership confirmation policy note */}
               <div style={{
                 padding: '10px 14px',
-                backgroundColor: '#F0FDFA',
-                border: '1px solid #CCFBF1',
+                backgroundColor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
                 borderRadius: '6px',
-                color: '#0F766E',
                 fontSize: '0.8125rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: 'var(--space-4)'
-              }}>
-                <CheckCircle2 size={16} />
-                <span>{infoMsg}</span>
-              </div>
-            )}
-
-            {errorMsg && (
-              <div style={{
-                padding: '10px 14px',
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                borderRadius: '6px',
-                color: '#B91C1C',
-                fontSize: '0.8125rem',
+                color: '#475569',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '8px',
                 marginBottom: 'var(--space-4)'
-              }} role="alert">
-                <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleVerify}>
-              {/* Email */}
-              <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                <label htmlFor="verify-email" className="form-label">
-                  {isNe ? 'दर्ता भएको इमेल' : 'Registered Email Address'} <span className="required">*</span>
-                </label>
-                <input
-                  id="verify-email"
-                  type="email"
-                  className="form-input"
-                  placeholder="e.g. student@example.com"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                  required
-                  disabled={isLoading}
-                />
+              }}>
+                <Info size={16} color="#0D8178" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span>
+                  {isNe
+                    ? 'यो चरणले तपाईंको इमेल स्वामित्व प्रमाणित गर्दछ। यसले स्वचालित रूपमा संस्थागत सदस्यता प्रमाणपत्र प्रदान गर्दैन।'
+                    : 'Email verification confirms email ownership only. It does not certify institutional status or replace college administrative triage.'}
+                </span>
               </div>
 
-              {/* Code */}
-              <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <label htmlFor="verify-token" className="form-label" style={{ margin: 0 }}>
-                    {isNe ? '६-अङ्कको प्रमाणीकरण कोड' : '6-Digit Verification Code'} <span className="required">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={isResending}
-                    style={{ background: 'none', border: 'none', padding: 0, color: '#0D8178', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
-                  >
-                    {isResending ? (isNe ? 'पठाउँदै...' : 'Resending...') : (isNe ? 'कोड पुनः पठाउनुहोस्' : 'Resend Code')}
-                  </button>
+              {infoMsg && (
+                <div style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#F0FDFA',
+                  border: '1px solid #CCFBF1',
+                  borderRadius: '6px',
+                  color: '#0F766E',
+                  fontSize: '0.8125rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: 'var(--space-4)'
+                }}>
+                  <CheckCircle2 size={16} />
+                  <span>{infoMsg}</span>
                 </div>
-                <input
-                  id="verify-token"
-                  type="text"
-                  maxLength={10}
-                  className="form-input"
-                  placeholder="e.g. 842109"
-                  value={token}
-                  onChange={(e) => {
-                    setToken(e.target.value);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                  style={{ fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '0.1em', textAlign: 'center', fontWeight: '700' }}
-                  required
+              )}
+
+              {errorMsg && (
+                <div style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: '6px',
+                  color: '#B91C1C',
+                  fontSize: '0.8125rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  marginBottom: 'var(--space-4)'
+                }} role="alert">
+                  <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleVerify}>
+                {/* Email */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                  <label htmlFor="verify-email" className="form-label">
+                    {isNe ? 'दर्ता भएको इमेल' : 'Registered Email Address'} <span className="required">*</span>
+                  </label>
+                  <input
+                    id="verify-email"
+                    type="email"
+                    className="form-input"
+                    placeholder="e.g. student@example.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+
+                {/* Code */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <label htmlFor="verify-token" className="form-label" style={{ margin: 0 }}>
+                      {isNe ? '६-अङ्कको प्रमाणीकरण कोड' : '6-Digit Verification Code'} <span className="required">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={isResending}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#0D8178', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
+                    >
+                      {isResending ? (isNe ? 'पठाउँदै...' : 'Resending...') : (isNe ? 'कोड पुनः पठाउनुहोस्' : 'Resend Code')}
+                    </button>
+                  </div>
+                  <input
+                    id="verify-token"
+                    type="text"
+                    maxLength={10}
+                    className="form-input"
+                    placeholder="e.g. 842109"
+                    value={token}
+                    onChange={(e) => {
+                      setToken(e.target.value);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    style={{ fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '0.1em', textAlign: 'center', fontWeight: '700' }}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-md"
                   disabled={isLoading}
-                />
+                  style={{ width: '100%', height: '44px', fontSize: '0.9375rem' }}
+                >
+                  {isLoading ? (
+                    <span>{isNe ? 'प्रमाणीकरण गरिँदैछ...' : 'Verifying email...'}</span>
+                  ) : (
+                    <>
+                      <MailCheck size={16} />
+                      <span>{isNe ? 'इमेल प्रमाणित गर्नुहोस्' : 'Confirm & Proceed to Portal'}</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Back to login */}
+              <div style={{
+                marginTop: 'var(--space-6)',
+                paddingTop: 'var(--space-4)',
+                borderTop: '1px solid var(--color-border)',
+                textAlign: 'center',
+                fontSize: '0.8125rem',
+                color: 'var(--color-muted)'
+              }}>
+                <Link to="/login" style={{ color: 'var(--color-muted)', fontWeight: '600' }}>
+                  {isNe ? 'लगइन पृष्ठमा फर्कनुहोस्' : 'Back to Login'}
+                </Link>
               </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="btn btn-primary btn-md"
-                disabled={isLoading}
-                style={{ width: '100%', height: '44px', fontSize: '0.9375rem' }}
-              >
-                {isLoading ? (
-                  <span>{isNe ? 'प्रमाणीकरण गरिँदैछ...' : 'Verifying email...'}</span>
-                ) : (
-                  <>
-                    <MailCheck size={16} />
-                    <span>{isNe ? 'इमेल प्रमाणित गर्नुहोस्' : 'Confirm & Proceed to Portal'}</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Back to login */}
-            <div style={{
-              marginTop: 'var(--space-6)',
-              paddingTop: 'var(--space-4)',
-              borderTop: '1px solid var(--color-border)',
-              textAlign: 'center',
-              fontSize: '0.8125rem',
-              color: 'var(--color-muted)'
-            }}>
-              <Link to="/login" style={{ color: 'var(--color-muted)', fontWeight: '600' }}>
-                {isNe ? 'लगइन पृष्ठमा फर्कनुहोस्' : 'Back to Login'}
-              </Link>
             </div>
-          </div>
 
-        </div>
+          </div>
       </main>
 
       <Footer />

@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getSafeRedirectUrl } from '../utils/url';
 
 export function LoginPage() {
-  const { loginStudent, language } = useApp();
+  const { loginStudent, isStudentLoggedIn, language } = useApp();
   const isNe = language === 'ne';
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect destination after login
+  // Safely validated redirect destination (defaulting to /dashboard)
   const searchParams = new URLSearchParams(location.search);
-  const redirectTarget = searchParams.get('redirect') || location.state?.from || '/student/complaints';
+  const rawTarget = searchParams.get('redirect') || location.state?.from;
+  const redirectTarget = getSafeRedirectUrl(rawTarget, '/dashboard');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // If already logged in, send directly to student dashboard
+  if (isStudentLoggedIn) {
+    return <Navigate to={redirectTarget} replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +54,7 @@ export function LoginPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ maxWidth: '460px', width: '100%', margin: '0 auto' }}>
-          
+
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
             <div style={{
@@ -196,7 +203,7 @@ export function LoginPage() {
             }}>
               <span>{isNe ? 'खाता छैन?' : "Don't have a student account yet?"} </span>
               <Link
-                to={`/register${redirectTarget !== '/student/complaints' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
+                to={`/register${redirectTarget !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
                 style={{ color: '#0D8178', fontWeight: '700' }}
               >
                 {isNe ? 'यहाँ दर्ता गर्नुहोस्' : 'Register Here'}

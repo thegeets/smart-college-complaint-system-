@@ -93,7 +93,7 @@ export function AppProvider({ children }) {
         setIsAdminLoggedIn(false);
         setAdminUser(null);
       }
-    } catch (err) {
+    } catch {
       setIsAdminLoggedIn(false);
       setAdminUser(null);
     } finally {
@@ -126,7 +126,7 @@ export function AppProvider({ children }) {
         setIsStudentLoggedIn(false);
         setStudentUser(null);
       }
-    } catch (err) {
+    } catch {
       setIsStudentLoggedIn(false);
       setStudentUser(null);
     } finally {
@@ -437,6 +437,28 @@ export function AppProvider({ children }) {
     return data;
   }, [csrfToken, showToast]);
 
+  // Real Admin Profile Update
+  const updateAdminProfile = useCallback(async ({ name, email, title }) => {
+    const res = await fetch('/api/v1/admin/auth/profile', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ name, email, title }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to update administrator profile.');
+    }
+
+    setAdminUser(data.admin);
+    showToast(data.message || 'Profile updated successfully.', 'success');
+    return data.admin;
+  }, [csrfToken, showToast]);
+
   // Legacy Public Complaint Submission (preserved)
   const submitComplaint = useCallback(async (formData, file) => {
     const body = new FormData();
@@ -695,6 +717,7 @@ export function AppProvider({ children }) {
     loginAdmin,
     logoutAdmin,
     changeAdminPassword,
+    updateAdminProfile,
     // Legacy Complaints Flow
     submitComplaint,
     trackComplaint,

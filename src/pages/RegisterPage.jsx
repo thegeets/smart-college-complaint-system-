@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { UserPlus, AlertCircle, Info } from 'lucide-react';
+import { getSafeRedirectUrl } from '../utils/url';
 
 const SEMESTERS = [
   '1st Semester',
@@ -23,7 +24,8 @@ export function RegisterPage() {
   const location = useLocation();
 
   const searchParams = new URLSearchParams(location.search);
-  const redirectTarget = searchParams.get('redirect') || '/student/complaints';
+  const rawTarget = searchParams.get('redirect') || location.state?.from;
+  const redirectTarget = getSafeRedirectUrl(rawTarget, '/dashboard');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -95,7 +97,7 @@ export function RegisterPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ maxWidth: '540px', width: '100%', margin: '0 auto' }}>
-          
+
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
             <div style={{
@@ -124,7 +126,7 @@ export function RegisterPage() {
 
           {/* Form Card */}
           <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
-            
+
             {/* Verification Disclaimer Notice */}
             <div style={{
               padding: '10px 14px',
@@ -332,7 +334,7 @@ export function RegisterPage() {
             }}>
               <span>{isNe ? 'पहिले नै खाता छ?' : 'Already have a registered account?'} </span>
               <Link
-                to={`/login${redirectTarget !== '/student/complaints' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
+                to={`/login${redirectTarget !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
                 style={{ color: '#0D8178', fontWeight: '700' }}
               >
                 {isNe ? 'यहाँ लगइन गर्नुहोस्' : 'Sign In'}

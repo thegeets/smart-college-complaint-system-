@@ -50,7 +50,8 @@ export function AdminLoginPage() {
 
     try {
       await loginAdmin(email.trim(), password);
-      navigate('/admin/dashboard');
+      const from = location.state?.from || '/admin/dashboard';
+      navigate(from, { replace: true });
     } catch (err) {
       console.error('Admin login error:', err);
       setErrorMsg(
@@ -125,7 +126,7 @@ export function AdminLoginPage() {
                 <Lock size={22} />
               </div>
               <h1 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
-                {isNe ? 'कलेज प्रशासनिक लगइन' : 'Administrator Sign In'}
+                {isNe ? 'प्रशासनिक साइन इन' : 'Administration sign in'}
               </h1>
               <p style={{ fontSize: '0.8125rem', color: 'var(--color-muted)', margin: 0 }}>
                 {COLLEGE_CONFIG.name} — {COLLEGE_CONFIG.deskTitle}
@@ -162,7 +163,7 @@ export function AdminLoginPage() {
                   id="adminEmail"
                   type="email"
                   className="form-input"
-                  placeholder="admin@sochcollege.edu.np"
+                  placeholder="admin@soch.example"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -263,7 +264,7 @@ export function AdminLoginPage() {
 
           <div style={{ textAlign: 'center', marginTop: 'var(--space-4)', fontSize: '0.8125rem' }}>
             <Link to="/" style={{ color: 'var(--color-muted)', textDecoration: 'none' }}>
-              ← {isNe ? 'सार्वजनिक उजुरी पोर्टलमा फर्कनुहोस्' : 'Return to Student Support Portal'}
+              ← {isNe ? 'सार्वजनिक गृहपृष्ठमा फर्कनुहोस्' : 'Return to public site'}
             </Link>
           </div>
 

@@ -40,15 +40,18 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Authenticated Student Portal Routes */}
-          <Route path="/student/complaints" element={<MyComplaintsPage />} />
+          <Route path="/dashboard" element={<MyComplaintsPage />} />
+          <Route path="/dashboard/complaints/:id" element={<ComplaintDetailsPage />} />
+          <Route path="/student/complaints" element={<Navigate to="/dashboard" replace />} />
           <Route path="/student/complaints/:id" element={<ComplaintDetailsPage />} />
-          <Route path="/student/dashboard" element={<Navigate to="/student/complaints" replace />} />
+          <Route path="/student/dashboard" element={<Navigate to="/dashboard" replace />} />
           <Route path="/student/profile" element={<ProfilePage />} />
-          <Route path="/student" element={<Navigate to="/student/complaints" replace />} />
+          <Route path="/student" element={<Navigate to="/dashboard" replace />} />
           <Route path="/student/submit" element={<Navigate to="/submit" replace />} />
 
-          {/* Dedicated Admin Portal Access */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+          {/* Dedicated Separate Administrator Access */}
+          <Route path="/adminlogin" element={<AdminLoginPage />} />
+          <Route path="/admin/login" element={<Navigate to="/adminlogin" replace />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
