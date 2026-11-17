@@ -126,7 +126,7 @@ export function PublicNavbar() {
             {isStudentLoggedIn ? (
               <Link 
                 to="/dashboard" 
-                className={`nav-link ${isComplaintsActive ? 'active' : ''}`}
+                className={`desktop-nav-link ${isComplaintsActive ? 'active' : ''}`}
                 aria-current={isComplaintsActive ? 'page' : undefined}
               >
                 <FileText size={15} aria-hidden="true" />
@@ -136,16 +136,16 @@ export function PublicNavbar() {
               <>
                 <Link 
                   to="/track" 
-                  className={`nav-link ${isTrackActive ? 'active' : ''}`}
+                  className={`desktop-nav-link ${isTrackActive ? 'active' : ''}`}
                   aria-current={isTrackActive ? 'page' : undefined}
                 >
                   <Search size={15} aria-hidden="true" />
                   <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Status'}</span>
                 </Link>
-                <a href="/#process" className="nav-link">
+                <a href="/#process" className="desktop-nav-link">
                   <span>{isNe ? 'प्रक्रिया' : 'Process'}</span>
                 </a>
-                <a href="/#contact" className="nav-link">
+                <a href="/#contact" className="desktop-nav-link">
                   <span>{isNe ? 'सम्पर्क' : 'Support'}</span>
                 </a>
               </>
@@ -193,7 +193,7 @@ export function PublicNavbar() {
 
             {/* Primary Action Button */}
             <Link 
-              to={isStudentLoggedIn ? '/submit' : '/login?redirect=/submit'} 
+              to={isStudentLoggedIn ? '/submit' : '/login?redirect=%2Fsubmit'} 
               className="btn btn-primary btn-sm btn-nav-cta"
             >
               <PlusCircle size={15} aria-hidden="true" />
@@ -354,7 +354,7 @@ export function PublicNavbar() {
         {/* Drawer Bottom CTA */}
         <div className="mobile-drawer-footer">
           <Link 
-            to={isStudentLoggedIn ? '/submit' : '/login?redirect=/submit'} 
+            to={isStudentLoggedIn ? '/submit' : '/login?redirect=%2Fsubmit'} 
             className="btn btn-primary btn-md mobile-drawer-cta"
             onClick={closeMenu}
             tabIndex={mobileMenuOpen ? 0 : -1}

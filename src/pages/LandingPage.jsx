@@ -178,11 +178,11 @@ export function LandingPage() {
             <h1 className="hero-main-title">
               {isNe ? (
                 <>
-                  क्याम्पस आईटी समस्याहरू दर्ता गर्नुहोस् र आफ्नो <span className="text-teal-highlight">विद्यार्थी ड्यासबोर्डबाट</span> प्रगति हेर्नुहोस्।
+                  विद्यार्थी क्याम्पस आईटी सेवा तथा <span className="text-teal-highlight">उजुरी पोर्टल</span>
                 </>
               ) : (
                 <>
-                  Report campus IT issues and follow updates from your <span className="text-teal-highlight">student dashboard.</span>
+                  Student Campus IT Service &amp; <span className="text-teal-highlight">Grievance Portal</span>
                 </>
               )}
             </h1>
@@ -190,8 +190,8 @@ export function LandingPage() {
             {/* Supporting Copy */}
             <p className="hero-lead-description">
               {isNe
-                ? 'कम्प्युटर ल्याब, वाइफाइ, प्रोजेक्टर तथा अन्य क्याम्पस आईटी समस्याहरू दर्ता गर्न लगइन गर्नुहोस्। प्रगति र आधिकारिक जवाफहरू एकै ठाउँमा हेर्नुहोस्।'
-                : 'Sign in to report computer lab, Wi-Fi, projector, and other campus IT issues. View progress and replies in one place.'}
+                ? 'कम्प्युटर ल्याब, क्याम्पस वाइफाइ, प्रोजेक्टर तथा सफ्टवेयरसम्बन्धी समस्याहरू आधिकारिक रूपमा दर्ता गर्नुहोस् र आफ्नो विद्यार्थी ड्यासबोर्डबाट प्रत्यक्ष समाधानको प्रगति हेर्नुहोस्।'
+                : 'Submit technical reports for computer lab workstations, campus Wi-Fi, classroom projectors, and programming environments. Track verified updates directly from your student dashboard.'}
             </p>
 
             {/* Action Buttons */}
@@ -214,23 +214,6 @@ export function LandingPage() {
                 </Link>
               )}
             </div>
-
-            {/* Quick Reassurance Features */}
-            <div className="hero-features-strip">
-              <div className="hero-feature-pill">
-                <UserCheck size={14} color="#0D8178" />
-                <span>{isNe ? 'विद्यार्थी प्रमाणीकरण' : 'Student Verified'}</span>
-              </div>
-              <div className="hero-feature-pill">
-                <CheckCircle2 size={14} color="#0D8178" />
-                <span>{isNe ? 'ड्यासबोर्ड ट्र्याकिङ' : 'Dashboard Tracking'}</span>
-              </div>
-              <div className="hero-feature-pill">
-                <ShieldCheck size={14} color="#0D8178" />
-                <span>{isNe ? 'कलेज डेस्कद्वारा प्रत्यक्ष मर्मत' : 'Campus IT Desk'}</span>
-              </div>
-            </div>
-
           </div>
 
           {/* Right Column: Complaint Resolution Workflow Visual */}
