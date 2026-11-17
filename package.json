@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server/server.js",
+    "setup-admin": "node server/scripts/createAdmin.js",
     "create-admin": "node server/scripts/createAdmin.js",
     "reset-admin-password": "node server/scripts/resetAdminPassword.js",
     "migrate-program": "node server/scripts/migrateProgramField.js",
@@ -28,6 +29,7 @@
     "lucide-react": "^1.55.0",
     "mongoose": "^9.11.2",
     "multer": "^2.4.0",
+    "nodemailer": "^10.6.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4"

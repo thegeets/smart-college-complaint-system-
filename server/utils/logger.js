@@ -18,6 +18,11 @@ const SENSITIVE_KEYS = new Set([
   'csrftoken',
   'studentdescription',
   'description',
+  'token',
+  'verificationtoken',
+  'emailverificationtoken',
+  'resettoken',
+  'resetpasswordtoken',
 ]);
 
 function redactObject(obj, depth = 0) {
