@@ -10,8 +10,65 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const REQUIRED_IN_PROD = ['SESSION_SECRET', 'MONGODB_URI'];
 
+/**
+ * Validates MongoDB URI format defensively without logging credentials.
+ * Fails fast with clear, actionable diagnostics if unreplaced templates or empty passwords are provided.
+ */
+export function validateMongoUri(uri) {
+  if (!uri || typeof uri !== 'string') {
+    throw new Error('[FATAL] MONGODB_URI must be a non-empty string.');
+  }
+
+  const trimmed = uri.trim();
+
+  if (!trimmed.startsWith('mongodb://') && !trimmed.startsWith('mongodb+srv://')) {
+    throw new Error(
+      '[FATAL] Invalid MONGODB_URI protocol. The connection string must start with "mongodb://" or "mongodb+srv://".'
+    );
+  }
+
+  // Check for common unreplaced placeholder tokens from MongoDB Atlas copy-paste templates
+  const placeholderPatterns = [/<password>/i, /<db_username>/i, /<username>/i, /<dbname>/i];
+  for (const pattern of placeholderPatterns) {
+    if (pattern.test(trimmed)) {
+      throw new Error(
+        `[FATAL] MONGODB_URI contains unreplaced placeholder text matching ${pattern}. Please replace with your actual MongoDB Atlas database credentials.`
+      );
+    }
+  }
+
+  // Check for authority part with empty password (e.g. mongodb+srv://username:@cluster...)
+  const authMatch = trimmed.match(/^mongodb(?:\+srv)?:\/\/([^@]+)@/);
+  if (authMatch) {
+    const creds = authMatch[1];
+    if (creds.includes(':')) {
+      const colonIndex = creds.indexOf(':');
+      const passwordPart = creds.slice(colonIndex + 1);
+      if (passwordPart.length === 0) {
+        throw new Error(
+          '[FATAL] MONGODB_URI has an empty password after the username colon (:). Please provide your database user password in the connection string.'
+        );
+      }
+    }
+  }
+
+  // Check for multiple unencoded '@' symbols in the authority segment
+  const schemeEnd = trimmed.indexOf('://') + 3;
+  const authorityAndPath = trimmed.slice(schemeEnd);
+  const hostPart = authorityAndPath.split('/')[0] || '';
+  const atCount = (hostPart.match(/@/g) || []).length;
+  if (atCount > 1) {
+    throw new Error(
+      '[FATAL] MONGODB_URI contains multiple "@" symbols before the host. If your password contains "@", please URL-encode it as "%40".'
+    );
+  }
+
+  return trimmed;
+}
+
 export function validateEnv() {
   const isProd = process.env.NODE_ENV === 'production';
+  const isTest = process.env.NODE_ENV === 'test';
 
   if (isProd) {
     const missing = REQUIRED_IN_PROD.filter((key) => !process.env[key]);
@@ -24,11 +81,33 @@ export function validateEnv() {
     }
   }
 
+  let rawMongoUri = process.env.MONGODB_URI;
+  let validatedMongoUri = 'mongodb://127.0.0.1:27017/smart_college_complaints';
+
+  if (isTest) {
+    // Tests always run against local database to avoid polluting or wiping production clusters
+    validatedMongoUri = process.env.MONGODB_URI_TEST || 'mongodb://127.0.0.1:27017/smart_college_complaints';
+  } else if (isProd) {
+    // In production, strictly enforce valid format
+    validatedMongoUri = validateMongoUri(rawMongoUri);
+  } else if (rawMongoUri) {
+    // In development, validate and fall back gracefully if invalid credentials were provided
+    try {
+      validatedMongoUri = validateMongoUri(rawMongoUri);
+    } catch (err) {
+      console.warn(`[WARN] ${err.message} Falling back to local MongoDB for development.`);
+      validatedMongoUri = 'mongodb://127.0.0.1:27017/smart_college_complaints';
+    }
+  }
+
+  const cookieSameSite = process.env.COOKIE_SAME_SITE || (isProd ? 'none' : 'lax');
+  const cookieSecure = process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : isProd;
+
   // Provide safe defaults for development
   return {
     PORT: parseInt(process.env.PORT || '5000', 10),
     NODE_ENV: process.env.NODE_ENV || 'development',
-    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/smart_college_complaints',
+    MONGODB_URI: validatedMongoUri,
     SESSION_SECRET: process.env.SESSION_SECRET || 'dev-only-secret-do-not-use-in-production-min-32-chars',
     CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
     UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/attachments',
@@ -37,6 +116,8 @@ export function validateEnv() {
     RATE_LIMIT_MAX_SUBMISSIONS: parseInt(process.env.RATE_LIMIT_MAX_SUBMISSIONS || '10', 10),
     RATE_LIMIT_MAX_TRACKING: parseInt(process.env.RATE_LIMIT_MAX_TRACKING || '30', 10),
     RATE_LIMIT_MAX_LOGINS: parseInt(process.env.RATE_LIMIT_MAX_LOGINS || '5', 10),
+    COOKIE_SAME_SITE: cookieSameSite,
+    COOKIE_SECURE: cookieSecure,
   };
 }
 

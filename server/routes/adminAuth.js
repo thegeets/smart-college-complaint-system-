@@ -1,4 +1,5 @@
 import express from 'express';
+import { ENV } from '../config/env.js';
 import { Admin } from '../models/Admin.js';
 import { requireAdminAuth } from '../middleware/auth.js';
 import { verifyCsrfToken } from '../middleware/csrf.js';
@@ -93,7 +94,8 @@ router.post('/logout', (req, res) => {
       res.clearCookie('sccs_admin_sid', {
         path: '/',
         httpOnly: true,
-        sameSite: 'lax',
+        secure: ENV.COOKIE_SECURE,
+        sameSite: ENV.COOKIE_SAME_SITE,
       });
       return res.status(200).json({
         success: true,

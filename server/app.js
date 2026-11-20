@@ -21,6 +21,10 @@ import studentComplaintsRouter from './routes/studentComplaints.js';
 export function createApp() {
   const app = express();
 
+  // 0. Enable reverse proxy trust (Render / Load Balancer / Cloudflare)
+  // Required so req.secure, X-Forwarded-Proto, and client IP are trusted for secure cookies & rate limiting
+  app.set('trust proxy', 1);
+
   // 1. Security Headers via Helmet
   app.use(
     helmet({
@@ -32,16 +36,20 @@ export function createApp() {
   // 2. Explicit CORS origin (strictly no wildcard with credentials: true)
   const allowedOrigins = (ENV.CORS_ORIGIN || 'http://localhost:5173')
     .split(',')
-    .map((o) => o.trim());
+    .map((o) => o.trim().replace(/\/+$/, '')); // Strip any trailing slashes
 
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow requests with no origin (e.g. mobile apps, curl, or same-origin)
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin) {
           return callback(null, true);
         }
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
+        const normalizedOrigin = origin.replace(/\/+$/, '');
+        if (allowedOrigins.includes(normalizedOrigin)) {
+          return callback(null, true);
+        }
+        return callback(null, false);
       },
       credentials: true,
       methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
@@ -72,8 +80,8 @@ export function createApp() {
       }),
       cookie: {
         httpOnly: true,
-        secure: ENV.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: ENV.COOKIE_SECURE,
+        sameSite: ENV.COOKIE_SAME_SITE,
         maxAge: 8 * 60 * 60 * 1000, // 8 hours
       },
     })

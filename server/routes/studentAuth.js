@@ -1,4 +1,5 @@
 import express from 'express';
+import { ENV } from '../config/env.js';
 import { Student, ALLOWED_SEMESTERS } from '../models/Student.js';
 import { hashPassword, verifyPassword, generateNumericToken } from '../utils/crypto.js';
 import { requireStudentAuth } from '../middleware/auth.js';
@@ -357,7 +358,12 @@ router.post('/logout', (req, res) => {
         message: 'Could not log out session cleanly.',
       });
     }
-    res.clearCookie('sccs_admin_sid');
+    res.clearCookie('sccs_admin_sid', {
+      path: '/',
+      httpOnly: true,
+      secure: ENV.COOKIE_SECURE,
+      sameSite: ENV.COOKIE_SAME_SITE,
+    });
     return res.status(200).json({
       success: true,
       message: 'Logged out successfully.',

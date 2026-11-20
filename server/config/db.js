@@ -3,8 +3,18 @@ import { ENV } from './env.js';
 
 let isConnected = false;
 
+// Register connection lifecycle listeners once
+mongoose.connection.on('error', (err) => {
+  console.error('[Database] MongoDB connection error event:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  isConnected = false;
+  console.warn('[Database] MongoDB connection lost/disconnected.');
+});
+
 export async function connectDB() {
-  if (isConnected) {
+  if (isConnected && mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
 
@@ -24,7 +34,7 @@ export async function connectDB() {
 }
 
 export async function disconnectDB() {
-  if (isConnected) {
+  if (isConnected || mongoose.connection.readyState !== 0) {
     await mongoose.disconnect();
     isConnected = false;
     console.log('[Database] MongoDB disconnected cleanly.');
