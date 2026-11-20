@@ -31,7 +31,7 @@ export function BrandLogo({
         className="brand-logo-mark"
         role="img"
         aria-label={accessibleName}
-        title={COLLEGE_CONFIG.logo.isTemporaryMark ? "Replaceable logo placeholder (configurable in collegeConfig.js)" : accessibleName}
+        title={accessibleName}
         style={{
           width: size,
           height: size,
@@ -40,21 +40,20 @@ export function BrandLogo({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '8px',
-          backgroundColor: isLight ? '#FFFFFF' : '#15365B',
-          border: isLight ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid #0F2847',
-          boxShadow: isLight ? '0 1px 3px rgba(0,0,0,0.12)' : '0 1px 2px rgba(15,23,42,0.15)',
+          borderRadius: imageUrl ? '50%' : '8px',
+          backgroundColor: imageUrl ? 'transparent' : (isLight ? '#FFFFFF' : '#15365B'),
+          border: imageUrl ? 'none' : (isLight ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid #0F2847'),
+          boxShadow: imageUrl ? 'none' : (isLight ? '0 1px 3px rgba(0,0,0,0.12)' : '0 1px 2px rgba(15,23,42,0.15)'),
           color: isLight ? '#15365B' : '#FFFFFF',
           flexShrink: 0,
           position: 'relative',
-          overflow: 'hidden',
         }}
       >
         {imageUrl ? (
           <img 
             src={imageUrl} 
             alt={accessibleName}
-            style={{ width: '85%', height: '85%', objectFit: 'contain' }} 
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} 
           />
         ) : (
           <svg 

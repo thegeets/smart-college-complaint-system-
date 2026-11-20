@@ -18,15 +18,15 @@ export const COLLEGE_CONFIG = {
   // Academic Program: Soch College of IT exclusively offers BSc CSIT
   program: 'BSc CSIT',
 
-  // Logo Configuration (Replaceable placeholder mark)
+  // Logo Configuration (Official college logo)
   logo: {
-    imageUrl: null,
-    altText: 'Soch College of IT, Pokhara - Logo Placeholder (Replaceable)',
-    accessibleName: 'Soch College of IT Logo Placeholder',
-    useOriginalLogoMark: true,
-    isTemporaryMark: true,
-    temporaryMarkLabel: 'Replaceable Logo Placeholder',
-    replacementGuide: 'To replace with the official college logo: place your logo image in /public or /src/assets and set imageUrl in src/config/collegeConfig.js',
+    imageUrl: '/college-logo.png',
+    altText: 'Soch College of IT, Pokhara - Official Logo',
+    accessibleName: 'Soch College of IT Official Logo',
+    useOriginalLogoMark: false,
+    isTemporaryMark: false,
+    temporaryMarkLabel: 'Official College Logo',
+    replacementGuide: 'Official college logo asset stored in /public/college-logo.png and /src/assets/college-logo.png',
   },
 
   // Contact Channels

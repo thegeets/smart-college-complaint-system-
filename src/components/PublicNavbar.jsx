@@ -96,115 +96,135 @@ export function PublicNavbar() {
   const isTrackActive = location.pathname === '/track';
   const isComplaintsActive = location.pathname === '/dashboard' || location.pathname.startsWith('/student/complaints');
   const isProfileActive = location.pathname === '/student/profile';
+  const isProcessActive = location.pathname === '/' && location.hash === '#process';
+  const isContactActive = location.pathname === '/' && location.hash === '#contact';
 
   return (
     <header className="site-header">
       <div className="site-header-inner">
         {/* Left: Brand Identity / Home Link */}
-        <Link 
-          to="/" 
-          className="site-brand-link" 
-          aria-label={`${COLLEGE_CONFIG.name} — Home`}
-          onClick={() => {
-            closeMenu();
-            if (location.pathname === '/') {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          }}
-        >
-          <BrandLogo 
-            size={34} 
-            collegeName={COLLEGE_CONFIG.shortName} 
-            subtitle={isNe ? 'आईटी उजुरी तथा सहायता डेस्क' : 'IT Service & Grievance Desk'} 
-          />
-        </Link>
+        <div className="header-brand-column">
+          <Link 
+            to="/" 
+            className="site-brand-link" 
+            aria-label={`${COLLEGE_CONFIG.name} — Home`}
+            onClick={() => {
+              closeMenu();
+              if (location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+          >
+            <BrandLogo 
+              size={44} 
+              collegeName={COLLEGE_CONFIG.shortName} 
+              subtitle={isNe ? 'आईटी सेवा डेस्क' : 'IT Service Desk'} 
+            />
+          </Link>
+        </div>
 
-        {/* Center / Right: Desktop Navigation */}
-        <nav className="desktop-nav-wrap" aria-label={isNe ? 'मुख्य नेभिगेसन' : 'Main Navigation'}>
-          {/* Essential Public or Authenticated Links */}
-          <div className="desktop-nav-links">
-            {isStudentLoggedIn ? (
-              <Link 
-                to="/dashboard" 
-                className={`desktop-nav-link ${isComplaintsActive ? 'active' : ''}`}
-                aria-current={isComplaintsActive ? 'page' : undefined}
-              >
-                <FileText size={15} aria-hidden="true" />
-                <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
-              </Link>
-            ) : (
-              <>
-                <Link 
-                  to="/track" 
-                  className={`desktop-nav-link ${isTrackActive ? 'active' : ''}`}
-                  aria-current={isTrackActive ? 'page' : undefined}
-                >
-                  <Search size={15} aria-hidden="true" />
-                  <span>{isNe ? 'उजुरी ट्र्याक' : 'Track Status'}</span>
-                </Link>
-                <a href="/#process" className="desktop-nav-link">
-                  <span>{isNe ? 'प्रक्रिया' : 'Process'}</span>
-                </a>
-                <a href="/#contact" className="desktop-nav-link">
-                  <span>{isNe ? 'सम्पर्क' : 'Support'}</span>
-                </a>
-              </>
-            )}
-          </div>
-
-          {/* Action Cluster: Language Switcher, Account Entry, Primary CTA */}
-          <div className="desktop-actions-cluster">
-            <LanguageSwitcher size="sm" />
-
-            {isStudentLoggedIn ? (
-              /* Signed In Student Actions */
-              <div className="student-account-cluster">
-                <Link
-                  to="/student/profile"
-                  className={`btn btn-secondary btn-sm ${isProfileActive ? 'active' : ''}`}
-                  title={studentUser?.name}
-                >
-                  <User size={14} aria-hidden="true" />
-                  <span className="student-profile-name">
-                    {studentUser?.name ? studentUser.name.split(' ')[0] : 'Profile'}
-                  </span>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="btn btn-secondary btn-sm btn-icon-only"
-                  title={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
-                  aria-label={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
-                >
-                  <LogOut size={14} aria-hidden="true" />
-                </button>
-              </div>
-            ) : (
-              /* Signed Out: Single Clear Account Entry Point */
-              <Link
-                to="/login"
-                className="btn btn-secondary btn-sm"
-              >
-                <LogIn size={14} aria-hidden="true" />
-                <span>{isNe ? 'लगइन' : 'Sign In'}</span>
-              </Link>
-            )}
-
-            {/* Primary Action Button */}
+        {/* Center: Deliberately Centered Navigation */}
+        <nav className="header-nav-column" aria-label={isNe ? 'मुख्य नेभिगेसन' : 'Main Navigation'}>
+          {isStudentLoggedIn ? (
             <Link 
-              to={isStudentLoggedIn ? '/submit' : '/login?redirect=%2Fsubmit'} 
-              className="btn btn-primary btn-sm btn-nav-cta"
+              to="/dashboard" 
+              className={`header-nav-link ${isComplaintsActive ? 'active' : ''}`}
+              aria-current={isComplaintsActive ? 'page' : undefined}
             >
-              <PlusCircle size={15} aria-hidden="true" />
-              <span>{isNe ? 'उजुरी दर्ता' : 'Report Issue'}</span>
+              <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
             </Link>
-          </div>
+          ) : null}
+
+          <Link 
+            to="/track" 
+            className={`header-nav-link ${isTrackActive ? 'active' : ''}`}
+            aria-current={isTrackActive ? 'page' : undefined}
+          >
+            <span>{isNe ? 'उजुरी स्थिति' : 'Track Status'}</span>
+          </Link>
+
+          <a 
+            href="/#process" 
+            className={`header-nav-link ${isProcessActive ? 'active' : ''}`}
+            aria-current={isProcessActive ? 'section' : undefined}
+            onClick={(e) => {
+              if (location.pathname === '/') {
+                e.preventDefault();
+                document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' });
+                navigate('/#process', { replace: true });
+              }
+            }}
+          >
+            <span>{isNe ? 'प्रक्रिया' : 'Process'}</span>
+          </a>
+
+          <a 
+            href="/#contact" 
+            className={`header-nav-link ${isContactActive ? 'active' : ''}`}
+            aria-current={isContactActive ? 'section' : undefined}
+            onClick={(e) => {
+              if (location.pathname === '/') {
+                e.preventDefault();
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                navigate('/#contact', { replace: true });
+              }
+            }}
+          >
+            <span>{isNe ? 'सहायता' : 'Support'}</span>
+          </a>
         </nav>
 
-        {/* Mobile Actions: Language Switcher & Hamburger Button */}
+        {/* Right: Actions (Compact Language Selector, Sign In, Report Issue) */}
+        <div className="header-actions-column">
+          <LanguageSwitcher />
+
+          {isStudentLoggedIn ? (
+            /* Signed In Student Actions */
+            <div className="student-account-cluster">
+              <Link
+                to="/student/profile"
+                className={`header-signin-link ${isProfileActive ? 'active' : ''}`}
+                title={studentUser?.name}
+              >
+                <User size={15} aria-hidden="true" style={{ marginRight: '4px' }} />
+                <span className="student-profile-name">
+                  {studentUser?.name ? studentUser.name.split(' ')[0] : 'Profile'}
+                </span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="header-signin-link"
+                title={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
+                aria-label={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
+                style={{ cursor: 'pointer', background: 'none', border: 'none' }}
+              >
+                <LogOut size={15} aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
+            /* Signed Out: Low-Emphasis Text-Style Sign In Action */
+            <Link
+              to="/login"
+              className="header-signin-link"
+            >
+              <span>{isNe ? 'लगइन' : 'Sign In'}</span>
+            </Link>
+          )}
+
+          {/* Solid Navy CTA: Report Issue (approx 40px high, 8px radius) */}
+          <Link 
+            to={isStudentLoggedIn ? '/submit' : '/login?redirect=%2Fsubmit'} 
+            className="header-cta-btn"
+          >
+            <span>{isNe ? 'उजुरी दर्ता' : 'Report Issue'}</span>
+          </Link>
+        </div>
+
+        {/* Mobile Bar: Compact Language Dropdown + Accessible Menu Toggle */}
         <div className="mobile-actions-bar">
-          <LanguageSwitcher size="sm" />
+          <LanguageSwitcher />
           <button
             ref={menuToggleRef}
             type="button"
@@ -236,9 +256,9 @@ export function PublicNavbar() {
       >
         <div className="mobile-drawer-header">
           <BrandLogo 
-            size={28} 
+            size={36} 
             collegeName={COLLEGE_CONFIG.shortName} 
-            subtitle={isNe ? 'आईटी उजुरी डेस्क' : 'IT Helpdesk'} 
+            subtitle={isNe ? 'आईटी सेवा डेस्क' : 'IT Service Desk'} 
           />
           <button
             ref={closeBtnRef}
@@ -270,7 +290,7 @@ export function PublicNavbar() {
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <Search size={16} aria-hidden="true" />
-            <span>{isNe ? 'उजुरी स्थिति ट्र्याक' : 'Track Issue Status'}</span>
+            <span>{isNe ? 'उजुरी स्थिति' : 'Track Status'}</span>
           </Link>
 
           <a 
@@ -280,7 +300,7 @@ export function PublicNavbar() {
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <HelpCircle size={16} aria-hidden="true" />
-            <span>{isNe ? 'समाधान प्रक्रिया' : 'Resolution Process'}</span>
+            <span>{isNe ? 'प्रक्रिया' : 'Process'}</span>
           </a>
 
           <a 
@@ -290,7 +310,7 @@ export function PublicNavbar() {
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <PhoneCall size={16} aria-hidden="true" />
-            <span>{isNe ? 'कलेज आईटी सम्पर्क' : 'Campus IT Support'}</span>
+            <span>{isNe ? 'सहायता' : 'Support'}</span>
           </a>
 
           <div className="mobile-drawer-divider" />
@@ -360,7 +380,7 @@ export function PublicNavbar() {
             tabIndex={mobileMenuOpen ? 0 : -1}
           >
             <PlusCircle size={16} aria-hidden="true" />
-            <span>{isNe ? 'नयाँ उजुरी दर्ता' : 'Report an Issue'}</span>
+            <span>{isNe ? 'उजुरी दर्ता' : 'Report Issue'}</span>
           </Link>
         </div>
       </div>
