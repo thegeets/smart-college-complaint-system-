@@ -19,7 +19,13 @@ export function validateMongoUri(uri) {
     throw new Error('[FATAL] MONGODB_URI must be a non-empty string.');
   }
 
-  const trimmed = uri.trim();
+  // Safely strip accidental copy-paste artifacts (quotes or "MONGODB_URI=" prefix)
+  let trimmed = uri.trim();
+  trimmed = trimmed.replace(/^["']+|["']+$/g, '').trim();
+  if (trimmed.startsWith('MONGODB_URI=')) {
+    console.warn('[Config] Note: Removed accidental "MONGODB_URI=" prefix from environment variable.');
+    trimmed = trimmed.replace(/^MONGODB_URI=\s*/, '').replace(/^["']+|["']+$/g, '').trim();
+  }
 
   if (!trimmed.startsWith('mongodb://') && !trimmed.startsWith('mongodb+srv://')) {
     throw new Error(
@@ -63,6 +69,13 @@ export function validateMongoUri(uri) {
     );
   }
 
+  // If the Atlas URI ends in a trailing slash without a database name, ensure smart_college_complaints is targeted
+  if (trimmed.endsWith('.mongodb.net/')) {
+    trimmed = `${trimmed}smart_college_complaints?retryWrites=true&w=majority`;
+  } else if (trimmed.endsWith('.mongodb.net')) {
+    trimmed = `${trimmed}/smart_college_complaints?retryWrites=true&w=majority`;
+  }
+
   return trimmed;
 }
 
@@ -83,6 +96,18 @@ export function validateEnv() {
 
   let rawMongoUri = process.env.MONGODB_URI;
   let validatedMongoUri = 'mongodb://127.0.0.1:27017/smart_college_complaints';
+
+  // Safe diagnostic: reports only presence and protocol type, NEVER prints secrets or hostnames
+  const rawClean = rawMongoUri ? rawMongoUri.trim().replace(/^["']+|["']+$/g, '') : '';
+  const hasUri = Boolean(rawClean);
+  const detectedProtocol = rawClean.startsWith('mongodb+srv://')
+    ? 'mongodb+srv://'
+    : rawClean.startsWith('mongodb://')
+    ? 'mongodb://'
+    : hasUri
+    ? 'invalid/non-mongodb'
+    : 'none';
+  console.log(`[Config] Database URI configured: ${hasUri} | Protocol: ${detectedProtocol}`);
 
   if (isTest) {
     // Tests always run against local database to avoid polluting or wiping production clusters

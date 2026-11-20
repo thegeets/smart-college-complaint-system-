@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "destination": "https://smart-college-complaint-system-4f8d.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
