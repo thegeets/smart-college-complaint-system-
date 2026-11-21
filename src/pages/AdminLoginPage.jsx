@@ -115,15 +115,15 @@ export function AdminLoginPage() {
               <div style={{
                 width: '46px',
                 height: '46px',
-                borderRadius: '8px',
-                backgroundColor: '#EEF4F9',
-                color: '#15365D',
+                borderRadius: '10px',
+                backgroundColor: '#EEF3FB',
+                color: '#101D35',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: 'var(--space-3)'
               }}>
-                <Lock size={22} />
+                <Lock size={22} color="#5278C8" />
               </div>
               <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
                 {isNe ? 'प्रशासनिक साइन इन' : 'Administration sign in'}

@@ -104,14 +104,14 @@ export function RegisterPage() {
               width: '52px',
               height: '52px',
               borderRadius: '12px',
-              backgroundColor: '#EEF4F9',
-              color: '#15365B',
+              backgroundColor: '#EEF3FB',
+              color: '#101D35',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 'var(--space-3)'
             }}>
-              <UserPlus size={26} />
+              <UserPlus size={26} color="#5278C8" />
             </div>
 
             <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
@@ -130,7 +130,7 @@ export function RegisterPage() {
             {/* Verification Disclaimer Notice */}
             <div style={{
               padding: '10px 14px',
-              backgroundColor: '#F8FAFC',
+              backgroundColor: '#F8FAFD',
               border: '1px solid #E2E8F0',
               borderRadius: '6px',
               fontSize: '0.8125rem',
@@ -140,7 +140,7 @@ export function RegisterPage() {
               gap: '8px',
               marginBottom: 'var(--space-6)'
             }}>
-              <Info size={16} color="#0D8178" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <Info size={16} color="#5278C8" style={{ flexShrink: 0, marginTop: '2px' }} />
               <span>
                 {isNe
                   ? 'दर्तापछि इमेल स्वामित्व प्रमाणित गर्न कोड पठाइनेछ। इमेल प्रमाणीकरणले इमेल स्वामित्व मात्र पुष्टि गर्छ; कलेजको सदस्यता प्रशासनिक रूपमा रुजु गरिन्छ।'
@@ -335,7 +335,7 @@ export function RegisterPage() {
               <span>{isNe ? 'पहिले नै खाता छ?' : 'Already have a registered account?'} </span>
               <Link
                 to={`/login${redirectTarget !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
-                style={{ color: '#0D8178', fontWeight: '700' }}
+                style={{ color: '#5278C8', fontWeight: '700' }}
               >
                 {isNe ? 'यहाँ लगइन गर्नुहोस्' : 'Sign In'}
               </Link>

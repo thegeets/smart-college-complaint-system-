@@ -122,7 +122,7 @@ export function SubmitComplaintPage() {
   if (isCheckingStudentSession) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)' }}>
-        <p style={{ fontWeight: '600', color: '#15365B' }}>Checking student credentials...</p>
+        <p style={{ fontWeight: '600', color: '#101D35' }}>Checking student credentials...</p>
       </div>
     );
   }
@@ -215,7 +215,7 @@ export function SubmitComplaintPage() {
                 <span style={{ fontSize: '0.8125rem', color: '#64748B', fontWeight: '600' }}>
                   {isNe ? 'सन्दर्भ कोड:' : 'Complaint Reference:'}
                 </span>
-                <span style={{ fontFamily: 'monospace', fontWeight: '700', fontSize: '1.1rem', color: '#15365B' }}>
+                <span style={{ fontFamily: 'monospace', fontWeight: '700', fontSize: '1.1rem', color: '#101D35' }}>
                   {submittedComplaint.reference}
                 </span>
               </div>
@@ -248,10 +248,10 @@ export function SubmitComplaintPage() {
             <div className="card" style={{ padding: 'var(--space-8)' }}>
 
               <div style={{ marginBottom: 'var(--space-6)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--space-4)' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0D8178', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#5278C8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
                   {COLLEGE_CONFIG.name}
                 </div>
-                <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 6px' }}>
+                <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: '#101D35', margin: '0 0 6px' }}>
                   {isNe ? 'आईटी उजुरी दर्ता फारम' : 'Lodge a Campus IT Complaint'}
                 </h1>
                 <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0, lineHeight: '1.5' }}>
@@ -283,15 +283,15 @@ export function SubmitComplaintPage() {
 
                 {/* 1. Student Identification (Auto-filled) */}
                 <div style={{
-                  backgroundColor: '#F8FAFC',
+                  backgroundColor: '#F8FAFD',
                   border: '1px solid #E2E8F0',
                   borderRadius: '8px',
                   padding: '16px',
                   marginBottom: 'var(--space-6)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <User size={16} color="#15365B" />
-                    <h2 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
+                    <User size={16} color="#101D35" />
+                    <h2 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#101D35', margin: 0 }}>
                       {isNe ? '१. विद्यार्थी परिचय (खाताबाट स्वचालित)' : '1. Student Identification (From Active Account)'}
                     </h2>
                   </div>
@@ -336,8 +336,8 @@ export function SubmitComplaintPage() {
                   marginBottom: 'var(--space-6)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                    <Layers size={16} color="#15365B" />
-                    <h2 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
+                    <Layers size={16} color="#101D35" />
+                    <h2 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#101D35', margin: 0 }}>
                       {isNe ? '२. उजुरीको वर्गीकरण तथा विवरण' : '2. Grievance Details'}
                     </h2>
                   </div>
@@ -390,7 +390,7 @@ export function SubmitComplaintPage() {
                       <label htmlFor="complaint-title" className="form-label" style={{ margin: 0 }}>
                         {isNe ? 'उजुरी शीर्षक' : 'Subject / Title'} <span className="required">*</span>
                       </label>
-                      <span style={{ fontSize: '0.6875rem', color: formData.title.length < 5 ? '#94A3B8' : '#0D8178' }}>
+                      <span style={{ fontSize: '0.6875rem', color: formData.title.length < 5 ? '#94A3B8' : '#15803D' }}>
                         {formData.title.length}/100
                       </span>
                     </div>
@@ -416,7 +416,7 @@ export function SubmitComplaintPage() {
                       <label htmlFor="complaint-description" className="form-label" style={{ margin: 0 }}>
                         {isNe ? 'विस्तृत विवरण' : 'Detailed Description'} <span className="required">*</span>
                       </label>
-                      <span style={{ fontSize: '0.6875rem', color: formData.description.length < 15 ? '#94A3B8' : '#0D8178' }}>
+                      <span style={{ fontSize: '0.6875rem', color: formData.description.length < 15 ? '#94A3B8' : '#15803D' }}>
                         {isNe ? 'कम्तीमा १५ अक्षर' : 'Min 15 chars'} ({formData.description.length})
                       </span>
                     </div>
@@ -445,8 +445,8 @@ export function SubmitComplaintPage() {
                   marginBottom: 'var(--space-6)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Upload size={16} color="#15365B" />
-                    <h2 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
+                    <Upload size={16} color="#101D35" />
+                    <h2 style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#101D35', margin: 0 }}>
                       {isNe ? '३. ऐच्छिक प्रमाण वा स्क्रिनसट' : '3. Optional Photo / Log Attachment'}
                     </h2>
                   </div>
@@ -463,12 +463,12 @@ export function SubmitComplaintPage() {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '12px 14px',
-                      backgroundColor: '#F0FDFA',
-                      border: '1px solid #CCFBF1',
+                      backgroundColor: '#EEF3FB',
+                      border: '1px solid #D5E1F7',
                       borderRadius: '6px'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FileText size={18} color="#0D8178" />
+                        <FileText size={18} color="#5278C8" />
                         <div>
                           <span style={{ fontSize: '0.875rem', fontWeight: '700', color: '#0F172A' }}>{selectedFile.name}</span>
                           <span style={{ fontSize: '0.75rem', color: '#64748B', marginLeft: '8px' }}>
@@ -502,9 +502,9 @@ export function SubmitComplaintPage() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           padding: '24px 16px',
-                          border: isDragging ? '2px dashed #0D8178' : '2px dashed #CBD5E1',
+                          border: isDragging ? '2px dashed #5278C8' : '2px dashed #CBD5E1',
                           borderRadius: '6px',
-                          backgroundColor: isDragging ? '#F0FDFA' : '#F8FAFC',
+                          backgroundColor: isDragging ? '#EEF3FB' : '#F8FAFD',
                           cursor: 'pointer',
                           gap: '6px',
                           transition: 'all 0.15s ease'
@@ -518,8 +518,8 @@ export function SubmitComplaintPage() {
                           if (file) processFile(file);
                         }}
                       >
-                        <Upload size={22} color={isDragging ? '#0D8178' : '#64748B'} />
-                        <span style={{ fontSize: '0.875rem', fontWeight: '700', color: '#15365B' }}>
+                        <Upload size={22} color={isDragging ? '#5278C8' : '#64748B'} />
+                        <span style={{ fontSize: '0.875rem', fontWeight: '700', color: '#101D35' }}>
                           {isNe ? 'फाइल चयन गर्न यहाँ थिच्नुहोस्' : 'Click to browse or drop file here'}
                         </span>
                         <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>

@@ -178,11 +178,11 @@ export function LandingPage() {
             <h1 className="hero-main-title">
               {isNe ? (
                 <>
-                  विद्यार्थी क्याम्पस आईटी सेवा तथा <span className="text-teal-highlight">उजुरी पोर्टल</span>
+                  विद्यार्थी क्याम्पस आईटी सेवा तथा <span style={{ color: '#5278C8' }}>उजुरी पोर्टल</span>
                 </>
               ) : (
                 <>
-                  Student Campus IT Service &amp; <span className="text-teal-highlight">Grievance Portal</span>
+                  Student Campus IT Service &amp; <span style={{ color: '#5278C8' }}>Grievance Portal</span>
                 </>
               )}
             </h1>
@@ -210,7 +210,7 @@ export function LandingPage() {
               ) : (
                 <Link to="/track" className="btn btn-secondary btn-lg hero-btn-secondary">
                   <Search size={17} />
-                  <span>{isNe ? 'उजुरी ट्र्याक गर्नुहोस्' : 'Track Status'}</span>
+                  <span>{isNe ? 'उजुरी ट्र्याक गर्नुहोस्' : 'Track Complaint'}</span>
                 </Link>
               )}
             </div>
@@ -221,6 +221,65 @@ export function LandingPage() {
             <HeroVisual />
           </div>
 
+        </div>
+      </section>
+
+      {/* =========================================================================
+          STATISTICS & OPERATIONAL HIGHLIGHTS STRIP
+          ========================================================================= */}
+      <section className="home-stats-strip" style={{ background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '36px 0' }}>
+        <div className="container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#5278C8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Monitor size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>6 Categories</div>
+                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+                  {isNe ? 'स्वीकृत ल्याब तथा आईटी विधा' : 'Dedicated IT Service Areas'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#203B64', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Clock size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>24–48 Hours</div>
+                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+                  {isNe ? 'औसत समीक्षा तथा खटन' : 'Target Desk Triage SLA'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#5278C8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>4 Stages</div>
+                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+                  {isNe ? 'पारदर्शी चरणबद्ध प्रगति' : 'Tracked Resolution Pipeline'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#203B64', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <ShieldCheck size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>100% Secure</div>
+                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+                  {isNe ? 'विद्यार्थी गोपनीयता संरक्षण' : 'Role-Protected Privacy'}
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
@@ -310,7 +369,7 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">1</div>
               <div className="step-icon-wrap">
-                <FileText size={20} color="#15365B" />
+                <FileText size={20} color="#101D35" />
               </div>
               <div className="step-status-chip status-submitted">
                 {isNe ? 'चरण १: दर्ता' : 'Status: Submitted'}
@@ -327,7 +386,7 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">2</div>
               <div className="step-icon-wrap">
-                <Search size={20} color="#D97706" />
+                <Search size={20} color="#203B64" />
               </div>
               <div className="step-status-chip status-review">
                 {isNe ? 'चरण २: समीक्षा' : 'Status: Under Review'}
@@ -344,7 +403,7 @@ export function LandingPage() {
             <div className="process-step-card">
               <div className="step-num-badge">3</div>
               <div className="step-icon-wrap">
-                <Wrench size={20} color="#0284C7" />
+                <Wrench size={20} color="#5278C8" />
               </div>
               <div className="step-status-chip status-progress">
                 {isNe ? 'चरण ३: प्रगतिमा' : 'Status: In Progress'}
@@ -405,7 +464,7 @@ export function LandingPage() {
 
             <div className="privacy-pillars-list">
               <div className="privacy-pillar-item">
-                <Lock size={16} color="#0D8178" />
+                <Lock size={16} color="#5278C8" />
                 <div>
                   <strong>{isNe ? 'कुनै सार्वजनिक सूची छैन' : 'No Public Complaint Directory'}</strong>
                   <p>{isNe ? 'उजुरीहरू बाहिरी आगन्तुकहरूका लागि उपलब्ध हुँदैनन्।' : 'Grievances are never listed in open public feeds.'}</p>
@@ -413,7 +472,7 @@ export function LandingPage() {
               </div>
 
               <div className="privacy-pillar-item">
-                <ShieldCheck size={16} color="#0D8178" />
+                <ShieldCheck size={16} color="#5278C8" />
                 <div>
                   <strong>{isNe ? 'प्रमाणीकृत पहुँच नियन्त्रण' : 'Role & Ownership Enforcement'}</strong>
                   <p>{isNe ? 'केवल आफ्ना उजुरी मात्र हेर्न मिल्ने कडा सुरक्षा।' : 'Strict server-side ownership checks on every request.'}</p>
@@ -421,7 +480,7 @@ export function LandingPage() {
               </div>
 
               <div className="privacy-pillar-item">
-                <UserCheck size={16} color="#0D8178" />
+                <UserCheck size={16} color="#5278C8" />
                 <div>
                   <strong>{isNe ? 'प्रशासनिक खटन' : 'Direct Campus Triage'}</strong>
                   <p>{isNe ? 'कलेज प्रशासन तथा सम्बन्धित डेस्कद्वारा प्रत्यक्ष सम्बोधन।' : 'Handled directly by authorized college desk administration.'}</p>
@@ -559,7 +618,7 @@ export function LandingPage() {
             {/* Bottom Call to Action */}
             <div className="contact-banner-footer">
               <div className="contact-footer-text">
-                <Wrench size={16} color="#0D8178" />
+                <Wrench size={16} color="#5278C8" />
                 <span>{isNe ? 'नयाँ समस्या दर्ता गर्न तयार हुनुहुन्छ?' : 'Ready to report an IT problem?'}</span>
               </div>
               <Link to="/submit" className="btn btn-primary btn-md">

@@ -360,14 +360,14 @@ export function TrackComplaintPage() {
                   <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <label htmlFor="tracking-secret" className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                        <KeyRound size={14} color="#0D8178" />
+                        <KeyRound size={14} color="#5278C8" />
                         <span>{isNe ? 'गोप्य ट्र्याकिङ कोड (Private Tracking Secret)' : 'Private Tracking Secret'}</span>
                         <span className="required">*</span>
                       </label>
                       <button
                         type="button"
                         onClick={() => setShowSecret(!showSecret)}
-                        style={{ background: 'none', border: 'none', padding: 0, color: '#0D8178', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: '600' }}
+                        style={{ background: 'none', border: 'none', padding: 0, color: '#5278C8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: '600' }}
                         tabIndex={-1}
                       >
                         {showSecret ? <EyeOff size={13} /> : <Eye size={13} />}

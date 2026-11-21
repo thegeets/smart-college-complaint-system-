@@ -287,7 +287,7 @@ export function AdminSettingsPage() {
         {/* Card 4: Administrator Profile & Email Settings */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
-            <User size={18} color="#0D8178" />
+            <User size={18} color="#5278C8" />
             <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0 }}>
               {isNe ? 'प्रशासक प्रोफाइल तथा इमेल' : 'Admin Profile & Email'}
             </h2>

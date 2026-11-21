@@ -64,14 +64,14 @@ export function ResetPasswordPage() {
               width: '52px',
               height: '52px',
               borderRadius: '12px',
-              backgroundColor: '#EEF4F9',
-              color: '#15365B',
+              backgroundColor: '#EEF3FB',
+              color: '#101D35',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 'var(--space-3)'
             }}>
-              <Lock size={26} />
+              <Lock size={26} color="#5278C8" />
             </div>
 
             <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>

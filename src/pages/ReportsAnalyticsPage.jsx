@@ -141,7 +141,7 @@ export function ReportsAnalyticsPage() {
           <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
             {isNe ? 'कार्यान्वयनमा' : 'In Progress'}
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-teal)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#5278C8' }}>
             {inProgress}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -165,7 +165,7 @@ export function ReportsAnalyticsPage() {
       {/* Category Breakdown Table */}
       <div className="card" style={{ padding: 'var(--space-6)' }}>
         <h2 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <BarChart3 size={18} color="#0F766E" />
+          <BarChart3 size={18} color="#5278C8" />
           <span>{isNe ? 'आईटी विधागत तथ्याङ्क' : 'Complaints by IT Category'}</span>
         </h2>
 
@@ -187,7 +187,7 @@ export function ReportsAnalyticsPage() {
                     style={{
                       width: `${pct}%`,
                       height: '100%',
-                      backgroundColor: '#0F766E',
+                      backgroundColor: '#5278C8',
                       borderRadius: '4px',
                       transition: 'width 0.4s ease'
                     }}

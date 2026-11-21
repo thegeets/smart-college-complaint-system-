@@ -57,8 +57,8 @@ export function ComplaintDetailsPage() {
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
         <PublicNavbar />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center', color: '#15365B' }}>
-            <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 10px', color: '#0D8178' }} />
+          <div style={{ textAlign: 'center', color: '#101D35' }}>
+            <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 10px', color: '#5278C8' }} />
             <p style={{ fontWeight: '600', fontSize: '0.9375rem' }}>Loading grievance docket...</p>
           </div>
         </main>
@@ -116,13 +116,13 @@ export function ComplaintDetailsPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '700', color: '#15365B' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '1.25rem', fontWeight: '700', color: '#101D35' }}>
                         {complaint.reference}
                       </span>
                       <StatusBadge status={complaint.status} />
                       <PriorityBadge priority={complaint.priority} />
                     </div>
-                    <h1 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#0F172A', margin: '0 0 6px', lineHeight: '1.3' }}>
+                    <h1 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#101D35', margin: '0 0 6px', lineHeight: '1.3' }}>
                       {complaint.title}
                     </h1>
                   </div>
@@ -138,15 +138,15 @@ export function ComplaintDetailsPage() {
                 {/* Metadata strip */}
                 <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.8125rem', color: '#475569', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
                   <div>
-                    <strong style={{ color: '#0F172A' }}>{isNe ? 'विधा:' : 'Category:'} </strong>
+                    <strong style={{ color: '#101D35' }}>{isNe ? 'विधा:' : 'Category:'} </strong>
                     <span>{getCategoryLabel(complaint.category)}</span>
                   </div>
                   <div>
-                    <strong style={{ color: '#0F172A' }}>{isNe ? 'कार्यक्रम:' : 'Program:'} </strong>
+                    <strong style={{ color: '#101D35' }}>{isNe ? 'कार्यक्रम:' : 'Program:'} </strong>
                     <span>{complaint.program || 'BSc CSIT'}</span>
                   </div>
                   <div>
-                    <strong style={{ color: '#0F172A' }}>{isNe ? 'विद्यार्थी आइडी:' : 'Student Roll:'} </strong>
+                    <strong style={{ color: '#101D35' }}>{isNe ? 'विद्यार्थी आइडी:' : 'Student Roll:'} </strong>
                     <span>{complaint.student?.studentId}</span>
                   </div>
                 </div>
@@ -154,7 +154,7 @@ export function ComplaintDetailsPage() {
 
               {/* 4-Stage Resolution Process Card */}
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#15365B', margin: '0 0 16px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#101D35', margin: '0 0 16px' }}>
                   {isNe ? 'समाधान प्रगति चरणहरू' : '4-Stage Resolution Process'}
                 </h3>
                 <ComplaintTimeline currentStatus={complaint.status} timeline={complaint.timeline} />
@@ -162,7 +162,7 @@ export function ComplaintDetailsPage() {
 
               {/* Full Description & Attached Evidence */}
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#15365B', margin: '0 0 12px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#101D35', margin: '0 0 12px' }}>
                   {isNe ? 'समस्याको विस्तृत विवरण' : 'Reported Description'}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.9375rem', color: '#334155', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
@@ -184,7 +184,7 @@ export function ComplaintDetailsPage() {
                     gap: '12px'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <FileText size={20} color="#0D8178" />
+                      <FileText size={20} color="#5278C8" />
                       <div>
                         <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#0F172A' }}>
                           {complaint.attachment?.originalName || 'Attached Evidence File'}
@@ -211,8 +211,8 @@ export function ComplaintDetailsPage() {
               {/* Official College Responses */}
               <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                  <MessageSquare size={18} color="#0D8178" />
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
+                  <MessageSquare size={18} color="#5278C8" />
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#101D35', margin: 0 }}>
                     {isNe ? 'कलेज प्रशासनको आधिकारिक जवाफ' : 'College Administration Replies'}
                   </h3>
                 </div>
@@ -259,8 +259,8 @@ export function ComplaintDetailsPage() {
               {complaint.timeline && complaint.timeline.length > 0 && (
                 <div className="card" style={{ padding: 'var(--space-6)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                    <Clock size={18} color="#15365B" />
-                    <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
+                    <Clock size={18} color="#5278C8" />
+                    <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#101D35', margin: 0 }}>
                       {isNe ? 'अवस्था परिवर्तन इतिहास' : 'Status History & Audit Trail'}
                     </h3>
                   </div>

@@ -8,32 +8,50 @@
    1. DESIGN TOKENS
    -------------------------------------------------------------------------- */
 :root {
-  /* Official Institutional Palette: Deep Navy & Purposeful Teal */
-  --color-primary: #15365B;
-  --color-primary-hover: #0E2642;
-  --color-primary-subtle: #EEF4F9;
-  --color-primary-border: #C8D7E6;
+  /* Official Visual Design System Palette */
+  --color-navy: #101D35;
+  --color-navy-secondary: #203B64;
+  --color-royal-blue: #5278C8;
+  --color-royal-blue-hover: #4164AE;
+  --color-royal-blue-subtle: #EEF3FB;
+  --color-royal-blue-border: #D5E1F7;
 
-  --color-teal: #0D8178;
-  --color-teal-hover: #0A6B63;
-  --color-teal-subtle: #F0FDFA;
-  --color-teal-border: #CCFBF1;
+  /* Legacy/Compatibility aliases */
+  --color-teal: var(--color-royal-blue);
+  --color-teal-hover: var(--color-royal-blue-hover);
+  --color-teal-subtle: var(--color-royal-blue-subtle);
+  --color-teal-border: var(--color-royal-blue-border);
+
+  /* Primary, Accent & Brand Roles */
+  --color-primary: #101D35;
+  --color-primary-hover: #203B64;
+  --color-primary-subtle: #F0F4FA;
+  --color-primary-border: #D0DCED;
+
+  --color-secondary: #203B64;
+  --color-secondary-hover: #101D35;
+
+  --color-accent: #5278C8;
+  --color-accent-hover: #4164AE;
+  --color-accent-subtle: #EEF3FB;
+  --color-accent-border: #D5E1F7;
 
   /* Neutral Canvas & Surfaces */
-  --color-bg: #F8FAFC;
+  --color-bg: #F4F6FA;
   --color-surface: #FFFFFF;
-  --color-surface-subtle: #F1F5F9;
+  --color-surface-subtle: #F8FAFD;
+  --color-surface-elevated: #FFFFFF;
 
   /* Typography Colors */
-  --color-heading: #0F172A;
-  --color-body: #334155;
-  --color-muted: #64748B;
+  --color-heading: #101D35;
+  --color-body: #172033;
+  --color-muted: #697586;
   --color-inverse: #FFFFFF;
 
   /* Borders & Dividers */
   --color-border: #E2E8F0;
   --color-border-hover: #CBD5E1;
-  --color-border-focus: #0D8178;
+  --color-border-focus: #5278C8;
 
   /* Semantic Feedback Tokens */
   --color-success: #15803D;
@@ -48,22 +66,22 @@
   --color-error-bg: #FEF2F2;
   --color-error-border: #FECACA;
 
-  --color-info: #1D4ED8;
-  --color-info-bg: #EFF6FF;
-  --color-info-border: #BFDBFE;
+  --color-info: #5278C8;
+  --color-info-bg: #EEF3FB;
+  --color-info-border: #D5E1F7;
 
   /* Status Badges */
-  --status-submitted-bg: #EFF6FF;
-  --status-submitted-text: #1E40AF;
-  --status-submitted-border: #BFDBFE;
+  --status-submitted-bg: #EEF3FB;
+  --status-submitted-text: #203B64;
+  --status-submitted-border: #D5E1F7;
 
   --status-review-bg: #FFFBEB;
   --status-review-text: #92400E;
   --status-review-border: #FDE68A;
 
-  --status-progress-bg: #F0FDFA;
-  --status-progress-text: #0F766E;
-  --status-progress-border: #99F6E4;
+  --status-progress-bg: #F0F7FF;
+  --status-progress-text: #1D4ED8;
+  --status-progress-border: #BFDBFE;
 
   --status-resolved-bg: #F0FDF4;
   --status-resolved-text: #166534;
@@ -92,7 +110,7 @@
 
   /* Unified Font System */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Devanagari', sans-serif;
-  --font-nav: 'Manrope', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-nav: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-nepali: 'Noto Sans Devanagari', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
@@ -291,7 +309,7 @@ a:hover {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-teal);
+  outline: 2px solid var(--color-royal-blue);
   outline-offset: 2px;
 }
 
@@ -303,21 +321,24 @@ a:hover {
 
 /* Button Variants */
 .btn-primary {
-  background-color: var(--color-primary);
+  background-color: var(--color-navy);
   color: #FFFFFF;
-  border-color: var(--color-primary);
+  border-color: var(--color-navy);
+  box-shadow: 0 1px 2px rgba(16, 29, 53, 0.12);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background-color: var(--color-navy-secondary);
+  border-color: var(--color-navy-secondary);
   color: #FFFFFF;
+  box-shadow: 0 3px 6px rgba(16, 29, 53, 0.16);
 }
 
 .btn-secondary {
   background-color: var(--color-surface);
   color: var(--color-heading);
   border-color: var(--color-border);
+  box-shadow: 0 1px 2px rgba(16, 29, 53, 0.04);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -326,16 +347,20 @@ a:hover {
   color: var(--color-heading);
 }
 
+.btn-accent,
 .btn-teal {
-  background-color: var(--color-teal);
+  background-color: var(--color-royal-blue);
   color: #FFFFFF;
-  border-color: var(--color-teal);
+  border-color: var(--color-royal-blue);
+  box-shadow: 0 1px 2px rgba(82, 120, 200, 0.2);
 }
 
+.btn-accent:hover:not(:disabled),
 .btn-teal:hover:not(:disabled) {
-  background-color: var(--color-teal-hover);
-  border-color: var(--color-teal-hover);
+  background-color: var(--color-royal-blue-hover);
+  border-color: var(--color-royal-blue-hover);
   color: #FFFFFF;
+  box-shadow: 0 3px 8px rgba(82, 120, 200, 0.3);
 }
 
 .btn-outline {
@@ -516,9 +541,15 @@ a:hover {
 .card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   padding: 28px;
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 1px 3px rgba(16, 29, 53, 0.05), 0 1px 2px rgba(16, 29, 53, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 8px 20px -4px rgba(16, 29, 53, 0.08), 0 4px 8px -2px rgba(16, 29, 53, 0.04);
 }
 
 /* --------------------------------------------------------------------------
@@ -789,23 +820,23 @@ a:hover {
   font-size: 14px;
   font-weight: 600;
   color: #FFFFFF;
-  background-color: #15365B;
-  border: 1px solid #0F2847;
+  background-color: var(--color-navy);
+  border: 1px solid var(--color-navy-secondary);
   border-radius: 8px;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1px 2px rgba(16, 29, 53, 0.08);
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
   white-space: nowrap;
 }
 
 .header-cta-btn:hover {
-  background-color: #0E2642;
+  background-color: var(--color-navy-secondary);
   color: #FFFFFF;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 2px 4px rgba(16, 29, 53, 0.14);
 }
 
 .header-cta-btn:focus-visible {
-  outline: 2px solid #15365B;
+  outline: 2px solid var(--color-royal-blue);
   outline-offset: 2px;
 }
 
@@ -2072,7 +2103,7 @@ a:hover {
   top: 17px;
   left: 36px;
   height: 3px;
-  background-color: var(--color-teal);
+  background-color: var(--color-royal-blue);
   z-index: 2;
   transition: width 300ms ease;
 }
@@ -2104,16 +2135,16 @@ a:hover {
 }
 
 .timeline-step-circle.completed {
-  background-color: var(--color-teal);
-  border-color: var(--color-teal);
+  background-color: var(--color-navy);
+  border-color: var(--color-navy);
   color: #FFFFFF;
 }
 
 .timeline-step-circle.active {
   background-color: #FFFFFF;
-  border-color: var(--color-teal);
-  color: var(--color-teal);
-  box-shadow: 0 0 0 4px var(--color-teal-border);
+  border-color: var(--color-royal-blue);
+  color: var(--color-royal-blue);
+  box-shadow: 0 0 0 4px rgba(82, 120, 200, 0.2);
 }
 
 .timeline-step-label {
@@ -2125,7 +2156,7 @@ a:hover {
 }
 
 .timeline-step-label.active {
-  color: var(--color-teal);
+  color: var(--color-royal-blue);
   font-weight: 700;
 }
 
@@ -2191,15 +2222,15 @@ a:hover {
 }
 
 .admin-nav-item:hover {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-navy-secondary);
   color: #FFFFFF;
 }
 
 .admin-nav-item.active {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-navy-secondary);
   color: #FFFFFF;
   font-weight: 600;
-  border-left: 3px solid #38BDF8;
+  border-left: 3px solid var(--color-royal-blue);
 }
 
 .admin-topbar {
@@ -2303,23 +2334,27 @@ a:hover {
 }
 
 .stat-icon-wrapper.blue {
-  background-color: #EFF6FF;
-  color: #1D4ED8;
+  background-color: #EEF3FB;
+  color: #101D35;
+  border: 1px solid #D5E1F7;
 }
 
 .stat-icon-wrapper.amber {
-  background-color: #FEF3C7;
-  color: #D97706;
+  background-color: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #FDE68A;
 }
 
 .stat-icon-wrapper.teal {
-  background-color: #F0FDFA;
-  color: #0F766E;
+  background-color: #EEF3FB;
+  color: #5278C8;
+  border: 1px solid #D5E1F7;
 }
 
 .stat-icon-wrapper.emerald {
   background-color: #F0FDF4;
-  color: #16A34A;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
 }
 
 .stat-icon-wrapper.red {
@@ -2525,7 +2560,7 @@ a:hover {
 }
 
 .lang-dropdown-trigger:focus-visible {
-  outline: 2px solid #15365B;
+  outline: 2px solid var(--color-royal-blue);
   outline-offset: 1px;
 }
 
@@ -2585,17 +2620,17 @@ a:hover {
 
 .lang-dropdown-option.selected {
   font-weight: 600;
-  color: #15365B;
-  background-color: #F8FAFC;
+  color: var(--color-navy);
+  background-color: var(--color-royal-blue-subtle);
 }
 
 .lang-dropdown-option:focus-visible {
-  outline: 2px solid #15365B;
+  outline: 2px solid var(--color-royal-blue);
   outline-offset: -1px;
 }
 
 .lang-option-check {
-  color: #15365B;
+  color: var(--color-royal-blue);
   margin-left: 6px;
   flex-shrink: 0;
 }

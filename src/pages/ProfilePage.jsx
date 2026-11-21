@@ -109,7 +109,7 @@ export function ProfilePage() {
   if (isCheckingStudentSession) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)' }}>
-        <p style={{ fontWeight: '600', color: '#15365B' }}>Loading student profile...</p>
+        <p style={{ fontWeight: '600', color: '#101D35' }}>Loading student profile...</p>
       </div>
     );
   }
@@ -124,7 +124,7 @@ export function ProfilePage() {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-6)', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: '#15365B', margin: '0 0 4px' }}>
+              <h1 style={{ fontSize: '1.65rem', fontWeight: '800', color: '#101D35', margin: '0 0 4px' }}>
                 {isNe ? 'विद्यार्थी प्रोफाइल' : 'Student Profile & Settings'}
               </h1>
               <p style={{ fontSize: '0.875rem', color: '#64748B', margin: 0 }}>
@@ -203,7 +203,7 @@ export function ProfilePage() {
 
           {/* Profile Overview Card */}
           <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#15365B', margin: '0 0 16px' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#101D35', margin: '0 0 16px' }}>
               {isNe ? 'खाता विवरण' : 'Account Details'}
             </h2>
 
@@ -326,8 +326,8 @@ export function ProfilePage() {
           {/* Claim Legacy Guest Complaint Section */}
           <div className="card" style={{ padding: 'var(--space-6)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Link2 size={18} color="#0D8178" />
-              <h2 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#15365B', margin: 0 }}>
+              <Link2 size={18} color="#5278C8" />
+              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#101D35', margin: 0 }}>
                 {isNe ? 'पुरानो उजुरी खातामा लिंक गर्नुहोस्' : 'Link Previous Guest Complaint'}
               </h2>
             </div>

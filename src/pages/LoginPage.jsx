@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { LogIn, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { getSafeRedirectUrl } from '../utils/url';
 
 export function LoginPage() {
@@ -19,6 +19,7 @@ export function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,14 +62,14 @@ export function LoginPage() {
               width: '52px',
               height: '52px',
               borderRadius: '12px',
-              backgroundColor: '#EEF4F9',
-              color: '#15365B',
+              backgroundColor: '#EEF3FB',
+              color: '#101D35',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 'var(--space-3)'
             }}>
-              <LogIn size={26} />
+              <LogIn size={26} color="#5278C8" />
             </div>
 
             <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
@@ -153,25 +154,48 @@ export function LoginPage() {
                   </label>
                   <Link
                     to="/forgot-password"
-                    style={{ fontSize: '0.75rem', color: '#0D8178', fontWeight: '600' }}
+                    style={{ fontSize: '0.75rem', color: '#5278C8', fontWeight: '600' }}
                   >
                     {isNe ? 'पासवर्ड बिर्सनुभयो?' : 'Forgot Password?'}
                   </Link>
                 </div>
-                <input
-                  id="login-password"
-                  type="password"
-                  className="form-input"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                  autoComplete="current-password"
-                  required
-                  disabled={isLoading}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="form-input"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    autoComplete="current-password"
+                    style={{ paddingRight: '40px' }}
+                    required
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      color: '#697586',
+                      cursor: 'pointer',
+                      padding: 0,
+                      display: 'flex'
+                    }}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -204,7 +228,7 @@ export function LoginPage() {
               <span>{isNe ? 'खाता छैन?' : "Don't have a student account yet?"} </span>
               <Link
                 to={`/register${redirectTarget !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
-                style={{ color: '#0D8178', fontWeight: '700' }}
+                style={{ color: '#5278C8', fontWeight: '700' }}
               >
                 {isNe ? 'यहाँ दर्ता गर्नुहोस्' : 'Register Here'}
               </Link>

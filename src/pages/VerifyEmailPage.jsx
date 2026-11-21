@@ -83,14 +83,14 @@ export function VerifyEmailPage() {
               width: '52px',
               height: '52px',
               borderRadius: '12px',
-              backgroundColor: '#EEF4F9',
-              color: '#0D8178',
+              backgroundColor: '#EEF3FB',
+              color: '#101D35',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 'var(--space-3)'
             }}>
-              <MailCheck size={28} />
+              <MailCheck size={28} color="#5278C8" />
             </div>
 
             <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
@@ -119,7 +119,7 @@ export function VerifyEmailPage() {
                 gap: '8px',
                 marginBottom: 'var(--space-4)'
               }}>
-                <Info size={16} color="#0D8178" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <Info size={16} color="#5278C8" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>
                   {isNe
                     ? 'यो चरणले तपाईंको इमेल स्वामित्व प्रमाणित गर्दछ। यसले स्वचालित रूपमा संस्थागत सदस्यता प्रमाणपत्र प्रदान गर्दैन।'
@@ -194,7 +194,7 @@ export function VerifyEmailPage() {
                       type="button"
                       onClick={handleResend}
                       disabled={isResending}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#0D8178', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#5278C8', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
                     >
                       {isResending ? (isNe ? 'पठाउँदै...' : 'Resending...') : (isNe ? 'कोड पुनः पठाउनुहोस्' : 'Resend Code')}
                     </button>

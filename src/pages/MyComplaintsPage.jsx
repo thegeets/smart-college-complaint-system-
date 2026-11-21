@@ -151,8 +151,8 @@ export function MyComplaintsPage() {
   if (isCheckingStudentSession) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)' }}>
-        <div style={{ textAlign: 'center', color: '#15365B' }}>
-          <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 12px' }} />
+        <div style={{ textAlign: 'center', color: '#101D35' }}>
+          <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 12px', color: '#5278C8' }} />
           <p style={{ fontWeight: '600', fontSize: '0.9375rem' }}>Loading student portal...</p>
         </div>
       </div>
@@ -170,7 +170,7 @@ export function MyComplaintsPage() {
           <div style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid var(--color-border)',
-            borderRadius: '8px',
+            borderRadius: '12px',
             padding: '24px 28px',
             marginBottom: 'var(--space-6)',
             display: 'flex',
@@ -178,27 +178,27 @@ export function MyComplaintsPage() {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '16px',
-            boxShadow: 'var(--shadow-xs)'
+            boxShadow: '0 1px 3px rgba(16, 29, 53, 0.05)'
           }}>
             <div>
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                backgroundColor: 'var(--color-teal-subtle)',
-                color: 'var(--color-teal)',
-                border: '1px solid var(--color-teal-border)',
+                backgroundColor: '#EEF3FB',
+                color: '#203B64',
+                border: '1px solid #D5E1F7',
                 padding: '3px 10px',
-                borderRadius: '4px',
+                borderRadius: '6px',
                 fontSize: '0.75rem',
                 fontWeight: '700',
                 letterSpacing: '0.04em',
                 marginBottom: '8px'
               }}>
-                <FileText size={12} />
+                <FileText size={12} color="#5278C8" />
                 <span>{isNe ? 'विद्यार्थी गुनासो व्यवस्थापन' : 'STUDENT COMPLAINT DASHBOARD'}</span>
               </div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)', margin: '0 0 4px' }}>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-navy)', margin: '0 0 4px' }}>
                 {isNe ? 'नमस्ते,' : 'Welcome back,'} {studentUser?.name}
               </h1>
               <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
@@ -258,11 +258,11 @@ export function MyComplaintsPage() {
 
           {/* Metric Summary Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
-            <div className="card" style={{ padding: 'var(--space-5)' }}>
+            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #101D35' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'कुल दर्ता उजुरी' : 'Total Complaints'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#15365B' }}>
+              <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#101D35' }}>
                 {total}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -270,11 +270,11 @@ export function MyComplaintsPage() {
               </div>
             </div>
 
-            <div className="card" style={{ padding: 'var(--space-5)' }}>
+            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #B45309' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'समीक्षा बाँकी' : 'Pending Review'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#D97706' }}>
+              <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#B45309' }}>
                 {pendingCount}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -282,11 +282,11 @@ export function MyComplaintsPage() {
               </div>
             </div>
 
-            <div className="card" style={{ padding: 'var(--space-5)' }}>
+            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #5278C8' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'कार्यप्रगतिमा' : 'In Progress'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#0D8178' }}>
+              <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#5278C8' }}>
                 {inProgressCount}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -294,11 +294,11 @@ export function MyComplaintsPage() {
               </div>
             </div>
 
-            <div className="card" style={{ padding: 'var(--space-5)' }}>
+            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #15803D' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'समाधान सम्पन्न' : 'Resolved'}
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#059669' }}>
+              <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#15803D' }}>
                 {resolvedCount}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
@@ -391,7 +391,7 @@ export function MyComplaintsPage() {
 
           {isLoading ? (
             <div className="card" style={{ padding: '48px 16px', textAlign: 'center', color: '#64748B' }}>
-              <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 10px', color: '#0D8178' }} />
+              <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 10px', color: '#5278C8' }} />
               <p style={{ margin: 0, fontSize: '0.875rem' }}>Loading your complaints from database...</p>
             </div>
           ) : complaints.length === 0 ? (
@@ -400,14 +400,14 @@ export function MyComplaintsPage() {
                 width: '56px',
                 height: '56px',
                 borderRadius: '50%',
-                backgroundColor: '#EEF4F9',
-                color: '#15365B',
+                backgroundColor: '#EEF3FB',
+                color: '#101D35',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: '14px'
               }}>
-                <FileText size={28} />
+                <FileText size={28} color="#5278C8" />
               </div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 6px' }}>
                 {isNe ? 'कुनै उजुरी फेला परेन' : 'No Complaints Found'}
@@ -441,7 +441,7 @@ export function MyComplaintsPage() {
                     {complaints.map((c) => (
                       <tr key={c.id || c.reference}>
                         <td>
-                          <span style={{ fontFamily: 'monospace', fontWeight: '700', color: '#15365B', fontSize: '0.875rem' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: '700', color: '#101D35', fontSize: '0.875rem' }}>
                             {c.reference}
                           </span>
                         </td>
@@ -548,8 +548,8 @@ export function MyComplaintsPage() {
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Link2 size={20} color="#0D8178" />
-                    <h3 id="claim-modal-title" style={{ margin: 0, fontSize: '1.15rem', fontWeight: '700', color: '#15365B' }}>
+                    <Link2 size={20} color="#5278C8" />
+                    <h3 id="claim-modal-title" style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: '#101D35' }}>
                       {isNe ? 'पुरानो उजुरी खातामा लिंक गर्नुहोस्' : 'Link Previous Guest Complaint'}
                     </h3>
                   </div>
