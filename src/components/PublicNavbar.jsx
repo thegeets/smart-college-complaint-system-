@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, PlusCircle, User, LogIn, LogOut, FileText, Search, HelpCircle, PhoneCall } from 'lucide-react';
+import { Menu, X, PlusCircle, User, LogIn, LogOut, FileText, Search, HelpCircle, PhoneCall, Layers } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { BrandLogo } from './BrandLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -96,6 +96,7 @@ export function PublicNavbar() {
   const isTrackActive = location.pathname === '/track';
   const isComplaintsActive = location.pathname === '/dashboard' || location.pathname.startsWith('/student/complaints');
   const isProfileActive = location.pathname === '/student/profile';
+  const isCategoriesActive = location.pathname === '/' && location.hash === '#categories';
   const isProcessActive = location.pathname === '/' && location.hash === '#process';
   const isContactActive = location.pathname === '/' && location.hash === '#contact';
 
@@ -116,7 +117,7 @@ export function PublicNavbar() {
             }}
           >
             <BrandLogo 
-              size={44} 
+              size={42} 
               collegeName={COLLEGE_CONFIG.shortName} 
               subtitle={isNe ? 'आईटी सेवा डेस्क' : 'IT Service Desk'} 
             />
@@ -142,6 +143,21 @@ export function PublicNavbar() {
           >
             <span>{isNe ? 'उजुरी स्थिति' : 'Track Status'}</span>
           </Link>
+
+          <a 
+            href="/#categories" 
+            className={`header-nav-link ${isCategoriesActive ? 'active' : ''}`}
+            aria-current={isCategoriesActive ? 'section' : undefined}
+            onClick={(e) => {
+              if (location.pathname === '/') {
+                e.preventDefault();
+                document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' });
+                navigate('/#categories', { replace: true });
+              }
+            }}
+          >
+            <span>{isNe ? 'विधाहरू' : 'Categories'}</span>
+          </a>
 
           <a 
             href="/#process" 
@@ -170,7 +186,7 @@ export function PublicNavbar() {
               }
             }}
           >
-            <span>{isNe ? 'सहायता' : 'Support'}</span>
+            <span>{isNe ? 'सम्पर्क' : 'Support'}</span>
           </a>
         </nav>
 
@@ -292,6 +308,16 @@ export function PublicNavbar() {
             <Search size={16} aria-hidden="true" />
             <span>{isNe ? 'उजुरी स्थिति' : 'Track Status'}</span>
           </Link>
+
+          <a 
+            href="/#categories" 
+            className="mobile-drawer-link" 
+            onClick={closeMenu}
+            tabIndex={mobileMenuOpen ? 0 : -1}
+          >
+            <Layers size={16} aria-hidden="true" />
+            <span>{isNe ? 'सेवा विधाहरू' : 'Categories'}</span>
+          </a>
 
           <a 
             href="/#process" 

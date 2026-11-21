@@ -11,7 +11,9 @@ import {
   Wrench,
   Search,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  UserCheck,
+  Laptop
 } from 'lucide-react';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import { Link } from 'react-router-dom';
@@ -23,154 +25,166 @@ export function HeroVisual() {
 
   return (
     <div className="hero-desk-card" aria-label={isNe ? 'कलेज आईटी सेवा कार्यप्रणाली' : 'Campus IT Resolution Workflow'}>
-      {/* Visual Mode Selector Tabs */}
-      <div style={{ display: 'flex', gap: '8px', padding: '16px 20px 0', borderBottom: '1px solid var(--color-border)' }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab('pipeline')}
-          style={{
-            padding: '8px 14px',
-            fontSize: '0.8125rem',
-            fontWeight: activeTab === 'pipeline' ? '700' : '500',
-            color: activeTab === 'pipeline' ? '#101D35' : '#697586',
-            borderBottom: activeTab === 'pipeline' ? '2px solid #5278C8' : '2px solid transparent',
-            background: 'transparent',
-            borderTop: 'none',
-            borderLeft: 'none',
-            borderRight: 'none',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <Sparkles size={14} color={activeTab === 'pipeline' ? '#5278C8' : '#697586'} />
-          <span>{isNe ? 'प्रत्यक्ष समाधान प्रणाली' : 'Resolution Pipeline'}</span>
-        </button>
+      {/* Top Segmented Tab Switcher */}
+      <div className="hero-desk-tabs-wrap">
+        <div className="hero-desk-tabs-segmented">
+          <button
+            type="button"
+            onClick={() => setActiveTab('pipeline')}
+            className={`hero-desk-tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`}
+            aria-selected={activeTab === 'pipeline'}
+          >
+            <Sparkles size={14} className="tab-icon" />
+            <span>{isNe ? 'प्रत्यक्ष समाधान प्रणाली' : 'Resolution Pipeline'}</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('contact')}
-          style={{
-            padding: '8px 14px',
-            fontSize: '0.8125rem',
-            fontWeight: activeTab === 'contact' ? '700' : '500',
-            color: activeTab === 'contact' ? '#101D35' : '#697586',
-            borderBottom: activeTab === 'contact' ? '2px solid #5278C8' : '2px solid transparent',
-            background: 'transparent',
-            borderTop: 'none',
-            borderLeft: 'none',
-            borderRight: 'none',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <Building2 size={14} color={activeTab === 'contact' ? '#5278C8' : '#697586'} />
-          <span>{isNe ? 'सहायता डेस्क सम्पर्क' : 'Campus Support Desk'}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('contact')}
+            className={`hero-desk-tab-btn ${activeTab === 'contact' ? 'active' : ''}`}
+            aria-selected={activeTab === 'contact'}
+          >
+            <Building2 size={14} className="tab-icon" />
+            <span>{isNe ? 'कलेज डेस्क सम्पर्क' : 'Campus Support Desk'}</span>
+          </button>
+        </div>
       </div>
 
       {activeTab === 'pipeline' ? (
         /* Real-Time Live Triage Pipeline Preview */
-        <div style={{ padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div className="hero-pipeline-body">
+          {/* Header row with simulation badge and status chip */}
+          <div className="hero-pipeline-header">
             <div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#5278C8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isNe ? 'प्रमाणीकृत उजुरी पूर्वावलोकन' : 'Live Triage Lifecycle'}
-              </span>
-              <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#101D35', margin: '4px 0 2px' }}>
+              <div className="hero-pipeline-eyebrow">
+                <span className="live-pulse-dot" aria-hidden="true" />
+                <span>{isNe ? 'प्रत्यक्ष उजुरी जीवनचक्र' : 'LIVE TICKET TRIAGE SIMULATION'}</span>
+              </div>
+              <h3 className="hero-pipeline-case-title">
                 Lab 2: Workstation #14 Network Drop
               </h3>
-              <p style={{ fontSize: '0.8125rem', color: '#697586', margin: 0 }}>
-                Reference: <code style={{ color: '#203B64', fontWeight: 600 }}>#SCCS-2026-084</code>
-              </p>
+              <div className="hero-pipeline-ref-row">
+                <span className="ref-label">{isNe ? 'सन्दर्भ कोड:' : 'Reference:'}</span>
+                <code className="ref-code">#SCCS-2026-084</code>
+                <span className="ref-category-tag">
+                  <Laptop size={12} />
+                  <span>Lab Workstations</span>
+                </span>
+              </div>
             </div>
-            <span style={{
-              background: '#EEF3FB',
-              color: '#203B64',
-              border: '1px solid #D5E1F7',
-              borderRadius: '20px',
-              padding: '4px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 700
-            }}>
-              {isNe ? 'प्रगतिमा' : 'In Progress'}
+
+            <span className="hero-status-pill in-progress">
+              <span className="status-indicator-dot" />
+              <span>{isNe ? 'प्रगतिमा' : 'In Progress'}</span>
             </span>
           </div>
 
           {/* Stepper Pipeline Visualization */}
-          <div style={{ background: '#F8FAFD', borderRadius: '10px', padding: '14px', border: '1px solid #E2E8F0', marginBottom: '18px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', textAlign: 'center', position: 'relative' }}>
-              <div>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#101D35', color: '#fff', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CheckCircle2 size={15} />
+          <div className="hero-stepper-box">
+            <div className="hero-stepper-track">
+              <div className="hero-stepper-progress-line" style={{ width: '66%' }} />
+              
+              <div className="hero-stepper-grid">
+                {/* Stage 1 */}
+                <div className="hero-step-node completed">
+                  <div className="step-circle">
+                    <CheckCircle2 size={14} />
+                  </div>
+                  <div className="step-label">{isNe ? 'दर्ता' : 'Submitted'}</div>
+                  <div className="step-time">10:15 AM</div>
                 </div>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#101D35' }}>Submitted</div>
-                <div style={{ fontSize: '0.625rem', color: '#697586' }}>10:15 AM</div>
-              </div>
 
-              <div>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#203B64', color: '#fff', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Search size={14} />
+                {/* Stage 2 */}
+                <div className="hero-step-node completed">
+                  <div className="step-circle">
+                    <Search size={13} />
+                  </div>
+                  <div className="step-label">{isNe ? 'समीक्षा' : 'Reviewed'}</div>
+                  <div className="step-time">10:45 AM</div>
                 </div>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#203B64' }}>Reviewed</div>
-                <div style={{ fontSize: '0.625rem', color: '#697586' }}>10:45 AM</div>
-              </div>
 
-              <div>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#5278C8', color: '#fff', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 4px rgba(82,120,200,0.2)' }}>
-                  <Wrench size={14} />
+                {/* Stage 3 */}
+                <div className="hero-step-node active">
+                  <div className="step-circle">
+                    <Wrench size={13} />
+                  </div>
+                  <div className="step-label">{isNe ? 'प्रगतिमा' : 'In Progress'}</div>
+                  <div className="step-time active-badge">{isNe ? 'सक्रिय' : 'Active'}</div>
                 </div>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#5278C8' }}>In Progress</div>
-                <div style={{ fontSize: '0.625rem', color: '#5278C8', fontWeight: 600 }}>Active</div>
-              </div>
 
-              <div>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#E2E8F0', color: '#697586', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CheckCircle2 size={14} />
+                {/* Stage 4 */}
+                <div className="hero-step-node pending">
+                  <div className="step-circle">
+                    <CheckCircle2 size={13} />
+                  </div>
+                  <div className="step-label">{isNe ? 'समाधान' : 'Resolved'}</div>
+                  <div className="step-time">{isNe ? 'बाँकी' : 'Pending'}</div>
                 </div>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#697586' }}>Resolved</div>
-                <div style={{ fontSize: '0.625rem', color: '#697586' }}>Pending</div>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.75rem', color: '#697586', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Clock size={13} color="#5278C8" />
-              {isNe ? 'औसत सम्बोधन: २४ घण्टा भित्र' : 'Target SLA: Within 24 Hours'}
+          {/* Incident Telemetry Card */}
+          <div className="hero-telemetry-grid">
+            <div className="telemetry-item">
+              <span className="telemetry-label">{isNe ? 'खटाइएका प्राविधिक' : 'Assigned Technician'}</span>
+              <span className="telemetry-value">
+                <UserCheck size={13} className="telemetry-icon" />
+                <span>Bikash Sharma (Senior Network Tech)</span>
+              </span>
+            </div>
+            <div className="telemetry-item">
+              <span className="telemetry-label">{isNe ? 'स्थान / कोठा' : 'Campus Location'}</span>
+              <span className="telemetry-value">
+                <MapPin size={13} className="telemetry-icon" />
+                <span>Block B, Lab 2 (Row 3, PC-14)</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="hero-pipeline-footer-row">
+            <span className="hero-sla-chip">
+              <Clock size={13} className="sla-icon" />
+              <span>{isNe ? 'औसत सम्बोधन: २४ घण्टा भित्र' : 'Target Desk SLA: < 24 Hours'}</span>
             </span>
-            <Link to="/track" style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#5278C8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span>{isNe ? 'उजुरी खोजी' : 'Search Any ID'}</span>
+            <Link to="/track" className="hero-track-link">
+              <span>{isNe ? 'उजुरी खोजी गर्नुहोस्' : 'Search Any Reference ID'}</span>
               <ArrowRight size={13} />
             </Link>
           </div>
         </div>
       ) : (
         /* Support Desk Facts */
-        <div className="hero-desk-body" style={{ padding: '20px' }}>
+        <div className="hero-desk-body">
           <div className="hero-desk-row">
-            <MapPin size={16} className="hero-desk-icon" aria-hidden="true" />
+            <div className="hero-desk-icon-box">
+              <MapPin size={16} />
+            </div>
             <div>
-              <div className="hero-desk-row-label">{isNe ? 'कलेज ठेगाना' : 'Campus Address'}</div>
+              <div className="hero-desk-row-label">{isNe ? 'कलेज ठेगाना' : 'Campus Location'}</div>
               <div className="hero-desk-row-val">{COLLEGE_CONFIG.contact.campusAddress}</div>
             </div>
           </div>
 
           <div className="hero-desk-row">
-            <Clock size={16} className="hero-desk-icon" aria-hidden="true" />
+            <div className="hero-desk-icon-box">
+              <Clock size={16} />
+            </div>
             <div>
-              <div className="hero-desk-row-label">{isNe ? 'कार्यालय समय' : 'Office Hours'}</div>
-              <div className="hero-desk-row-val">{isNe ? COLLEGE_CONFIG.contact.officeHoursNe : COLLEGE_CONFIG.contact.officeHours}</div>
+              <div className="hero-desk-row-label">{isNe ? 'कार्यालय समय' : 'Desk Operating Hours'}</div>
+              <div className="hero-desk-row-val">
+                {isNe ? COLLEGE_CONFIG.contact.officeHoursNe : COLLEGE_CONFIG.contact.officeHours}
+              </div>
             </div>
           </div>
 
           <div className="hero-desk-row">
-            <Mail size={16} className="hero-desk-icon" aria-hidden="true" />
+            <div className="hero-desk-icon-box">
+              <Mail size={16} />
+            </div>
             <div>
-              <div className="hero-desk-row-label">{isNe ? 'इमेल सम्पर्क' : 'Configured Email'}</div>
+              <div className="hero-desk-row-label">{isNe ? 'इमेल सम्पर्क' : 'Official IT Support Email'}</div>
               <div className="hero-desk-row-val">
                 <a href={`mailto:${COLLEGE_CONFIG.contact.email}`} className="hero-desk-link">
                   {COLLEGE_CONFIG.contact.email}
@@ -180,9 +194,11 @@ export function HeroVisual() {
           </div>
 
           <div className="hero-desk-row">
-            <Phone size={16} className="hero-desk-icon" aria-hidden="true" />
+            <div className="hero-desk-icon-box">
+              <Phone size={16} />
+            </div>
             <div>
-              <div className="hero-desk-row-label">{isNe ? 'कलेज फोन' : 'Direct Telephone'}</div>
+              <div className="hero-desk-row-label">{isNe ? 'कलेज फोन' : 'Direct Campus Hotline'}</div>
               <div className="hero-desk-row-val">
                 <a href={`tel:${COLLEGE_CONFIG.contact.phone}`} className="hero-desk-link">
                   {COLLEGE_CONFIG.contact.phone}
@@ -194,9 +210,9 @@ export function HeroVisual() {
       )}
 
       {/* Card Footer Institutional Guarantee */}
-      <div className="hero-desk-footer" style={{ borderTop: '1px solid var(--color-border)', padding: '12px 20px', background: '#F8FAFD' }}>
-        <ShieldCheck size={14} color="#5278C8" aria-hidden="true" />
-        <span style={{ fontSize: '0.75rem', color: '#203B64', fontWeight: 600 }}>
+      <div className="hero-desk-footer">
+        <ShieldCheck size={14} className="hero-footer-shield" aria-hidden="true" />
+        <span>
           {isNe
             ? 'सोच कलेज अफ आईटी — आधिकारिक तथा सुरक्षित आईटी पोर्टल'
             : 'Soch College of IT — Official Campus Grievance Desk'}

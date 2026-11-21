@@ -219,7 +219,7 @@ export function AdminComplaintDetailPage() {
             <div style={{ color: '#64748B', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', marginBottom: '2px' }}>
               {isNe ? 'विद्यार्थी परिचयपत्र / रोल नं' : 'Student ID / Roll'}
             </div>
-            <span style={{ fontFamily: 'monospace', fontWeight: '600', color: '#15365D' }}>
+            <span style={{ fontFamily: 'monospace', fontWeight: '600', color: 'var(--color-navy)' }}>
               {complaint.student?.studentId || 'N/A'}
             </span>
           </div>
@@ -304,7 +304,7 @@ export function AdminComplaintDetailPage() {
         {/* Card A: Update Status */}
         <div className="card" style={{ padding: 'var(--space-6)' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Clock size={16} color="#15365D" />
+            <Clock size={16} color="var(--color-navy)" />
             <span>{isNe ? 'स्थिति अद्यावधिक (Status Transition)' : 'Transition Complaint Status'}</span>
           </h2>
 
@@ -486,7 +486,7 @@ export function AdminComplaintDetailPage() {
       {/* Audit History Timeline */}
       <div className="card" style={{ padding: 'var(--space-6)' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Clock size={16} color="#15365D" />
+          <Clock size={16} color="var(--color-navy)" />
           <span>{isNe ? 'सम्पूर्ण कार्यप्रगति अडिट इतिहास' : 'Complete Audit Timeline'}</span>
         </h3>
         <ComplaintTimeline timeline={complaint.timeline || []} />

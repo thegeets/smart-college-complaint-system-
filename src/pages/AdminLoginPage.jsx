@@ -10,8 +10,7 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
-  AlertCircle,
-  Terminal
+  AlertCircle
 } from 'lucide-react';
 
 export function AdminLoginPage() {
@@ -239,26 +238,6 @@ export function AdminLoginPage() {
                 )}
               </button>
             </form>
-
-            {/* CLI Account Management Disclosure */}
-            <div style={{
-              marginTop: 'var(--space-6)',
-              paddingTop: 'var(--space-4)',
-              borderTop: '1px solid var(--color-border)',
-              fontSize: '0.75rem',
-              color: '#64748B',
-              lineHeight: '1.5'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', color: '#0F172A', fontWeight: '600' }}>
-                <Terminal size={13} color="#0F766E" />
-                <span>{isNe ? 'प्रशासक खाता व्यवस्थापन:' : 'Account Provisioning:'}</span>
-              </div>
-              <p style={{ margin: 0 }}>
-                {isNe
-                  ? 'सुरक्षाका लागि सार्वजनिक प्रशासक दर्ता उपलब्ध छैन। नयाँ प्रशासक खाता सिर्जना गर्न कलेज सर्भरमा "npm run create-admin" कमाण्ड प्रयोग गर्नुहोस्।'
-                  : 'Public registration is disabled for security. Authorized administrators are provisioned locally via CLI: "npm run create-admin". Passwords are hashed with Argon2id.'}
-              </p>
-            </div>
 
           </div>
 

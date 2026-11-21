@@ -295,7 +295,7 @@ export function TrackComplaintPage() {
               {trackedComplaint.timeline && trackedComplaint.timeline.length > 0 && (
                 <div className="card" style={{ padding: 'var(--space-6)' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Clock size={17} color="#15365D" />
+                    <Clock size={17} color="var(--color-navy)" />
                     <span>{isNe ? 'कार्यप्रगति इतिहास' : 'Progress History'}</span>
                   </h3>
                   <ComplaintTimeline currentStatus={trackedComplaint.status} timeline={trackedComplaint.timeline} />
@@ -311,8 +311,8 @@ export function TrackComplaintPage() {
                   width: '48px',
                   height: '48px',
                   borderRadius: '8px',
-                  backgroundColor: '#EEF4F9',
-                  color: '#15365D',
+                  backgroundColor: '#EEF3FB',
+                  color: 'var(--color-navy)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',

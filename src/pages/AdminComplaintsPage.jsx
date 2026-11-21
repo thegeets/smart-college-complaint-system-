@@ -8,7 +8,8 @@ import {
   Wrench,
   CheckCircle2,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 
 export function AdminComplaintsPage() {
@@ -20,7 +21,7 @@ export function AdminComplaintsPage() {
     language
   } = useApp();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isNe = language === 'ne';
 
   const urlStatus = searchParams.get('status') || 'ALL';
@@ -28,7 +29,7 @@ export function AdminComplaintsPage() {
 
   const [complaints, setComplaints] = useState([]);
   const [summary, setSummary] = useState({ total: 0, pendingReview: 0, inProgress: 0, resolved: 0 });
-  const [, setPagination] = useState({ page: 1, limit: 25, total: 0, totalPages: 1 });
+  const [, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -77,53 +78,158 @@ export function AdminComplaintsPage() {
     }
   };
 
+  const setStatusUrl = (st) => {
+    const next = new URLSearchParams(searchParams);
+    if (st === 'ALL') {
+      next.delete('status');
+    } else {
+      next.set('status', st);
+    }
+    setSearchParams(next);
+  };
+
   return (
     <div>
-      {/* Page Title & Stats Strip */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+      {/* Page Title & Operational Stats Strip */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '16px',
+        marginBottom: '24px',
+        paddingBottom: '20px',
+        borderBottom: '1px solid var(--color-border)'
+      }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
-            {isNe ? 'कलेज उजुरी व्यवस्थापन सूची' : 'Complaints Management Queue'}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <h1 style={{ fontSize: '1.625rem', fontWeight: '700', color: 'var(--color-heading)', margin: 0, letterSpacing: '-0.02em' }}>
+              {isNe ? 'कलेज उजुरी व्यवस्थापन सूची' : 'Complaints Management Queue'}
+            </h1>
+            <span style={{
+              fontSize: '0.6875rem',
+              fontWeight: '700',
+              padding: '2px 8px',
+              backgroundColor: '#EEF3FB',
+              color: '#203B64',
+              borderRadius: '9999px',
+              border: '1px solid #D5E1F7'
+            }}>
+              Queue Live
+            </span>
+          </div>
           <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
-            {isNe ? 'डाटाबेसमा सुरक्षित विद्यार्थी उजुरीहरूको प्रत्यक्ष समीक्षा र स्थिति अद्यावधिक' : 'Inspect live student IT grievances, triage issues, and document technical resolutions'}
+            {isNe
+              ? 'डाटाबेसमा सुरक्षित विद्यार्थी उजुरीहरूको प्रत्यक्ष समीक्षा, ट्रिएज र प्राविधिक समाधान'
+              : 'Inspect student IT grievances, triage pending tickets, assign technician dispatch, and record resolutions'}
           </p>
         </div>
 
-        {/* Quick Summary Badges & Refresh */}
-        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem' }}>
-            <span style={{ color: 'var(--color-muted)' }}>{isNe ? 'कुल' : 'Total'}: </span>
-            <strong style={{ color: 'var(--color-heading)' }}>{summary.total}</strong>
-          </div>
+        {/* Quick Summary Chips & Refresh */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Total Chip */}
+          <button
+            type="button"
+            onClick={() => setStatusUrl('ALL')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: urlStatus === 'ALL' ? '#101D35' : '#FFFFFF',
+              color: urlStatus === 'ALL' ? '#FFFFFF' : 'var(--color-heading)',
+              border: urlStatus === 'ALL' ? '1px solid #101D35' : '1px solid var(--color-border)',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8125rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <FileText size={13} color={urlStatus === 'ALL' ? '#FFFFFF' : 'var(--color-muted)'} />
+            <span>{isNe ? 'कुल' : 'Total'}:</span>
+            <strong style={{ fontWeight: '700' }}>{summary.total}</strong>
+          </button>
 
-          <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-warning-border)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Clock size={12} color="var(--color-warning)" />
-            <span style={{ color: 'var(--color-warning)' }}>{isNe ? 'बाँकी' : 'Pending'}: </span>
-            <strong style={{ color: 'var(--color-warning)' }}>{summary.pendingReview}</strong>
-          </div>
+          {/* Pending Review Chip */}
+          <button
+            type="button"
+            onClick={() => setStatusUrl('Under Review')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: urlStatus === 'Under Review' ? '#B45309' : '#FFFBEB',
+              color: urlStatus === 'Under Review' ? '#FFFFFF' : '#B45309',
+              border: '1px solid #FDE68A',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8125rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Clock size={13} />
+            <span>{isNe ? 'समीक्षा बाँकी' : 'Pending'}:</span>
+            <strong style={{ fontWeight: '700' }}>{summary.pendingReview}</strong>
+          </button>
 
-          <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-teal-border)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Wrench size={12} color="var(--color-teal)" />
-            <span style={{ color: 'var(--color-teal)' }}>{isNe ? 'कार्यान्वयनमा' : 'In-Progress'}: </span>
-            <strong style={{ color: 'var(--color-teal)' }}>{summary.inProgress}</strong>
-          </div>
+          {/* In Progress Chip */}
+          <button
+            type="button"
+            onClick={() => setStatusUrl('In Progress')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: urlStatus === 'In Progress' ? '#5278C8' : '#EEF3FB',
+              color: urlStatus === 'In Progress' ? '#FFFFFF' : '#203B64',
+              border: '1px solid #D5E1F7',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8125rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Wrench size={13} />
+            <span>{isNe ? 'कार्यान्वयनमा' : 'In Progress'}:</span>
+            <strong style={{ fontWeight: '700' }}>{summary.inProgress}</strong>
+          </button>
 
-          <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-success-border)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <CheckCircle2 size={12} color="var(--color-success)" />
-            <span style={{ color: 'var(--color-success)' }}>{isNe ? 'समाधान' : 'Resolved'}: </span>
-            <strong style={{ color: 'var(--color-success)' }}>{summary.resolved}</strong>
-          </div>
+          {/* Resolved Chip */}
+          <button
+            type="button"
+            onClick={() => setStatusUrl('Resolved')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: urlStatus === 'Resolved' ? '#15803D' : '#F0FDF4',
+              color: urlStatus === 'Resolved' ? '#FFFFFF' : '#15803D',
+              border: '1px solid #BBF7D0',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8125rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <CheckCircle2 size={13} />
+            <span>{isNe ? 'समाधान' : 'Resolved'}:</span>
+            <strong style={{ fontWeight: '700' }}>{summary.resolved}</strong>
+          </button>
 
+          {/* Reload Button */}
           <button
             type="button"
             onClick={loadData}
             className="btn btn-secondary btn-sm"
             disabled={isLoading}
-            title="Reload from MongoDB"
+            title="Reload from MongoDB Atlas"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
             <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
-            <span>{isNe ? 'ताजा' : 'Refresh'}</span>
+            <span className="desktop-only">{isNe ? 'ताजा' : 'Refresh'}</span>
           </button>
         </div>
       </div>
@@ -133,35 +239,38 @@ export function AdminComplaintsPage() {
           padding: '12px 16px',
           backgroundColor: '#FEF2F2',
           border: '1px solid #FECACA',
-          borderRadius: '6px',
+          borderRadius: '8px',
           color: '#B91C1C',
           fontSize: '0.875rem',
-          marginBottom: 'var(--space-6)',
+          marginBottom: '24px',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '10px'
         }}>
-          <AlertCircle size={16} />
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Main Filterable Table */}
-      {isLoading ? (
-        <div className="card" style={{ padding: '40px', textAlign: 'center', color: 'var(--color-muted)', fontSize: '0.875rem' }}>
-          {isNe ? 'डाटाबेसबाट उजुरीहरू लोड गरिँदैछ...' : 'Loading grievances from MongoDB...'}
-        </div>
-      ) : (
-        <ComplaintTable
-          complaints={complaints}
-          role="admin"
-          showStudentInfo={true}
-          defaultStatus={urlStatus}
-          defaultCategory={urlCategory}
-          onActionClick={(item) => navigate(`/admin/complaints/${item._id || item.id}`)}
-          actionButtonLabel={isNe ? 'समीक्षा' : 'Inspect'}
-        />
-      )}
+      {/* Main Filterable Table in Card Container */}
+      <div className="card" style={{ padding: '24px' }}>
+        {isLoading ? (
+          <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--color-muted)', fontSize: '0.875rem' }}>
+            <div className="animate-spin" style={{ width: '24px', height: '24px', border: '2px solid var(--color-royal-blue)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 12px' }} />
+            <span>{isNe ? 'डाटाबेसबाट उजुरीहरू लोड गरिँदैछ...' : 'Loading grievance queue from MongoDB Atlas...'}</span>
+          </div>
+        ) : (
+          <ComplaintTable
+            complaints={complaints}
+            role="admin"
+            showStudentInfo={true}
+            defaultStatus={urlStatus}
+            defaultCategory={urlCategory}
+            onActionClick={(item) => navigate(`/admin/complaints/${item._id || item.id}`)}
+            actionButtonLabel={isNe ? 'समीक्षा' : 'Inspect'}
+          />
+        )}
+      </div>
 
       {/* Quick Status Modal */}
       {statusModalOpen && selectedComp && (

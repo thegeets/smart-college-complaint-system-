@@ -166,11 +166,12 @@ export function LandingPage() {
 
             {/* Trust Eyebrow Tag */}
             <div className="hero-trust-tag">
+              <span className="live-pulse-dot" aria-hidden="true" />
               <ShieldCheck size={14} className="hero-trust-icon" />
               <span>
                 {isNe
-                  ? 'सोच कलेज अफ आईटी, पोखरा — विद्यार्थी आईटी पोर्टल'
-                  : 'Soch College of IT, Pokhara — Student IT Portal'}
+                  ? 'सोच कलेज अफ आईटी, पोखरा — आधिकारिक विद्यार्थी आईटी डेस्क'
+                  : 'Soch College of IT, Pokhara — Official Student IT Desk'}
               </span>
             </div>
 
@@ -178,11 +179,11 @@ export function LandingPage() {
             <h1 className="hero-main-title">
               {isNe ? (
                 <>
-                  विद्यार्थी क्याम्पस आईटी सेवा तथा <span style={{ color: '#5278C8' }}>उजुरी पोर्टल</span>
+                  विद्यार्थी क्याम्पस आईटी सेवा तथा <span className="hero-title-accent">उजुरी पोर्टल</span>
                 </>
               ) : (
                 <>
-                  Student Campus IT Service &amp; <span style={{ color: '#5278C8' }}>Grievance Portal</span>
+                  Student Campus IT Service &amp; <span className="hero-title-accent">Grievance Portal</span>
                 </>
               )}
             </h1>
@@ -214,6 +215,22 @@ export function LandingPage() {
                 </Link>
               )}
             </div>
+
+            {/* High-Trust Verification Badges */}
+            <div className="hero-trust-badges-strip">
+              <div className="hero-trust-badge-item">
+                <CheckCircle2 size={13} className="trust-badge-icon" />
+                <span>{isNe ? '२४–४८ घण्टा डेस्क SLA' : '24–48h Target SLA'}</span>
+              </div>
+              <div className="hero-trust-badge-item">
+                <ShieldCheck size={13} className="trust-badge-icon" />
+                <span>{isNe ? 'प्रमाणीकृत विद्यार्थी सुरक्षा' : 'Student Auth Protected'}</span>
+              </div>
+              <div className="hero-trust-badge-item">
+                <Clock size={13} className="trust-badge-icon" />
+                <span>{isNe ? 'प्रत्यक्ष ४-चरणीय ट्र्याकिङ' : 'Live 4-Stage Tracking'}</span>
+              </div>
+            </div>
           </div>
 
           {/* Right Column: Complaint Resolution Workflow Visual */}
@@ -227,53 +244,53 @@ export function LandingPage() {
       {/* =========================================================================
           STATISTICS & OPERATIONAL HIGHLIGHTS STRIP
           ========================================================================= */}
-      <section className="home-stats-strip" style={{ background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '36px 0' }}>
+      <section className="home-stats-strip">
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
+          <div className="home-stats-grid">
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#5278C8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Monitor size={24} />
+            <div className="home-stat-card">
+              <div className="home-stat-icon-box royal-blue">
+                <Monitor size={22} />
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>6 Categories</div>
-                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+              <div className="home-stat-content">
+                <div className="home-stat-num">6 Categories</div>
+                <div className="home-stat-label">
                   {isNe ? 'स्वीकृत ल्याब तथा आईटी विधा' : 'Dedicated IT Service Areas'}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#203B64', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Clock size={24} />
+            <div className="home-stat-card">
+              <div className="home-stat-icon-box navy">
+                <Clock size={22} />
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>24–48 Hours</div>
-                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+              <div className="home-stat-content">
+                <div className="home-stat-num">24–48 Hours</div>
+                <div className="home-stat-label">
                   {isNe ? 'औसत समीक्षा तथा खटन' : 'Target Desk Triage SLA'}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#5278C8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <CheckCircle2 size={24} />
+            <div className="home-stat-card">
+              <div className="home-stat-icon-box royal-blue">
+                <CheckCircle2 size={22} />
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>4 Stages</div>
-                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+              <div className="home-stat-content">
+                <div className="home-stat-num">4 Stages</div>
+                <div className="home-stat-label">
                   {isNe ? 'पारदर्शी चरणबद्ध प्रगति' : 'Tracked Resolution Pipeline'}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', background: '#F8FAFD', border: '1px solid #EBF1FA' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#EEF3FB', color: '#203B64', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <ShieldCheck size={24} />
+            <div className="home-stat-card">
+              <div className="home-stat-icon-box navy">
+                <ShieldCheck size={22} />
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#101D35', lineHeight: 1.1 }}>100% Secure</div>
-                <div style={{ fontSize: '0.8125rem', color: '#697586', marginTop: '2px' }}>
+              <div className="home-stat-content">
+                <div className="home-stat-num">100% Secure</div>
+                <div className="home-stat-label">
                   {isNe ? 'विद्यार्थी गोपनीयता संरक्षण' : 'Role-Protected Privacy'}
                 </div>
               </div>
