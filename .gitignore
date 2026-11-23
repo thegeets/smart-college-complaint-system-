@@ -19,6 +19,8 @@ dist-ssr
 # Private uploads
 uploads/
 uploads/attachments/
+server/uploads/
+server/uploads/complaints/
 
 # Editor directories and files
 .vscode/*

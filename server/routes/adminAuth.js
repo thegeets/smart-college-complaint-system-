@@ -109,17 +109,46 @@ router.post('/logout', (req, res) => {
 
 /**
  * GET /api/v1/admin/auth/me
- * Checks session and returns currently authenticated administrator profile.
+ * Session-check endpoint for administrators.
+ * Returns 200 with { authenticated: true, user, admin, csrfToken } if active session,
+ * or 200 with { authenticated: false, user: null, admin: null } if unauthenticated.
  */
-router.get('/me', requireAdminAuth, (req, res) => {
-  if (!req.session.csrfToken) {
-    req.session.csrfToken = generateCsrfToken();
+router.get('/me', async (req, res, next) => {
+  try {
+    if (!req.session || !req.session.adminId) {
+      return res.status(200).json({
+        success: true,
+        authenticated: false,
+        user: null,
+        admin: null,
+      });
+    }
+
+    const admin = await Admin.findById(req.session.adminId);
+    if (!admin || !admin.isActive) {
+      req.session.destroy(() => {});
+      return res.status(200).json({
+        success: true,
+        authenticated: false,
+        user: null,
+        admin: null,
+      });
+    }
+
+    if (!req.session.csrfToken) {
+      req.session.csrfToken = generateCsrfToken();
+    }
+
+    return res.status(200).json({
+      success: true,
+      authenticated: true,
+      user: admin.toSafeObject(),
+      admin: admin.toSafeObject(),
+      csrfToken: req.session.csrfToken,
+    });
+  } catch (error) {
+    next(error);
   }
-  res.status(200).json({
-    success: true,
-    admin: req.admin.toSafeObject(),
-    csrfToken: req.session.csrfToken,
-  });
 });
 
 /**

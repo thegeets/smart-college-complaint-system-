@@ -1,34 +1,16 @@
 import multer from 'multer';
-import path from 'path';
 import fs from 'fs';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
-import { ENV } from '../config/env.js';
 import { validateFileMetadata, validateFileSignature } from '../utils/fileValidator.js';
+import { uploadBufferToGridFS, deleteGridFSFiles } from '../services/gridfsService.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Multer in-memory storage (serverless-ready, never writes to disk)
+const storage = multer.memoryStorage();
 
-// Ensure upload directory exists outside public directory
-const absoluteUploadDir = path.resolve(__dirname, '../../', ENV.UPLOAD_DIR);
-if (!fs.existsSync(absoluteUploadDir)) {
-  fs.mkdirSync(absoluteUploadDir, { recursive: true });
-}
+// Allowed file constraints
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB per file
+const MAX_FILES_COUNT = 3;
 
-// Multer disk storage with random server-generated filenames
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, absoluteUploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const randomHex = crypto.randomBytes(12).toString('hex');
-    const safeName = `att_${Date.now()}_${randomHex}${ext}`;
-    cb(null, safeName);
-  },
-});
-
-// Multer fileFilter: checks extension and declared MIME
+// Multer fileFilter: checks file extension and declared MIME type against strict whitelist
 const fileFilter = (req, file, cb) => {
   const metaValidation = validateFileMetadata(file.originalname, file.mimetype);
   if (!metaValidation.valid) {
@@ -37,20 +19,22 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
+// Single attachment middleware for public complaint submission
 export const uploadAttachment = multer({
   storage,
   limits: {
-    fileSize: ENV.MAX_FILE_SIZE_BYTES, // 5 MB
-    files: 1, // Max 1 file per complaint
+    fileSize: MAX_FILE_SIZE,
+    files: 1,
   },
   fileFilter,
 }).single('attachment');
 
+// Multi-attachment middleware for student/admin complaint wizard (up to 3 files total)
 export const uploadComplaintAttachments = multer({
   storage,
   limits: {
-    fileSize: ENV.MAX_FILE_SIZE_BYTES, // 5 MB
-    files: 3, // Max 3 files total
+    fileSize: MAX_FILE_SIZE,
+    files: MAX_FILES_COUNT,
   },
   fileFilter,
 }).fields([
@@ -60,37 +44,21 @@ export const uploadComplaintAttachments = multer({
 
 /**
  * Middleware: verifyUploadedFileSignature
- * Inspects the actual magic bytes of the saved file(s) to ensure it matches
- * declared type and is strictly JPG, PNG, PDF, or WEBP (rejects disguised SVGs, HTML, EXEs).
+ * Inspects the actual magic bytes of each in-memory file buffer to ensure it
+ * strictly matches JPG, PNG, PDF, or WEBP (rejects disguised scripts, SVGs, EXEs).
  */
 export async function verifyUploadedFileSignature(req, res, next) {
-  const filesToVerify = [];
-  if (req.file) {
-    filesToVerify.push(req.file);
-  }
-  if (Array.isArray(req.files) && req.files.length > 0) {
-    filesToVerify.push(...req.files);
-  } else if (req.files && typeof req.files === 'object') {
-    for (const key of Object.keys(req.files)) {
-      if (Array.isArray(req.files[key])) {
-        filesToVerify.push(...req.files[key]);
-      }
-    }
-  }
+  const filesToVerify = getUploadedFiles(req);
 
   if (filesToVerify.length === 0) {
     return next(); // Attachments are optional
   }
 
   for (const file of filesToVerify) {
-    const result = await validateFileSignature(file.path);
+    const result = await validateFileSignature(file.buffer);
     if (!result.valid) {
-      // Delete all uploaded files on any signature error
-      for (const f of filesToVerify) {
-        await safeDeleteFile(f.path);
-      }
       req.file = null;
-      req.files = [];
+      req.files = null;
       return res.status(400).json({
         success: false,
         code: 'INVALID_FILE_SIGNATURE',
@@ -103,7 +71,10 @@ export async function verifyUploadedFileSignature(req, res, next) {
 }
 
 /**
- * Helper to collect all uploaded files from req (supports req.file, req.files array, or req.files object).
+ * Collect all uploaded files from req (supports req.file, req.files array, or req.files object).
+ *
+ * @param {import('express').Request} req
+ * @returns {Array<Express.Multer.File>}
  */
 export function getUploadedFiles(req) {
   const files = [];
@@ -123,15 +94,44 @@ export function getUploadedFiles(req) {
 }
 
 /**
- * Helper to safely delete an orphaned or invalid file.
+ * Persist uploaded in-memory files into MongoDB GridFS.
+ * Returns an array of attachment metadata objects with GridFS fileId (ObjectId).
+ *
+ * @param {Array<Express.Multer.File>} files
+ * @returns {Promise<Array<{ fileId: import('mongoose').Types.ObjectId, originalName: string, mimetype: string, mimeType: string, size: number, filename: string, storageFilename: string, uploadedAt: Date }>>}
+ */
+export async function persistFilesToGridFS(files) {
+  if (!Array.isArray(files) || files.length === 0) return [];
+  const uploadedResults = [];
+
+  try {
+    for (const file of files) {
+      const result = await uploadBufferToGridFS(file.buffer, {
+        originalName: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+      });
+      uploadedResults.push(result);
+    }
+    return uploadedResults;
+  } catch (error) {
+    // If any upload fails midway, delete all previously uploaded files from GridFS
+    const fileIdsToDelete = uploadedResults.map((r) => r.fileId);
+    await deleteGridFSFiles(fileIdsToDelete);
+    throw error;
+  }
+}
+
+/**
+ * Helper to safely delete any legacy disk file (for backwards compatibility).
  */
 export async function safeDeleteFile(filePath) {
-  if (!filePath) return;
+  if (!filePath || typeof filePath !== 'string') return;
   try {
     if (fs.existsSync(filePath)) {
       await fs.promises.unlink(filePath);
     }
   } catch (error) {
-    console.warn(`[File Cleanup] Could not delete file: ${filePath}`, error.message);
+    console.warn(`[File Cleanup] Could not delete disk file: ${filePath}`, error.message);
   }
 }

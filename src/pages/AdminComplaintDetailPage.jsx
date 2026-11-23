@@ -3,17 +3,16 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { StatusBadge, PriorityBadge, CategoryBadge } from '../components/StatusBadge';
 import { ComplaintTimeline } from '../components/ComplaintTimeline';
+import { ComplaintAttachments } from '../components/ComplaintAttachments';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
   ArrowLeft,
   Calendar,
   AlertCircle,
-  Download,
   MessageSquare,
   Lock,
   Clock,
-  Send,
-  Paperclip
+  Send
 } from 'lucide-react';
 
 export function AdminComplaintDetailPage() {
@@ -149,7 +148,6 @@ export function AdminComplaintDetailPage() {
     );
   }
 
-  const docId = complaint._id || complaint.id;
   const refCode = complaint.reference || complaint.id;
   const lodgedDateStr = new Date(complaint.createdAt || complaint.submittedAt).toLocaleString(isNe ? 'ne-NP' : 'en-US', {
     dateStyle: 'medium',
@@ -260,42 +258,8 @@ export function AdminComplaintDetailPage() {
           </div>
         </div>
 
-        {/* File Attachment Strip */}
-        {complaint.attachment && (
-          <div style={{
-            marginTop: 'var(--space-4)',
-            padding: '12px 16px',
-            backgroundColor: '#F0FDFA',
-            border: '1px solid #CCFBF1',
-            borderRadius: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Paperclip size={16} color="#0F766E" />
-              <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0F766E' }}>
-                {complaint.attachment.originalName}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                ({(complaint.attachment.size / 1024).toFixed(0)} KB)
-              </span>
-            </div>
-
-            <a
-              href={`/api/v1/admin/complaints/${docId}/attachment`}
-              className="btn btn-secondary btn-sm"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-            >
-              <Download size={13} />
-              <span>{isNe ? 'प्रमाण फाइल डाउनलोड गर्नुहोस्' : 'Download Attachment'}</span>
-            </a>
-          </div>
-        )}
+        {/* Attachments Section with Grid, Thumbnails, Lightbox & Download */}
+        <ComplaintAttachments complaint={complaint} isNe={isNe} />
       </div>
 
       {/* Two Column Administrative Actions Grid */}

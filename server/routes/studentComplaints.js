@@ -1,6 +1,4 @@
 import express from 'express';
-import path from 'path';
-import fs from 'fs';
 import { Complaint } from '../models/Complaint.js';
 import { Admin } from '../models/Admin.js';
 import { Student } from '../models/Student.js';
@@ -19,6 +17,7 @@ import {
 import { getNextComplaintReference } from '../models/Counter.js';
 import { sendComplaintConfirmationEmail } from '../utils/emailService.js';
 import { generateComplaintReference, verifyTrackingSecret } from '../utils/crypto.js';
+import { streamComplaintAttachment } from '../controllers/attachmentController.js';
 
 const router = express.Router();
 
@@ -160,7 +159,9 @@ router.post(
       // 2. Build attachment metadata
       const attachments = uploadedFiles.map((file) => ({
         originalName: file.originalname,
+        filename: file.filename,
         storageFilename: file.filename,
+        mimetype: file.mimetype,
         mimeType: file.mimetype,
         size: file.size,
         path: file.path,
@@ -294,145 +295,15 @@ router.get('/:id', requireStudentOrAdminAuth, async (req, res, next) => {
 
 /**
  * GET /:id/attachments/:filename
- * Securely streams an attachment file ONLY to the owning student or admin.
+ * Securely streams an attachment file ONLY to the owning student or staff/admin.
  */
-router.get('/:id/attachments/:filename', requireStudentOrAdminAuth, async (req, res, next) => {
-  try {
-    const { id, filename } = req.params;
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
-    const upperId = id.toUpperCase();
-
-    const query = isObjectId
-      ? { _id: id }
-      : { $or: [{ referenceId: upperId }, { reference: upperId }] };
-
-    const complaint = await Complaint.findOne(query);
-    if (!complaint) {
-      return res.status(404).json({
-        success: false,
-        code: 'COMPLAINT_NOT_FOUND',
-        message: 'Complaint not found.',
-      });
-    }
-
-    if (req.student && (!complaint.studentId || !complaint.studentId.equals(req.student._id))) {
-      return res.status(404).json({
-        success: false,
-        code: 'COMPLAINT_NOT_FOUND',
-        message: 'Complaint not found.',
-      });
-    }
-
-    // Find requested attachment in attachments array or legacy attachment field
-    let matchedAttachment = null;
-    if (Array.isArray(complaint.attachments)) {
-      matchedAttachment = complaint.attachments.find(
-        (att) => att.storageFilename === filename || att.originalName === filename
-      );
-    }
-    if (!matchedAttachment && complaint.attachment) {
-      if (
-        complaint.attachment.storageFilename === filename ||
-        complaint.attachment.originalName === filename
-      ) {
-        matchedAttachment = complaint.attachment;
-      }
-    }
-
-    if (!matchedAttachment || !matchedAttachment.path) {
-      return res.status(404).json({
-        success: false,
-        code: 'ATTACHMENT_NOT_FOUND',
-        message: 'The requested attachment does not exist on this complaint.',
-      });
-    }
-
-    const resolvedPath = path.resolve(matchedAttachment.path);
-    if (!fs.existsSync(resolvedPath)) {
-      return res.status(404).json({
-        success: false,
-        code: 'FILE_MISSING_ON_DISK',
-        message: 'The attachment file could not be found in storage.',
-      });
-    }
-
-    res.setHeader('Content-Type', matchedAttachment.mimeType || 'application/octet-stream');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(matchedAttachment.originalName)}"`
-    );
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-
-    const fileStream = fs.createReadStream(resolvedPath);
-    fileStream.pipe(res);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/:id/attachments/:filename', streamComplaintAttachment);
 
 /**
  * GET /:id/attachment
  * Legacy route: Securely streams the primary attachment file.
  */
-router.get('/:id/attachment', requireStudentOrAdminAuth, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
-    const upperId = id.toUpperCase();
-
-    const query = isObjectId
-      ? { _id: id }
-      : { $or: [{ referenceId: upperId }, { reference: upperId }] };
-
-    const complaint = await Complaint.findOne(query);
-    if (!complaint) {
-      return res.status(404).json({
-        success: false,
-        code: 'COMPLAINT_NOT_FOUND',
-        message: 'Complaint not found.',
-      });
-    }
-
-    if (req.student && (!complaint.studentId || !complaint.studentId.equals(req.student._id))) {
-      return res.status(404).json({
-        success: false,
-        code: 'COMPLAINT_NOT_FOUND',
-        message: 'Complaint not found.',
-      });
-    }
-
-    const primaryAttachment =
-      complaint.attachment || (complaint.attachments && complaint.attachments[0]);
-    if (!primaryAttachment || !primaryAttachment.path) {
-      return res.status(404).json({
-        success: false,
-        code: 'NO_ATTACHMENT',
-        message: 'This complaint has no attachment file.',
-      });
-    }
-
-    const resolvedPath = path.resolve(primaryAttachment.path);
-    if (!fs.existsSync(resolvedPath)) {
-      return res.status(404).json({
-        success: false,
-        code: 'FILE_MISSING_ON_DISK',
-        message: 'The requested attachment file is missing from the storage disk.',
-      });
-    }
-
-    res.setHeader('Content-Type', primaryAttachment.mimeType || 'application/octet-stream');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(primaryAttachment.originalName)}"`
-    );
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-
-    const fileStream = fs.createReadStream(resolvedPath);
-    fileStream.pipe(res);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/:id/attachment', streamComplaintAttachment);
 
 /**
  * POST /claim-legacy

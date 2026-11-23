@@ -3,6 +3,7 @@ import { Complaint } from '../models/Complaint.js';
 import { uploadAttachment, verifyUploadedFileSignature, safeDeleteFile } from '../middleware/upload.js';
 import { validateComplaintSubmission, validateTrackingInput } from '../middleware/validate.js';
 import { submissionRateLimiter, trackingRateLimiter } from '../middleware/rateLimiter.js';
+import { streamComplaintAttachment } from '../controllers/attachmentController.js';
 import {
   generateComplaintReference,
   generateTrackingSecret,
@@ -56,7 +57,9 @@ router.post(
       if (req.file) {
         attachmentData = {
           originalName: req.file.originalname,
+          filename: req.file.filename,
           storageFilename: req.file.filename,
+          mimetype: req.file.mimetype,
           mimeType: req.file.mimetype,
           size: req.file.size,
           path: req.file.path,
@@ -146,5 +149,12 @@ router.post('/track', trackingRateLimiter, validateTrackingInput, async (req, re
     next(error);
   }
 });
+
+/**
+ * GET /api/v1/complaints/:id/attachments/:filename
+ * Secure authenticated attachment streaming (owner student or staff/admin only).
+ */
+router.get('/:id/attachments/:filename', streamComplaintAttachment);
+router.get('/:id/attachment', streamComplaintAttachment);
 
 export default router;

@@ -135,7 +135,7 @@ export function validateEnv() {
     MONGODB_URI: validatedMongoUri,
     SESSION_SECRET: process.env.SESSION_SECRET || 'dev-only-secret-do-not-use-in-production-min-32-chars',
     CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/attachments',
+    UPLOAD_DIR: process.env.UPLOAD_DIR || 'server/uploads/complaints',
     MAX_FILE_SIZE_BYTES: parseInt(process.env.MAX_FILE_SIZE_BYTES || '5242880', 10), // 5MB
     RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 min
     RATE_LIMIT_MAX_SUBMISSIONS: parseInt(process.env.RATE_LIMIT_MAX_SUBMISSIONS || '10', 10),

@@ -67,24 +67,33 @@ export function AppProvider({ children }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const isAdminOrStaffPath = (path) => {
+    if (!path) return false;
+    const lower = path.toLowerCase();
+    return lower.startsWith('/admin') || lower === '/adminlogin' || lower.startsWith('/staff');
+  };
+
   // 3. Admin Authentication Session State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
   const [csrfToken, setCsrfToken] = useState(null);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(() => {
+    return typeof window !== 'undefined' ? isAdminOrStaffPath(window.location.pathname) : false;
+  });
 
-  // Check admin session on mount
+  // Check admin session (called only on admin/staff routes or admin login)
   const checkAdminSession = useCallback(async () => {
+    setIsCheckingSession(true);
     try {
       const res = await fetch('/api/v1/admin/auth/me', {
         credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.admin) {
+        if (data.authenticated && (data.admin || data.user)) {
           setIsAdminLoggedIn(true);
-          setAdminUser(data.admin);
-          setCsrfToken(data.csrfToken);
+          setAdminUser(data.admin || data.user);
+          setCsrfToken(data.csrfToken || null);
         } else {
           setIsAdminLoggedIn(false);
           setAdminUser(null);
@@ -108,15 +117,16 @@ export function AppProvider({ children }) {
 
   // Check student session on mount
   const checkStudentSession = useCallback(async () => {
+    setIsCheckingStudentSession(true);
     try {
       const res = await fetch('/api/v1/student/auth/me', {
         credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.student) {
+        if (data.authenticated && (data.student || data.user)) {
           setIsStudentLoggedIn(true);
-          setStudentUser(data.student);
+          setStudentUser(data.student || data.user);
           if (data.csrfToken) setCsrfToken(data.csrfToken);
         } else {
           setIsStudentLoggedIn(false);
@@ -135,7 +145,9 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    checkAdminSession();
+    if (typeof window !== 'undefined' && isAdminOrStaffPath(window.location.pathname)) {
+      checkAdminSession();
+    }
     checkStudentSession();
   }, [checkAdminSession, checkStudentSession]);
 
@@ -293,6 +305,11 @@ export function AppProvider({ children }) {
       credentials: 'include',
     });
 
+    if (res.status === 401) {
+      setIsStudentLoggedIn(false);
+      setStudentUser(null);
+    }
+
     const data = await res.json();
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Failed to load complaints.');
@@ -305,6 +322,11 @@ export function AppProvider({ children }) {
     const res = await fetch(`/api/v1/student/complaints/${id}`, {
       credentials: 'include',
     });
+
+    if (res.status === 401) {
+      setIsStudentLoggedIn(false);
+      setStudentUser(null);
+    }
 
     const data = await res.json();
     if (!res.ok || !data.success) {
@@ -533,6 +555,11 @@ export function AppProvider({ children }) {
       credentials: 'include',
     });
 
+    if (res.status === 401) {
+      setIsAdminLoggedIn(false);
+      setAdminUser(null);
+    }
+
     const data = await res.json();
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Failed to fetch complaints list.');
@@ -545,6 +572,11 @@ export function AppProvider({ children }) {
     const res = await fetch(`/api/v1/admin/complaints/${id}`, {
       credentials: 'include',
     });
+
+    if (res.status === 401) {
+      setIsAdminLoggedIn(false);
+      setAdminUser(null);
+    }
 
     const data = await res.json();
     if (!res.ok || !data.success) {
@@ -631,6 +663,11 @@ export function AppProvider({ children }) {
       credentials: 'include',
     });
 
+    if (res.status === 401) {
+      setIsAdminLoggedIn(false);
+      setAdminUser(null);
+    }
+
     const data = await res.json();
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Failed to load reports summary.');
@@ -709,6 +746,7 @@ export function AppProvider({ children }) {
     isStudentLoggedIn,
     studentUser,
     isCheckingStudentSession,
+    checkStudentSession,
     registerStudent,
     verifyStudentEmail,
     resendStudentVerification,
@@ -727,6 +765,7 @@ export function AppProvider({ children }) {
     adminUser,
     csrfToken,
     isCheckingSession,
+    checkAdminSession,
     loginAdmin,
     logoutAdmin,
     changeAdminPassword,

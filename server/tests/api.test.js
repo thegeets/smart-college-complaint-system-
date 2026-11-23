@@ -473,12 +473,20 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(res.status, 200);
     assert.equal(res.body.success, true);
 
-    // Subsequent authenticated request must be rejected
+    // Session-check endpoint returns 200 with authenticated: false for logged out session
     const afterLogout = await request(app)
       .get('/api/v1/admin/auth/me')
       .set('Cookie', adminSessionCookie);
 
-    assert.equal(afterLogout.status, 401);
+    assert.equal(afterLogout.status, 200);
+    assert.equal(afterLogout.body.authenticated, false);
+    assert.equal(afterLogout.body.admin, null);
+
+    // Protected administrative endpoint must be rejected with 401
+    const protectedAfterLogout = await request(app)
+      .get('/api/v1/admin/complaints')
+      .set('Cookie', adminSessionCookie);
+    assert.equal(protectedAfterLogout.status, 401);
   });
 
   // =========================================================================
@@ -798,12 +806,20 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(logoutRes.status, 200);
     assert.equal(logoutRes.body.success, true);
 
-    // 30c. Subsequent request rejected
+    // 30c. Session-check endpoint returns 200 with authenticated: false for logged out student
     const afterLogout = await request(app)
       .get('/api/v1/student/auth/me')
       .set('Cookie', studentASessionCookie);
 
-    assert.equal(afterLogout.status, 401);
+    assert.equal(afterLogout.status, 200);
+    assert.equal(afterLogout.body.authenticated, false);
+    assert.equal(afterLogout.body.student, null);
+
+    // Protected student endpoint must be rejected with 401
+    const protectedAfterLogout = await request(app)
+      .get('/api/v1/student/complaints')
+      .set('Cookie', studentASessionCookie);
+    assert.equal(protectedAfterLogout.status, 401);
   });
 
   // 31. Administrator Profile Management & Email Rotation
@@ -847,6 +863,19 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
 
     // Clean up updated admin email
     await Admin.deleteMany({ email: updatedEmail });
+  });
+
+  // 31d. Clean Unauthenticated Session Checks (No 401 on /me)
+  await t.test('GET /me endpoints return 200 with authenticated: false when unauthenticated', async () => {
+    const studentMe = await request(app).get('/api/v1/student/auth/me');
+    assert.equal(studentMe.status, 200);
+    assert.equal(studentMe.body.authenticated, false);
+    assert.equal(studentMe.body.user, null);
+
+    const adminMe = await request(app).get('/api/v1/admin/auth/me');
+    assert.equal(adminMe.status, 200);
+    assert.equal(adminMe.body.authenticated, false);
+    assert.equal(adminMe.body.user, null);
   });
 
   // 32. Preservation of Intended Submission Route and Category Query Parameters
@@ -1194,5 +1223,112 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
 
     // Cleanup test student
     await Student.deleteMany({ email: unverifiedEmail });
+  });
+
+  // 38. Comprehensive Complaint Attachment Access Control (GET /api/v1/complaints/:id/attachments/:filename)
+  await t.test('Complaint Attachment Security: Owner views, other student denied, admin views, unauth denied, traversal rejected', async () => {
+    // 38a. Re-authenticate Student A, Student B, and Admin for fresh active sessions
+    const loginStudentARes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: 'student.alpha@sochcollege.edu.np',
+        password: 'StudentPass123!',
+      });
+    const sACookies = loginStudentARes.headers['set-cookie'];
+    const activeStudentACookie = sACookies?.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
+    assert.ok(activeStudentACookie);
+
+    const loginStudentBRes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: 'student.beta@sochcollege.edu.np',
+        password: 'StudentBetaPass123!',
+      });
+    assert.equal(loginStudentBRes.status, 200);
+    const sBCookies = loginStudentBRes.headers['set-cookie'];
+    const activeStudentBCookie = sBCookies?.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
+    assert.ok(activeStudentBCookie);
+
+    // Ensure an active admin exists for attachment streaming verification
+    const adminPasswordHash = await hashPassword('AdminPass123!');
+    await Admin.deleteMany({ email: 'attachment.admin@sochcollege.edu.np' });
+    const testAdminDoc = await Admin.create({
+      name: 'Attachment Test Admin',
+      email: 'attachment.admin@sochcollege.edu.np',
+      passwordHash: adminPasswordHash,
+      role: 'Admin',
+      isActive: true,
+    });
+
+    const loginAdminRes = await request(app)
+      .post('/api/v1/admin/auth/login')
+      .send({
+        email: testAdminDoc.email,
+        password: 'AdminPass123!',
+      });
+    assert.equal(loginAdminRes.status, 200);
+    const admCookies = loginAdminRes.headers['set-cookie'];
+    const activeAdminCookie = admCookies?.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
+    assert.ok(activeAdminCookie);
+
+    // Retrieve student A's attachment filename
+    const complaintA = await Complaint.findById(studentAComplaintId);
+    assert.ok(complaintA.attachment);
+    const attachFilename = complaintA.attachment.storageFilename || complaintA.attachment.filename;
+
+    // 1. Owner student CAN view/stream their own attachment (inline Content-Disposition for image)
+    const ownerRes = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/${attachFilename}`)
+      .set('Cookie', activeStudentACookie);
+
+    assert.equal(ownerRes.status, 200);
+    assert.equal(ownerRes.headers['content-type'], 'image/png');
+    assert.ok(ownerRes.headers['content-disposition'].includes('inline'));
+    assert.equal(ownerRes.headers['x-content-type-options'], 'nosniff');
+
+    // Also verify ?download=1 serves attachment disposition
+    const downloadRes = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/${attachFilename}?download=1`)
+      .set('Cookie', activeStudentACookie);
+    assert.equal(downloadRes.status, 200);
+    assert.ok(downloadRes.headers['content-disposition'].includes('attachment'));
+
+    // 2. Other student (Student B) gets denied (403/404)
+    const otherStudentRes = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/${attachFilename}`)
+      .set('Cookie', activeStudentBCookie);
+
+    assert.ok([403, 404].includes(otherStudentRes.status), 'Other student must be denied');
+
+    // 3. Staff/Admin CAN view any complaint attachment
+    const adminRes = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/${attachFilename}`)
+      .set('Cookie', activeAdminCookie);
+
+    assert.equal(adminRes.status, 200);
+    assert.equal(adminRes.headers['content-type'], 'image/png');
+    assert.ok(adminRes.headers['content-disposition'].includes('inline'));
+
+    // 4. Unauthenticated request is denied (401/403)
+    const unauthRes = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/${attachFilename}`);
+
+    assert.ok([401, 403].includes(unauthRes.status), 'Unauthenticated request must be denied');
+
+    // 5. Directory traversal attempt is rejected (400/403/404)
+    const traversalRes1 = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/..%2f..%2fserver.js`)
+      .set('Cookie', activeStudentACookie);
+
+    assert.ok([400, 403, 404].includes(traversalRes1.status), 'Directory traversal must be rejected');
+
+    const traversalRes2 = await request(app)
+      .get(`/api/v1/complaints/${studentAComplaintId}/attachments/..%5c..%5cserver.js`)
+      .set('Cookie', activeStudentACookie);
+
+    assert.ok([400, 403, 404].includes(traversalRes2.status), 'Backslash traversal must be rejected');
+
+    // Cleanup test admin
+    await Admin.deleteMany({ email: 'attachment.admin@sochcollege.edu.np' });
   });
 });

@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from 'framer-motion';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { MOTION_EASE } from './lib/motion';
 
 import { SkeletonLoader } from './components/SkeletonLoader';
@@ -63,6 +63,16 @@ function PageFallback() {
 function AnimatedRoutes() {
   const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
+  const { checkAdminSession, isAdminLoggedIn } = useApp();
+
+  // Call admin /me only on admin routes (/admin/*) or admin login page, or staff routes
+  React.useEffect(() => {
+    const path = location.pathname.toLowerCase();
+    const isAdminOrStaff = path.startsWith('/admin') || path === '/adminlogin' || path.startsWith('/staff');
+    if (isAdminOrStaff && !isAdminLoggedIn) {
+      checkAdminSession();
+    }
+  }, [location.pathname, isAdminLoggedIn, checkAdminSession]);
 
   // Responsive mobile keyboard handling: prevent active input from being hidden behind virtual keyboard
   React.useEffect(() => {

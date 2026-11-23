@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { m, useInView, useReducedMotion } from 'framer-motion';
+import { m, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 
 /**
  * TypewriterTerminal
- * Terminal showcase that reveals lines sequentially with a typing effect and blinking cursor.
- * Includes a live-ticking SLA countdown timer ("Remaining: 18h 41m 58s") and soft dot hover glows.
- * Pauses timers when off-screen or tab is hidden via Page Visibility API.
+ * Terminal showcase displaying 5 complete lines per feature with line-by-line reveal
+ * and smooth cross-fade transitions.
+ * Includes a live-ticking SLA countdown timer and hover glowing window dots.
  */
 export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
   const terminalRef = useRef(null);
@@ -36,7 +36,7 @@ export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Tick only when both in viewport and tab is visible
+  // Tick SLA countdown only when both in viewport and tab is visible
   useEffect(() => {
     if (!isInView || !isTabVisible) return;
 
@@ -52,7 +52,7 @@ export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
     return () => clearInterval(timer);
   }, [isInView, isTabVisible]);
 
-  // Structured lines per tab
+  // Structured 5 complete lines per feature view
   const tabContent = [
     {
       comment: isNe ? '// नमुना उजुरी खटन तथा जिम्मेवारी' : '// SAMPLE TICKET ASSIGNMENT',
@@ -73,11 +73,11 @@ export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
       tagColor: '#93C5FD',
       tagBg: 'rgba(59, 130, 246, 0.16)',
       lines: [
-        { text: '> Student Account: SOCH-CSIT-2023-045 (Verified)', color: '#CBD5E1' },
+        { text: '> Ticket Reference: #SCCS-2026-112', color: '#CBD5E1' },
+        { text: '> Issue Category: Computer Lab & Workstations', color: '#CBD5E1' },
         { text: '> Privacy Guard: Active (Individual account protection)', color: '#CBD5E1' },
-        { text: '> Public Directory: None (Complaints are never exposed publicly)', color: '#CBD5E1' },
         { text: '> Access Permission: Student owner & assigned staff only', color: '#38BDF8' },
-        { text: '> Confidentiality Status: Fully Protected & Isolated', color: '#4ADE80' },
+        { text: '> Confidentiality: Isolated feed [Zero public exposure]', color: '#4ADE80' },
       ],
     },
     {
@@ -86,11 +86,11 @@ export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
       tagColor: '#C084FC',
       tagBg: 'rgba(168, 85, 247, 0.16)',
       lines: [
-        { text: '[10:15 AM] 1. Submitted: Report lodged for Lab 2: Workstation #14', color: '#CBD5E1' },
-        { text: '[10:45 AM] 2. Reviewed: Assigned to Bikash Sharma – Senior Technician', color: '#CBD5E1' },
-        { text: '[11:20 AM] 3. In Progress: Hardware inspection & cable testing', color: '#FCD34D' },
-        { text: '> Technician Update: RJ-45 connector crimped & latency verified', color: '#38BDF8' },
-        { text: '[Next Step] 4. Resolved: Closing remarks logged to student dashboard', color: '#94A3B8' },
+        { text: '> Ticket Reference: #SCCS-2026-097 [Lab 2: Workstation #14]', color: '#CBD5E1' },
+        { text: '[10:15 AM] 1. Submitted: Hardware fault report logged', color: '#CBD5E1' },
+        { text: '[10:45 AM] 2. Under Review: Assigned to Bikash Sharma', color: '#CBD5E1' },
+        { text: '[11:20 AM] 3. In Progress: RJ-45 cable testing & crimping', color: '#FCD34D' },
+        { text: '[Upcoming] 4. Resolved: Verified fix & closing remarks', color: '#38BDF8' },
       ],
     },
     {
@@ -99,43 +99,43 @@ export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
       tagColor: '#FDE047',
       tagBg: 'rgba(234, 179, 8, 0.16)',
       lines: [
-        { text: '> Input Reference Code: #SCCS-2026-084', color: '#CBD5E1' },
-        { text: '> Secret Verification: Authenticated', color: '#CBD5E1' },
+        { text: '> Ticket Reference: #SCCS-2026-052 [Guest Submission]', color: '#CBD5E1' },
+        { text: '> Issue Category: Programming Tools & Software', color: '#CBD5E1' },
+        { text: '> Secret Verification: Authenticated with 6-digit key', color: '#CBD5E1' },
         { text: '> Account Assignment: Linked to SOCH-CSIT-2023-045', color: '#38BDF8' },
-        { text: '> Success: Ticket is permanently available in "My Complaints"', color: '#4ADE80' },
+        { text: '> Target SLA: Synced to personal student dashboard', color: '#4ADE80' },
       ],
     },
   ];
 
   const currentTab = tabContent[activeFeatureTab] || tabContent[0];
-  const [typedCount, setTypedCount] = useState(1);
 
-  useEffect(() => {
-    if (shouldReduceMotion) return;
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.04,
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.2 },
+    },
+  };
 
-    const timeouts = [];
-    const count = currentTab.lines.length;
-
-    const t0 = setTimeout(() => {
-      setTypedCount(1);
-    }, 0);
-    timeouts.push(t0);
-
-    for (let idx = 1; idx < count; idx++) {
-      const t = setTimeout(() => {
-        setTypedCount((prev) => Math.max(prev, idx + 1));
-      }, idx * 180);
-      timeouts.push(t);
-    }
-
-    return () => {
-      timeouts.forEach(clearTimeout);
-    };
-  }, [activeFeatureTab, shouldReduceMotion, currentTab.lines]);
-
-  const visibleLines = shouldReduceMotion
-    ? currentTab.lines
-    : currentTab.lines.slice(0, typedCount);
+  const lineVariants = {
+    hidden: { opacity: 0, y: 6 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.22,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  };
 
   return (
     <div ref={terminalRef} className="demo-viewport-card" aria-live="polite">
@@ -157,52 +157,54 @@ export function TypewriterTerminal({ activeFeatureTab = 0, isNe = false }) {
 
       {/* Terminal Body */}
       <div className="demo-terminal-content">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-          <span style={{ color: '#60A5FA', fontWeight: 600, fontSize: '0.8125rem' }}>
-            {currentTab.comment}
-          </span>
-          <span
-            style={{
-              backgroundColor: currentTab.tagBg,
-              color: currentTab.tagColor,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-            }}
+        <AnimatePresence mode="wait">
+          <m.div
+            key={activeFeatureTab}
+            variants={shouldReduceMotion ? undefined : containerVariants}
+            initial={shouldReduceMotion ? false : 'hidden'}
+            animate="visible"
+            exit="exit"
+            style={{ display: 'flex', flexDirection: 'column', flex: 1 }}
           >
-            {currentTab.tag}
-          </span>
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <span style={{ color: '#60A5FA', fontWeight: 600, fontSize: '0.8125rem' }}>
+                {currentTab.comment}
+              </span>
+              <span
+                style={{
+                  backgroundColor: currentTab.tagBg,
+                  color: currentTab.tagColor,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                }}
+              >
+                {currentTab.tag}
+              </span>
+            </div>
 
-        <div
-          style={{
-            fontFamily: 'var(--font-mono, monospace)',
-            fontSize: '0.8125rem',
-            lineHeight: 1.75,
-            color: '#CBD5E1',
-            minHeight: '140px',
-          }}
-        >
-          {visibleLines.map((line, i) => (
-            <m.div
-              key={`${activeFeatureTab}-${i}`}
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.18 }}
-              style={{ color: line.color }}
+            <div
+              style={{
+                fontFamily: 'var(--font-mono, monospace)',
+                fontSize: '0.8125rem',
+                lineHeight: 1.75,
+                color: '#CBD5E1',
+                minHeight: '150px',
+              }}
             >
-              {line.text}
-            </m.div>
-          ))}
-
-          {/* Blinking Typewriter Cursor */}
-          {!shouldReduceMotion && typedCount <= currentTab.lines.length && (
-            <span className="terminal-cursor" aria-hidden="true">
-              ▋
-            </span>
-          )}
-        </div>
+              {currentTab.lines.map((line, i) => (
+                <m.div
+                  key={`${activeFeatureTab}-${i}`}
+                  variants={shouldReduceMotion ? undefined : lineVariants}
+                  style={{ color: line.color, wordBreak: 'break-word' }}
+                >
+                  {line.text}
+                </m.div>
+              ))}
+            </div>
+          </m.div>
+        </AnimatePresence>
       </div>
     </div>
   );

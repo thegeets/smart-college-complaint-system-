@@ -178,11 +178,6 @@ body {
   min-height: 100dvh;
 }
 
-.app-route-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
 img,
 svg,
 video,
@@ -3541,6 +3536,7 @@ a:hover {
 
 /* Breakpoint 2: 768px (Tablets in portrait, e.g. iPad 768x1024) */
 @media (max-width: 768px) {
+
   /* Prevent iOS zoom on inputs / form controls */
   input,
   select,
@@ -4395,6 +4391,9 @@ a:hover {
   color: #F8FAFC;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+  min-height: 270px;
+  display: flex;
+  flex-direction: column;
 }
 
 .demo-terminal-bar {
@@ -4439,6 +4438,9 @@ a:hover {
 
 .demo-terminal-content {
   padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Authentication Pages Cinematic Background */
@@ -4912,6 +4914,7 @@ a:hover {
    TOUCH DEVICE ACCESSIBILITY & USABILITY (@media (pointer: coarse))
    -------------------------------------------------------------------------- */
 @media (pointer: coarse) {
+
   .btn,
   button:not(.btn-icon-only),
   a.btn,
@@ -4929,24 +4932,390 @@ a:hover {
   }
 }
 
-
 /* --------------------------------------------------------------------------
-   TOUCH DEVICE ACCESSIBILITY & USABILITY (@media (pointer: coarse))
+   COMPLAINT ATTACHMENTS GRID & LIGHTBOX MODAL
    -------------------------------------------------------------------------- */
-@media (pointer: coarse) {
-  .btn,
-  button:not(.btn-icon-only),
-  a.btn,
-  .form-select,
-  .filter-select {
-    min-height: 44px !important;
+.complaint-attachments-section {
+  margin-top: var(--space-5, 20px);
+  margin-bottom: var(--space-5, 20px);
+}
+
+.attachments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.attachments-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1E3A8A;
+  background-color: #DBEAFE;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  min-width: 22px;
+}
+
+.no-attachments-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background-color: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  border-radius: 8px;
+  color: #64748B;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.complaint-attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.attachment-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.attachment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.1);
+  border-color: #93C5FD;
+}
+
+.attachment-thumb-wrapper {
+  height: 140px;
+  background-color: #0F172A;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.attachment-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attachment-card:hover .attachment-thumb-img {
+  transform: scale(1.05);
+}
+
+.attachment-preview-overlay-btn {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #FFFFFF;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.attachment-card:hover .attachment-preview-overlay-btn,
+.attachment-thumb-wrapper:focus-within .attachment-preview-overlay-btn {
+  opacity: 1;
+}
+
+.attachment-placeholder-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  background-color: #F1F5F9;
+}
+
+.attachment-doc-wrapper {
+  height: 120px;
+  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-icon-pill {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachment-card-info {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: #FFFFFF;
+  border-top: 1px solid #F1F5F9;
+}
+
+.attachment-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.attachment-filename {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1E293B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.attachment-size {
+  font-size: 0.75rem;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+.attachment-action-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: #F8FAFD;
+  border: 1px solid #CBD5E1;
+  color: #203B64;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.attachment-action-download:hover {
+  background-color: #203B64;
+  border-color: #203B64;
+  color: #FFFFFF;
+}
+
+/* Lightbox Modal Overlay */
+.attachment-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: rgba(10, 17, 30, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lightboxFadeIn 0.2s ease-out;
+}
+
+@keyframes lightboxFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.attachment-lightbox-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lightbox-toolbar {
+  height: 64px;
+  padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.lightbox-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 60%;
+}
+
+.lightbox-filename {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #F8FAFC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lightbox-subinfo {
+  font-size: 0.75rem;
+  color: #94A3B8;
+  margin-top: 2px;
+}
+
+.lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lightbox-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.lightbox-btn:hover {
+  background-color: rgba(255, 255, 255, 0.24);
+  transform: scale(1.05);
+}
+
+.lightbox-btn-close {
+  background-color: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.lightbox-btn-close:hover {
+  background-color: rgba(239, 68, 68, 0.5);
+}
+
+.lightbox-viewport {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.lightbox-img-stage {
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.lightbox-active-img {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: zoom-in;
+  user-select: none;
+}
+
+.lightbox-active-img.zoomed {
+  transform: scale(1.8);
+  cursor: zoom-out;
+}
+
+.lightbox-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 50%;
+  background-color: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.lightbox-nav-btn:hover {
+  background-color: rgba(32, 59, 100, 0.9);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.lightbox-nav-btn.prev {
+  left: max(20px, env(safe-area-inset-left));
+}
+
+.lightbox-nav-btn.next {
+  right: max(20px, env(safe-area-inset-right));
+}
+
+@media (max-width: 640px) {
+  .complaint-attachments-grid {
+    grid-template-columns: 1fr;
   }
 
-  .category-rich-card:hover,
-  .process-step-card:hover,
-  .home-stat-card:hover,
-  .tilt-card-wrapper:hover,
-  .hero-desk-card:hover {
-    transform: none !important;
+  .lightbox-toolbar {
+    height: 56px;
+  }
+
+  .lightbox-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .lightbox-nav-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
   }
 }

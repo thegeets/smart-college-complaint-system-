@@ -1,10 +1,9 @@
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
 import { Complaint, ALLOWED_STATUSES, VALID_STATUS_TRANSITIONS } from '../models/Complaint.js';
 import { requireAdminAuth } from '../middleware/auth.js';
 import { verifyCsrfToken } from '../middleware/csrf.js';
 import { validateObjectId } from '../middleware/validate.js';
+import { streamComplaintAttachment } from '../controllers/attachmentController.js';
 
 const router = express.Router();
 
@@ -291,40 +290,10 @@ router.post('/:id/notes', validateObjectId('id'), verifyCsrfToken, async (req, r
 });
 
 /**
- * GET /api/v1/admin/complaints/:id/attachment
+ * GET /api/v1/admin/complaints/:id/attachments/:filename
  * Securely streams the private file attachment to authenticated administrators.
  */
-router.get('/:id/attachment', validateObjectId('id'), async (req, res, next) => {
-  try {
-    const complaint = await Complaint.findById(req.params.id);
-    if (!complaint || !complaint.attachment) {
-      return res.status(404).json({
-        success: false,
-        code: 'ATTACHMENT_NOT_FOUND',
-        message: 'No attachment exists for this complaint.',
-      });
-    }
-
-    const filePath = path.resolve(complaint.attachment.path);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        success: false,
-        code: 'FILE_MISSING_ON_DISK',
-        message: 'The requested attachment file is missing from persistent storage.',
-      });
-    }
-
-    const safeFilename = path.basename(complaint.attachment.originalName).replace(/[^a-zA-Z0-9._-]/g, '_');
-
-    res.setHeader('Content-Type', complaint.attachment.mimeType || 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/:id/attachments/:filename', streamComplaintAttachment);
+router.get('/:id/attachment', streamComplaintAttachment);
 
 export default router;

@@ -8,7 +8,8 @@ import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import { useApp } from '../context/AppContext';
 import { staggerContainer, fadeUp } from '../lib/motion';
 
-export function Footer() {
+export function Footer
+  () {
   const { getCategoryLabel, categories, language } = useApp();
   const isNe = language === 'ne';
   const shouldReduceMotion = useReducedMotion();
@@ -25,11 +26,11 @@ export function Footer() {
         {/* Col 1: Institute Profile & Accreditation */}
         <m.div className="footer-col footer-col-brand" variants={fadeUp(0)}>
           <div style={{ marginBottom: '1.25rem' }}>
-            <BrandLogo 
-              size={40} 
-              variant="light" 
-              collegeName="Soch College of IT, Pokhara" 
-              subtitle={isNe ? 'गुनासो व्यवस्थापन प्रणाली' : 'Complaint Management System'} 
+            <BrandLogo
+              size={40}
+              variant="light"
+              collegeName="Soch College of IT, Pokhara"
+              subtitle={isNe ? 'गुनासो व्यवस्थापन प्रणाली' : 'Complaint Management System'}
             />
           </div>
           <p className="footer-desc">

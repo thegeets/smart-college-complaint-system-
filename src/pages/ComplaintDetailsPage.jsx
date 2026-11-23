@@ -5,13 +5,12 @@ import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { ComplaintTimeline } from '../components/ComplaintTimeline';
+import { ComplaintAttachments } from '../components/ComplaintAttachments';
 import {
   ArrowLeft,
   Calendar,
   Clock,
   MessageSquare,
-  FileText,
-  Download,
   AlertCircle,
   RefreshCw,
   Printer
@@ -170,42 +169,7 @@ export function ComplaintDetailsPage() {
                 </p>
 
                 {/* Attachment Section */}
-                {complaint.hasAttachment && (
-                  <div style={{
-                    marginTop: '20px',
-                    padding: '14px 16px',
-                    backgroundColor: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '12px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <FileText size={20} color="#5278C8" />
-                      <div>
-                        <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#0F172A' }}>
-                          {complaint.attachment?.originalName || 'Attached Evidence File'}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                          {complaint.attachment?.size ? `${Math.round(complaint.attachment.size / 1024)} KB` : 'Verified attachment'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <a
-                      href={`/api/v1/student/complaints/${encodeURIComponent(complaint.id || complaint.reference)}/attachment`}
-                      download
-                      className="btn btn-secondary btn-sm"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <Download size={14} />
-                      <span>{isNe ? 'डाउनलोड गर्नुहोस्' : 'Download Attachment'}</span>
-                    </a>
-                  </div>
-                )}
+                <ComplaintAttachments complaint={complaint} isNe={isNe} />
               </div>
 
               {/* Official College Responses */}

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { m, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { m, AnimatePresence, useScroll, useTransform, useReducedMotion, useInView } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
@@ -52,8 +52,40 @@ export function LandingPage() {
   // FAQ Accordion State (item 0 open by default)
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
-  // Interactive Platform Showcase tab state
+  // Interactive Platform Showcase tab state & auto-rotation
   const [activeFeatureTab, setActiveFeatureTab] = useState(0);
+  const [hasUserInteractedFeature, setHasUserInteractedFeature] = useState(false);
+  const showcaseSectionRef = useRef(null);
+  const isShowcaseInView = useInView(showcaseSectionRef, { margin: '-40px' });
+  const [isLandingPageVisible, setIsLandingPageVisible] = useState(
+    typeof document !== 'undefined' ? !document.hidden : true
+  );
+
+  useEffect(() => {
+    const handleVis = () => {
+      setIsLandingPageVisible(!document.hidden);
+    };
+    document.addEventListener('visibilitychange', handleVis);
+    return () => document.removeEventListener('visibilitychange', handleVis);
+  }, []);
+
+  // Auto-rotate through the 4 features every 5s until user interacts
+  useEffect(() => {
+    if (hasUserInteractedFeature || shouldReduceMotion || !isShowcaseInView || !isLandingPageVisible) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setActiveFeatureTab((prev) => (prev + 1) % 4);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [hasUserInteractedFeature, shouldReduceMotion, isShowcaseInView, isLandingPageVisible]);
+
+  const handleSelectFeatureTab = (index) => {
+    setHasUserInteractedFeature(true);
+    setActiveFeatureTab(index);
+  };
 
   // Floating Back to Top button visibility (appears after 600px of scroll)
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -655,7 +687,7 @@ export function LandingPage() {
               </div>
             </Reveal>
 
-            <div className="interactive-demo-container">
+            <div ref={showcaseSectionRef} className="interactive-demo-container">
               {/* Left Column: Interactive Feature Selector Pills */}
               <div className="demo-tab-selector" role="tablist">
                 {platformFeatures.map((feat, index) => {
@@ -667,7 +699,14 @@ export function LandingPage() {
                       type="button"
                       role="tab"
                       aria-selected={isActive}
-                      onClick={() => setActiveFeatureTab(index)}
+                      onClick={() => handleSelectFeatureTab(index)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectFeatureTab(index);
+                        }
+                      }}
+                      onMouseEnter={() => handleSelectFeatureTab(index)}
                       className={`demo-tab-card ${isActive ? 'active' : ''}`}
                     >
                       <div className="demo-tab-icon">
@@ -682,7 +721,7 @@ export function LandingPage() {
                 })}
               </div>
 
-              {/* Right Column: Sample Ticket Typewriter Terminal with Live SLA Countdown */}
+              {/* Right Column: Sample Ticket Terminal Showcase with Live SLA Countdown */}
               <TypewriterTerminal activeFeatureTab={activeFeatureTab} isNe={isNe} />
             </div>
           </div>

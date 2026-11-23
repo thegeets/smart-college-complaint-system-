@@ -6,6 +6,7 @@ import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { StatusBadge } from '../components/StatusBadge';
 import { ComplaintTimeline } from '../components/ComplaintTimeline';
+import { ComplaintAttachments } from '../components/ComplaintAttachments';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
     Search,
@@ -25,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export function TrackComplaintPage() {
-    const { trackComplaint, language, getCategoryLabel, showToast } = useApp();
+    const { trackComplaint, language, getCategoryLabel, showToast, isStudentLoggedIn } = useApp();
     const isNe = language === 'ne';
     const [searchParams] = useSearchParams();
 
@@ -249,6 +250,11 @@ export function TrackComplaintPage() {
                                 }}>
                                     {trackedComplaint.description}
                                 </div>
+
+                                {/* Authenticated Student Attachment Viewer */}
+                                {isStudentLoggedIn && trackedComplaint.hasAttachment && (
+                                    <ComplaintAttachments complaint={trackedComplaint} isNe={isNe} />
+                                )}
                             </div>
 
                             {/* Student-Visible Responses from College Desk */}

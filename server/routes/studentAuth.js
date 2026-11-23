@@ -373,14 +373,42 @@ router.post('/logout', (req, res) => {
 
 /**
  * GET /api/v1/student/auth/me
- * Retrieves active authenticated student profile.
+ * Session-check endpoint for students.
+ * Returns 200 with { authenticated: true, user, student, csrfToken } if active session,
+ * or 200 with { authenticated: false, user: null, student: null } if unauthenticated.
  */
-router.get('/me', requireStudentAuth, (req, res) => {
-  return res.status(200).json({
-    success: true,
-    student: req.student.toSafeObject(),
-    csrfToken: req.session.csrfToken,
-  });
+router.get('/me', async (req, res, next) => {
+  try {
+    if (!req.session || !req.session.studentId) {
+      return res.status(200).json({
+        success: true,
+        authenticated: false,
+        user: null,
+        student: null,
+      });
+    }
+
+    const student = await Student.findById(req.session.studentId);
+    if (!student || !student.isActive) {
+      req.session.destroy(() => {});
+      return res.status(200).json({
+        success: true,
+        authenticated: false,
+        user: null,
+        student: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      authenticated: true,
+      user: student.toSafeObject(),
+      student: student.toSafeObject(),
+      csrfToken: req.session.csrfToken,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
