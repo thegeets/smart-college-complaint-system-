@@ -23,7 +23,7 @@ export async function verifyPassword(storedHash, plainPassword) {
   if (!storedHash || !plainPassword) return false;
   try {
     return await argon2.verify(storedHash, plainPassword);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -57,7 +57,7 @@ export async function verifyTrackingSecret(storedHash, enteredSecret) {
   if (!storedHash || !enteredSecret) return false;
   try {
     return await argon2.verify(storedHash, enteredSecret);
-  } catch (error) {
+  } catch {
     return false;
   }
 }

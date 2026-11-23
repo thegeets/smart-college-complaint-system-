@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ComplaintTable } from '../components/ComplaintTable';
 import { ConfirmationModal } from '../components/ConfirmationModal';
+import { AnimatedNumber } from '../components/AnimatedNumber';
 import {
   FileText,
   Clock,
@@ -19,9 +20,9 @@ import {
 } from 'lucide-react';
 
 export function AdminDashboard() {
-  const { 
-    fetchAdminComplaints, 
-    fetchReportsSummary, 
+  const {
+    fetchAdminComplaints,
+    fetchReportsSummary,
     updateComplaintStatus,
     statusList,
     categories,
@@ -240,7 +241,7 @@ export function AdminDashboard() {
       {/* Enterprise KPI Cards Grid */}
       <div className="admin-kpi-grid">
         {/* Total Complaints */}
-        <div 
+        <div
           className="admin-kpi-card kpi-navy"
           onClick={() => navigate('/admin/complaints')}
           role="button"
@@ -253,7 +254,7 @@ export function AdminDashboard() {
               <FileText size={18} />
             </div>
           </div>
-          <div className="admin-kpi-value">{total}</div>
+          <div className="admin-kpi-value"><AnimatedNumber value={total} /></div>
           <div className="admin-kpi-subtext">
             <span>{isNe ? 'डाटाबेसमा सुरक्षित' : 'All records in MongoDB'}</span>
             <span style={{ fontWeight: '600', color: 'var(--color-navy)' }}>100%</span>
@@ -261,7 +262,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Pending Review */}
-        <div 
+        <div
           className="admin-kpi-card kpi-amber"
           onClick={() => navigate('/admin/complaints?status=Under%20Review')}
           role="button"
@@ -274,7 +275,7 @@ export function AdminDashboard() {
               <Clock size={18} />
             </div>
           </div>
-          <div className="admin-kpi-value" style={{ color: '#B45309' }}>{summary.pendingReview}</div>
+          <div className="admin-kpi-value" style={{ color: '#B45309' }}><AnimatedNumber value={summary.pendingReview} /></div>
           <div className="admin-kpi-subtext">
             <span>{isNe ? 'जाँच तथा कार्यभार बाँकी' : 'Awaiting review'}</span>
             <span style={{ fontWeight: '600', color: '#B45309' }}>{pendingPct}%</span>
@@ -282,7 +283,7 @@ export function AdminDashboard() {
         </div>
 
         {/* In Progress */}
-        <div 
+        <div
           className="admin-kpi-card kpi-blue"
           onClick={() => navigate('/admin/complaints?status=In%20Progress')}
           role="button"
@@ -295,7 +296,7 @@ export function AdminDashboard() {
               <Wrench size={18} />
             </div>
           </div>
-          <div className="admin-kpi-value" style={{ color: '#5278C8' }}>{summary.inProgress}</div>
+          <div className="admin-kpi-value" style={{ color: '#5278C8' }}><AnimatedNumber value={summary.inProgress} /></div>
           <div className="admin-kpi-subtext">
             <span>{isNe ? 'प्राविधिक कार्य जारी' : 'Active remediation'}</span>
             <span style={{ fontWeight: '600', color: '#5278C8' }}>{inProgPct}%</span>
@@ -303,7 +304,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Resolved */}
-        <div 
+        <div
           className="admin-kpi-card kpi-emerald"
           onClick={() => navigate('/admin/complaints?status=Resolved')}
           role="button"
@@ -316,7 +317,7 @@ export function AdminDashboard() {
               <CheckCircle2 size={18} />
             </div>
           </div>
-          <div className="admin-kpi-value" style={{ color: '#15803D' }}>{summary.resolved}</div>
+          <div className="admin-kpi-value" style={{ color: '#15803D' }}><AnimatedNumber value={summary.resolved} /></div>
           <div className="admin-kpi-subtext">
             <span>{isNe ? 'समाधान दर' : 'Resolution rate'}</span>
             <span style={{ fontWeight: '600', color: '#15803D' }}>{resolvedPct}%</span>
@@ -326,7 +327,7 @@ export function AdminDashboard() {
 
       {/* Analytics Overview: Resolution Pipeline + Category Distribution */}
       <div className="admin-analytics-grid">
-        
+
         {/* Left: Resolution Pipeline Funnel */}
         <div className="card" style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -345,8 +346,8 @@ export function AdminDashboard() {
             {pipelineStages.map((stage) => {
               const stagePct = total > 0 ? Math.round((stage.count / total) * 100) : 0;
               return (
-                <div 
-                  key={stage.id} 
+                <div
+                  key={stage.id}
                   className="admin-funnel-stage-card"
                   onClick={() => navigate(stage.to)}
                   style={{ cursor: 'pointer' }}

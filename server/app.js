@@ -4,6 +4,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import compression from 'compression';
+import path from 'path';
+import fs from 'fs';
 
 import { ENV } from './config/env.js';
 import { sanitizeInputs } from './middleware/validate.js';
@@ -25,7 +28,10 @@ export function createApp() {
   // Required so req.secure, X-Forwarded-Proto, and client IP are trusted for secure cookies & rate limiting
   app.set('trust proxy', 1);
 
-  // 1. Security Headers via Helmet
+  // 1. Gzip/Brotli Compression Middleware for performance
+  app.use(compression());
+
+  // 2. Security Headers via Helmet
   app.use(
     helmet({
       contentSecurityPolicy: false, // Served independently in dev or behind reverse proxy
@@ -90,8 +96,9 @@ export function createApp() {
   // 6. Ensure CSRF token is available on session
   app.use(ensureCsrfToken);
 
-  // 7. Mount API Routes under /api/v1
+  // 7. Mount API Routes under /api/v1 and /api
   app.use('/api/v1', healthRouter);
+  app.use('/api/complaints', studentComplaintsRouter);
   app.use('/api/v1/complaints', complaintsRouter);
   app.use('/api/v1/student/auth', studentAuthRouter);
   app.use('/api/v1/student/complaints', studentComplaintsRouter);
@@ -99,7 +106,37 @@ export function createApp() {
   app.use('/api/v1/admin/complaints', adminComplaintsRouter);
   app.use('/api/v1/admin/reports', reportsRouter);
 
-  // 8. 404 handler for unknown API routes
+  // 8. Serve Vite production build with performance cache headers
+  const distPath = path.resolve(process.cwd(), 'dist');
+  if (fs.existsSync(distPath)) {
+    app.use(
+      express.static(distPath, {
+        maxAge: '1d',
+        setHeaders: (res, filePath) => {
+          if (filePath.includes(`${path.sep}assets${path.sep}`) || filePath.includes('/assets/')) {
+            // Immutable content-hashed assets
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          } else if (filePath.endsWith('.html')) {
+            // Never cache index.html
+            res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+          }
+        },
+      })
+    );
+
+    // React Router SPA HTML fallback for non-API GET/HEAD routes (Express 5 safe)
+    app.use((req, res, next) => {
+      if ((req.method !== 'GET' && req.method !== 'HEAD') || req.path.startsWith('/api')) {
+        return next();
+      }
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      res.sendFile(path.join(distPath, 'index.html'), (err) => {
+        if (err) next(err);
+      });
+    });
+  }
+
+  // 9. 404 handler for unknown API routes
   app.use('/api', (req, res) => {
     res.status(404).json({
       success: false,
@@ -108,7 +145,7 @@ export function createApp() {
     });
   });
 
-  // 9. Centralized Error Handling
+  // 10. Centralized Error Handling
   app.use(errorHandler);
 
   return app;

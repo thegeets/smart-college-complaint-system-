@@ -30,7 +30,7 @@ export async function requireAdminAuth(req, res, next) {
 
     req.admin = admin;
     next();
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       success: false,
       code: 'AUTH_ERROR',
@@ -66,7 +66,7 @@ export async function requireStudentAuth(req, res, next) {
 
     req.student = student;
     next();
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       success: false,
       code: 'AUTH_ERROR',

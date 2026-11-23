@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { LogIn, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { LogIn, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { getSafeRedirectUrl } from '../utils/url';
 
 export function LoginPage() {
@@ -50,29 +51,48 @@ export function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
+    <div className="auth-cinematic-wrapper">
       <PublicNavbar />
 
-      <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ maxWidth: '460px', width: '100%', margin: '0 auto' }}>
+      {/* Atmospheric ambient orbs */}
+      <div className="cinematic-hero-bg" aria-hidden="true">
+        <div className="hero-mesh-grid" />
+        <div className="ambient-orb ambient-orb-1" />
+        <div className="ambient-orb ambient-orb-2" />
+      </div>
+
+      <main style={{ flex: 1, padding: 'clamp(32px, 6vw, 64px) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+        <motion.div
+          style={{ maxWidth: '460px', width: '100%', margin: '0 auto' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-            <div style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '12px',
-              backgroundColor: '#EEF3FB',
-              color: '#101D35',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 'var(--space-3)'
-            }}>
-              <LogIn size={26} color="#5278C8" />
-            </div>
+            <motion.div
+              style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '14px',
+                backgroundColor: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                color: '#101D35',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 'var(--space-3)',
+                boxShadow: '0 8px 16px -4px rgba(82, 120, 200, 0.15)'
+              }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <LogIn size={26} color="#356ACB" />
+            </motion.div>
 
-            <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-heading)', marginBottom: 'var(--space-2)', letterSpacing: '-0.02em' }}>
               {isNe ? 'विद्यार्थी लगइन' : 'Student Portal Login'}
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
@@ -83,13 +103,13 @@ export function LoginPage() {
           </div>
 
           {/* Form Card */}
-          <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
+          <div className="auth-cinematic-card">
             {redirectTarget === '/submit' && (
               <div style={{
                 padding: '10px 14px',
                 backgroundColor: '#F0FDFA',
                 border: '1px solid #CCFBF1',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 color: '#0F766E',
                 fontSize: '0.8125rem',
                 display: 'flex',
@@ -107,27 +127,32 @@ export function LoginPage() {
             )}
 
             {errorMsg && (
-              <div style={{
-                padding: '10px 14px',
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                borderRadius: '6px',
-                color: '#B91C1C',
-                fontSize: '0.8125rem',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '8px',
-                marginBottom: 'var(--space-4)'
-              }} role="alert">
+              <motion.div
+                style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: '8px',
+                  color: '#B91C1C',
+                  fontSize: '0.8125rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  marginBottom: 'var(--space-4)'
+                }}
+                role="alert"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>{errorMsg}</span>
-              </div>
+              </motion.div>
             )}
 
             <form onSubmit={handleSubmit} noValidate>
               {/* Email */}
               <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                <label htmlFor="login-email" className="form-label">
+                <label htmlFor="login-email" className="form-label" style={{ fontWeight: 600 }}>
                   {isNe ? 'विद्यार्थी इमेल' : 'Email Address'} <span className="required">*</span>
                 </label>
                 <input
@@ -140,21 +165,21 @@ export function LoginPage() {
                     setEmail(e.target.value);
                     if (errorMsg) setErrorMsg('');
                   }}
-                  autoComplete="email"
                   required
-                  disabled={isLoading}
+                  autoComplete="email"
+                  style={{ borderRadius: '8px', height: '44px' }}
                 />
               </div>
 
               {/* Password */}
-              <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <label htmlFor="login-password" className="form-label" style={{ margin: 0 }}>
+              <div className="form-group" style={{ marginBottom: 'var(--space-5)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)' }}>
+                  <label htmlFor="login-password" className="form-label" style={{ margin: 0, fontWeight: 600 }}>
                     {isNe ? 'पासवर्ड' : 'Password'} <span className="required">*</span>
                   </label>
                   <Link
                     to="/forgot-password"
-                    style={{ fontSize: '0.75rem', color: '#5278C8', fontWeight: '600' }}
+                    style={{ fontSize: '0.75rem', color: 'var(--color-royal-blue)', textDecoration: 'none', fontWeight: 600 }}
                   >
                     {isNe ? 'पासवर्ड बिर्सनुभयो?' : 'Forgot Password?'}
                   </Link>
@@ -170,10 +195,9 @@ export function LoginPage() {
                       setPassword(e.target.value);
                       if (errorMsg) setErrorMsg('');
                     }}
-                    autoComplete="current-password"
-                    style={{ paddingRight: '40px' }}
                     required
-                    disabled={isLoading}
+                    autoComplete="current-password"
+                    style={{ paddingRight: '42px', borderRadius: '8px', height: '44px' }}
                   />
                   <button
                     type="button"
@@ -185,15 +209,15 @@ export function LoginPage() {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
-                      color: '#697586',
+                      color: 'var(--color-muted)',
                       cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
                       padding: 0,
-                      display: 'flex'
                     }}
-                    title={showPassword ? 'Hide password' : 'Show password'}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
@@ -201,16 +225,26 @@ export function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="btn btn-primary btn-md"
+                className="btn btn-primary btn-block"
                 disabled={isLoading}
-                style={{ width: '100%', height: '44px', fontSize: '0.9375rem', marginTop: 'var(--space-2)' }}
+                style={{
+                  height: '46px',
+                  fontWeight: 600,
+                  fontSize: '0.9375rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(16, 29, 53, 0.15)'
+                }}
               >
                 {isLoading ? (
-                  <span>{isNe ? 'प्रमाणीकरण गरिँदैछ...' : 'Signing in...'}</span>
+                  <span>{isNe ? 'प्रमाणीकरण हुँदैछ...' : 'Authenticating...'}</span>
                 ) : (
                   <>
                     <LogIn size={16} />
-                    <span>{isNe ? 'लगइन गर्नुहोस्' : 'Sign In to Dashboard'}</span>
+                    <span>{isNe ? 'लगइन गर्नुहोस्' : 'Sign In to Student Portal'}</span>
                   </>
                 )}
               </button>
@@ -222,20 +256,34 @@ export function LoginPage() {
               paddingTop: 'var(--space-4)',
               borderTop: '1px solid var(--color-border)',
               textAlign: 'center',
-              fontSize: '0.8125rem',
+              fontSize: '0.875rem',
               color: 'var(--color-muted)'
             }}>
-              <span>{isNe ? 'खाता छैन?' : "Don't have a student account yet?"} </span>
+              <span>{isNe ? 'खाता छैन?' : "Don't have a student account?"} </span>
               <Link
-                to={`/register${redirectTarget !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
-                style={{ color: '#5278C8', fontWeight: '700' }}
+                to={`/register?redirect=${encodeURIComponent(redirectTarget)}`}
+                style={{ color: 'var(--color-royal-blue)', fontWeight: '600', textDecoration: 'none' }}
               >
-                {isNe ? 'यहाँ दर्ता गर्नुहोस्' : 'Register Here'}
+                {isNe ? 'नयाँ खाता खोल्नुहोस्' : 'Register Here'}
               </Link>
+            </div>
+
+            {/* Security Notice */}
+            <div style={{
+              marginTop: 'var(--space-4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '0.75rem',
+              color: 'var(--color-muted)'
+            }}>
+              <ShieldCheck size={14} color="#5278C8" />
+              <span>Argon2id Encrypted &bull; Student Privacy Protected</span>
             </div>
           </div>
 
-        </div>
+        </motion.div>
       </main>
 
       <Footer />

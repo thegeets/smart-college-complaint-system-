@@ -1,13 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
-const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.pdf']);
+const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.pdf', '.webp']);
 
 const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
   'image/pjpeg',
   'image/png',
   'application/pdf',
+  'image/webp',
 ]);
 
 /**
@@ -56,9 +57,23 @@ export async function validateFileSignature(filePath) {
       return { valid: true, detectedType: 'application/pdf', extension: '.pdf' };
     }
 
+    // WEBP signature: 'RIFF' at 0..3 and 'WEBP' at 8..11
+    if (
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46 &&
+      buffer[8] === 0x57 &&
+      buffer[9] === 0x45 &&
+      buffer[10] === 0x42 &&
+      buffer[11] === 0x50
+    ) {
+      return { valid: true, detectedType: 'image/webp', extension: '.webp' };
+    }
+
     return {
       valid: false,
-      reason: 'File signature does not match allowed types (JPG, PNG, PDF only). Executables, SVGs, and scripts are strictly rejected.',
+      reason: 'File signature does not match allowed types (JPG, PNG, PDF, WEBP only). Executables, SVGs, and scripts are strictly rejected.',
     };
   } catch (error) {
     if (fd) await fd.close().catch(() => {});
@@ -74,14 +89,14 @@ export function validateFileMetadata(filename, mimetype) {
   if (!ALLOWED_EXTENSIONS.has(ext)) {
     return {
       valid: false,
-      reason: `File extension "${ext}" is not permitted. Only JPG, PNG, and PDF files are accepted.`,
+      reason: `File extension "${ext}" is not permitted. Only JPG, PNG, PDF, and WEBP files are accepted.`,
     };
   }
 
   if (!ALLOWED_MIME_TYPES.has(mimetype?.toLowerCase())) {
     return {
       valid: false,
-      reason: `MIME type "${mimetype}" is not permitted. Only image/jpeg, image/png, and application/pdf are accepted.`,
+      reason: `MIME type "${mimetype}" is not permitted. Only image/jpeg, image/png, application/pdf, and image/webp are accepted.`,
     };
   }
 

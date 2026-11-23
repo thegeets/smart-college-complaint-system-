@@ -1,93 +1,72 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useInView, useReducedMotion } from 'framer-motion';
 
 /**
  * AnimatedNumber
- * Counts up smoothly when first mounted or when the value changes.
- * Keeps the effect brief (~500ms - 700ms) with ease-out quad.
- * Automatically respects prefers-reduced-motion.
+ * Counts up smoothly when scrolled into view.
+ * Respects prefers-reduced-motion.
  */
-export function AnimatedNumber({ value, duration = 650, className = '' }) {
-  const [displayValue, setDisplayValue] = useState(value);
-  const prevValueRef = useRef(value);
+export function AnimatedNumber({ value, duration = 850, className = '' }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-20px' });
+  const shouldReduceMotion = useReducedMotion();
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    let animFrameId;
-    // Check for prefers-reduced-motion
-    const prefersReducedMotion = 
-      typeof window !== 'undefined' && 
-      window.matchMedia && 
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (shouldReduceMotion) return;
+    if (!isInView || hasAnimatedRef.current) return;
+    hasAnimatedRef.current = true;
 
-    if (prefersReducedMotion) {
-      animFrameId = requestAnimationFrame(() => {
-        setDisplayValue(value);
-        prevValueRef.current = value;
-      });
-      return () => cancelAnimationFrame(animFrameId);
-    }
-
-    // Parse target number and format (e.g., "98%", "4.8", 14)
     const strVal = String(value ?? 0);
     const match = strVal.match(/^([^0-9.-]*)([0-9.-]+)(.*)$/);
-
-    if (!match) {
-      animFrameId = requestAnimationFrame(() => {
-        setDisplayValue(value);
-        prevValueRef.current = value;
-      });
-      return () => cancelAnimationFrame(animFrameId);
-    }
+    if (!match || !ref.current) return;
 
     const prefix = match[1] || '';
     const numTarget = parseFloat(match[2]);
     const suffix = match[3] || '';
+    if (isNaN(numTarget)) return;
 
-    if (isNaN(numTarget)) {
-      animFrameId = requestAnimationFrame(() => {
-        setDisplayValue(value);
-        prevValueRef.current = value;
-      });
-      return () => cancelAnimationFrame(animFrameId);
-    }
-
-    // Determine decimal precision if present
     const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
-
-    // Previous numeric value
-    const prevStr = String(prevValueRef.current ?? 0);
-    const prevMatch = prevStr.match(/^([^0-9.-]*)([0-9.-]+)(.*)$/);
-    const startNum = prevMatch && !isNaN(parseFloat(prevMatch[2])) ? parseFloat(prevMatch[2]) : 0;
-
     const startTime = performance.now();
     let animationFrameId;
 
     const animate = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
-      // Ease-out cubic curve: fast start, soft gentle landing
       const ease = 1 - Math.pow(1 - progress, 3);
-      const current = startNum + (numTarget - startNum) * ease;
-
+      const current = numTarget * ease;
       const formatted = decimals > 0 ? current.toFixed(decimals) : Math.round(current);
-      setDisplayValue(`${prefix}${formatted}${suffix}`);
+
+      if (ref.current) {
+        ref.current.textContent = `${prefix}${formatted}${suffix}`;
+      }
 
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setDisplayValue(`${prefix}${numTarget.toFixed(decimals > 0 ? decimals : 0)}${suffix}`);
-        prevValueRef.current = value;
+      } else if (ref.current) {
+        ref.current.textContent = `${prefix}${numTarget.toFixed(decimals > 0 ? decimals : 0)}${suffix}`;
       }
     };
 
     animationFrameId = requestAnimationFrame(animate);
-
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [value, duration]);
+  }, [isInView, value, duration, shouldReduceMotion]);
 
-  return <span className={className}>{displayValue}</span>;
+  if (shouldReduceMotion) {
+    return <span className={className}>{value}</span>;
+  }
+
+  const strVal = String(value ?? 0);
+  const match = strVal.match(/^([^0-9.-]*)([0-9.-]+)(.*)$/);
+  const initialText = match ? `${match[1] || ''}0${match[3] || ''}` : String(value);
+
+  return (
+    <span ref={ref} className={className}>
+      {initialText}
+    </span>
+  );
 }
+
+export default AnimatedNumber;

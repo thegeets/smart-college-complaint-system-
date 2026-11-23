@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { BrandLogo } from '../components/BrandLogo';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -10,7 +11,8 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  ShieldCheck
 } from 'lucide-react';
 
 export function AdminLoginPage() {
@@ -62,12 +64,7 @@ export function AdminLoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: 'var(--color-bg)'
-    }}>
+    <div className="auth-cinematic-wrapper">
       {/* Top Header */}
       <header style={{
         padding: 'var(--space-3) var(--space-6)',
@@ -75,10 +72,13 @@ export function AdminLoginPage() {
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: '1px solid var(--color-border)',
-        backgroundColor: 'var(--color-surface)'
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(16px)',
+        position: 'relative',
+        zIndex: 10
       }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <BrandLogo size={34} subtitle={isNe ? 'प्रशासनिक लगइन' : 'Admin Operations Desk'} />
+          <BrandLogo size={36} subtitle={isNe ? 'प्रशासनिक लगइन' : 'Admin Operations Desk'} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
           <LanguageSwitcher size="sm" />
@@ -86,7 +86,7 @@ export function AdminLoginPage() {
             display: 'flex',
             alignItems: 'center',
             gap: 'var(--space-1)',
-            color: 'var(--color-primary)',
+            color: 'var(--color-navy)',
             fontSize: '0.8125rem',
             fontWeight: '600',
             textDecoration: 'none'
@@ -97,35 +97,56 @@ export function AdminLoginPage() {
         </div>
       </header>
 
+      {/* Atmospheric Ambient Mesh */}
+      <div className="cinematic-hero-bg" aria-hidden="true">
+        <div className="hero-mesh-grid" />
+        <div className="ambient-orb ambient-orb-1" />
+        <div className="ambient-orb ambient-orb-2" />
+      </div>
+
       {/* Main Login Form Area */}
       <main style={{
         flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 'var(--space-8) var(--space-4)'
+        padding: 'clamp(32px, 6vw, 64px) var(--space-4)',
+        position: 'relative',
+        zIndex: 1
       }}>
-        <div style={{ width: '100%', maxWidth: '440px' }}>
+        <motion.div 
+          style={{ width: '100%', maxWidth: '440px' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
           
-          <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <div className="auth-cinematic-card">
             
             {/* Header */}
             <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-              <div style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '10px',
-                backgroundColor: '#EEF3FB',
-                color: '#101D35',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 'var(--space-3)'
-              }}>
-                <Lock size={22} color="#5278C8" />
-              </div>
-              <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: 'var(--color-heading)', margin: '0 0 var(--space-1)' }}>
-                {isNe ? 'प्रशासनिक साइन इन' : 'Administration sign in'}
+              <motion.div 
+                style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
+                  backgroundColor: '#EFF6FF',
+                  border: '1px solid #BFDBFE',
+                  color: '#101D35',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--space-3)',
+                  boxShadow: '0 8px 16px -4px rgba(82, 120, 200, 0.15)'
+                }}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Lock size={24} color="#356ACB" />
+              </motion.div>
+              <h1 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--color-heading)', margin: '0 0 var(--space-1)', letterSpacing: '-0.02em' }}>
+                {isNe ? 'प्रशासनिक साइन इन' : 'Administration Sign In'}
               </h1>
               <p style={{ fontSize: '0.8125rem', color: 'var(--color-muted)', margin: 0 }}>
                 {COLLEGE_CONFIG.name} — {COLLEGE_CONFIG.deskTitle}
@@ -134,28 +155,33 @@ export function AdminLoginPage() {
 
             {/* Error Message */}
             {errorMsg && (
-              <div style={{
-                padding: '10px 14px',
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                borderRadius: '6px',
-                color: '#B91C1C',
-                fontSize: '0.8125rem',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '8px',
-                marginBottom: 'var(--space-4)'
-              }}>
+              <motion.div 
+                style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: '8px',
+                  color: '#B91C1C',
+                  fontSize: '0.8125rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  marginBottom: 'var(--space-4)'
+                }}
+                role="alert"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>{errorMsg}</span>
-              </div>
+              </motion.div>
             )}
 
             {/* Login Form */}
             <form onSubmit={handleAdminSignIn}>
               {/* Email */}
               <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                <label htmlFor="adminEmail" className="form-label">
+                <label htmlFor="adminEmail" className="form-label" style={{ fontWeight: 600 }}>
                   {isNe ? 'प्रशासक इमेल' : 'Administrator Email'} <span className="required">*</span>
                 </label>
                 <input
@@ -171,16 +197,15 @@ export function AdminLoginPage() {
                   disabled={isSubmitting}
                   autoComplete="username"
                   required
+                  style={{ borderRadius: '8px', height: '44px' }}
                 />
               </div>
 
               {/* Password */}
               <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)' }}>
-                  <label htmlFor="adminPassword" className="form-label" style={{ margin: 0 }}>
-                    {isNe ? 'पासवर्ड' : 'Password'} <span className="required">*</span>
-                  </label>
-                </div>
+                <label htmlFor="adminPassword" className="form-label" style={{ fontWeight: 600 }}>
+                  {isNe ? 'पासवर्ड' : 'Password'} <span className="required">*</span>
+                </label>
                 <div style={{ position: 'relative' }}>
                   <input
                     id="adminPassword"
@@ -194,7 +219,7 @@ export function AdminLoginPage() {
                     }}
                     disabled={isSubmitting}
                     autoComplete="current-password"
-                    style={{ paddingRight: '40px' }}
+                    style={{ paddingRight: '40px', borderRadius: '8px', height: '44px' }}
                     required
                   />
                   <button
@@ -224,30 +249,50 @@ export function AdminLoginPage() {
               {/* Submit */}
               <button
                 type="submit"
-                className="btn btn-primary btn-md"
+                className="btn btn-primary btn-block"
                 disabled={isSubmitting}
-                style={{ width: '100%', height: '44px', fontSize: '0.9375rem' }}
+                style={{
+                  height: '46px',
+                  fontWeight: 600,
+                  fontSize: '0.9375rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(16, 29, 53, 0.15)'
+                }}
               >
                 {isSubmitting ? (
                   <span>{isNe ? 'प्रमाणीकरण हुँदैछ...' : 'Authenticating...'}</span>
                 ) : (
                   <>
-                    <span>{isNe ? 'साइन इन गर्नुहोस्' : 'Sign In as Administrator'}</span>
+                    <span>{isNe ? 'प्रशासनिक साइन इन' : 'Sign In as Administrator'}</span>
                     <ArrowRight size={16} />
                   </>
                 )}
               </button>
             </form>
 
+            {/* Strict Session Guarantee */}
+            <div style={{
+              marginTop: 'var(--space-6)',
+              paddingTop: 'var(--space-4)',
+              borderTop: '1px solid var(--color-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '0.75rem',
+              color: 'var(--color-muted)'
+            }}>
+              <ShieldCheck size={14} color="#5278C8" />
+              <span>TLS Enforced &bull; Role-Based Access Audit Logged</span>
+            </div>
+
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 'var(--space-4)', fontSize: '0.8125rem' }}>
-            <Link to="/" style={{ color: 'var(--color-muted)', textDecoration: 'none' }}>
-              ← {isNe ? 'सार्वजनिक गृहपृष्ठमा फर्कनुहोस्' : 'Return to public site'}
-            </Link>
-          </div>
-
-        </div>
+        </motion.div>
       </main>
     </div>
   );

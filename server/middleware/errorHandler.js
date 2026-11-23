@@ -2,7 +2,7 @@ import multer from 'multer';
 import { logger } from '../utils/logger.js';
 import { ENV } from '../config/env.js';
 
-export function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, _next) {
   // Log sanitized error
   logger.error(`${req.method} ${req.url} - Error: ${err.message}`, {
     stack: ENV.NODE_ENV === 'development' ? err.stack : undefined,

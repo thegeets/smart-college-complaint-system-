@@ -1036,4 +1036,163 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
       setEmailTransporter(null);
     }
   });
+
+  // 37. Authenticated Complaint Submission System (SCCS-YYYY-NNN, Zod, Duplicate Guard, SLA, Attachments, Concurrency)
+  await t.test('Authenticated Complaint System: Multi-step submission, Zod validation, Atomic Reference, Duplicate Guard, and Isolation', async () => {
+    // 37a. Unauthenticated access rejected with 401
+    const unauthRes = await request(app)
+      .post('/api/complaints')
+      .send({
+        category: 'Computer Lab & Workstations',
+        title: 'Unauthorized test ticket',
+        description: 'This submission should be rejected because no student session exists.',
+        location: 'Lab 1',
+      });
+    assert.equal(unauthRes.status, 401);
+    assert.equal(unauthRes.body.success, false);
+
+    // 37b. Unverified student rejected with 403
+    const unverifiedEmail = 'unverified.submitter@sochcollege.edu.np';
+    await request(app)
+      .post('/api/v1/student/auth/register')
+      .send({
+        name: 'Unverified Student',
+        studentId: 'SOCH-CSIT-UNVER-01',
+        email: unverifiedEmail,
+        password: 'Password123!',
+        semester: '2nd Semester',
+      });
+
+    const unverifiedLoginRes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: unverifiedEmail,
+        password: 'Password123!',
+      });
+    assert.equal(unverifiedLoginRes.status, 200);
+    const unverifiedCookie = unverifiedLoginRes.headers['set-cookie'];
+
+    const unverifiedSubmitRes = await request(app)
+      .post('/api/complaints')
+      .set('Cookie', unverifiedCookie)
+      .send({
+        category: 'Computer Lab & Workstations',
+        title: 'Unverified email attempt',
+        description: 'This submission should be blocked until email ownership is confirmed.',
+        location: 'Lab 1',
+      });
+    assert.equal(unverifiedSubmitRes.status, 403);
+    assert.equal(unverifiedSubmitRes.body.code, 'EMAIL_NOT_VERIFIED');
+
+    // 37c. Verified student login
+    const verifiedLoginRes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: 'student.alpha@sochcollege.edu.np',
+        password: 'StudentPass123!',
+      });
+    assert.equal(verifiedLoginRes.status, 200);
+    const studentCookie = verifiedLoginRes.headers['set-cookie'];
+
+    // 37d. Zod validation failure (description < 20 chars)
+    const invalidZodRes = await request(app)
+      .post('/api/complaints')
+      .set('Cookie', studentCookie)
+      .send({
+        category: 'Wi-Fi & Campus Network',
+        title: 'Valid Short Title',
+        description: 'Too short', // less than 20 characters
+        location: 'Lab 2',
+      });
+    assert.equal(invalidZodRes.status, 400);
+    assert.equal(invalidZodRes.body.code, 'VALIDATION_ERROR');
+    assert.ok(invalidZodRes.body.errors?.description);
+
+    // 37e. Successful submission with atomic SCCS reference and 24h SLA for Urgent
+    const validSubmitRes = await request(app)
+      .post('/api/complaints')
+      .set('Cookie', studentCookie)
+      .field('category', 'Computer Lab & Workstations')
+      .field('title', 'Workstation 14 blue screen kernel panic')
+      .field('description', 'During the operating systems practical session, PC 14 consistently crashes on boot with error code 0x0000007B.')
+      .field('location', 'Computer Lab 2 (1st Floor)')
+      .field('pcNumber', 'LAB-2-PC14')
+      .field('priority', 'Urgent')
+      .attach('attachments', Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]), {
+        filename: 'bsod_evidence.png',
+        contentType: 'image/png',
+      });
+
+    assert.equal(validSubmitRes.status, 201);
+    assert.equal(validSubmitRes.body.success, true);
+    assert.match(validSubmitRes.body.referenceId, /^SCCS-\d{4}-\d{3,}$/);
+    assert.equal(validSubmitRes.body.complaint.priority, 'Urgent');
+    assert.equal(validSubmitRes.body.complaint.status, 'Submitted');
+    assert.ok(validSubmitRes.body.complaint.slaDueAt);
+
+    const createdRefId = validSubmitRes.body.referenceId;
+    const uploadedFilename = validSubmitRes.body.complaint.attachments?.[0]?.storageFilename;
+
+    // 37f. Duplicate submission guard: same title + category within 2 min rejected with 409
+    const dupRes = await request(app)
+      .post('/api/complaints')
+      .set('Cookie', studentCookie)
+      .send({
+        category: 'Computer Lab & Workstations',
+        title: 'Workstation 14 blue screen kernel panic',
+        description: 'A duplicate attempt sent right away with the exact same title and category.',
+        location: 'Computer Lab 2',
+      });
+    assert.equal(dupRes.status, 409);
+    assert.equal(dupRes.body.code, 'DUPLICATE_SUBMISSION');
+
+    // 37g. Student owner can fetch complaint via GET /api/complaints/:referenceId
+    const ownerFetchRes = await request(app)
+      .get(`/api/complaints/${createdRefId}`)
+      .set('Cookie', studentCookie);
+    assert.equal(ownerFetchRes.status, 200);
+    assert.equal(ownerFetchRes.body.complaint.referenceId, createdRefId);
+
+    // 37h. Cross-student ownership isolation: Student Beta receives 404 for Student Alpha's ticket
+    const studentBetaLoginRes = await request(app)
+      .post('/api/v1/student/auth/login')
+      .send({
+        email: 'student.beta@sochcollege.edu.np',
+        password: 'StudentBetaPass123!',
+      });
+    assert.equal(studentBetaLoginRes.status, 200);
+    const betaCookie = studentBetaLoginRes.headers['set-cookie'];
+
+    const betaFetchRes = await request(app)
+      .get(`/api/complaints/${createdRefId}`)
+      .set('Cookie', betaCookie);
+    assert.equal(betaFetchRes.status, 404, 'Student Beta must NOT access Student Alpha complaint');
+
+    // 37i. Authenticated attachment download with nosniff security header
+    if (uploadedFilename) {
+      const attRes = await request(app)
+        .get(`/api/complaints/${createdRefId}/attachments/${uploadedFilename}`)
+        .set('Cookie', studentCookie);
+      assert.equal(attRes.status, 200);
+      assert.equal(attRes.headers['x-content-type-options'], 'nosniff');
+    }
+
+    // 37j. Atomic Counter Concurrency: concurrent requests get strictly unique sequential references
+    const { getNextComplaintReference } = await import('../models/Counter.js');
+    const concurrentRefs = await Promise.all([
+      getNextComplaintReference(2026),
+      getNextComplaintReference(2026),
+      getNextComplaintReference(2026),
+      getNextComplaintReference(2026),
+      getNextComplaintReference(2026),
+    ]);
+    const uniqueRefs = new Set(concurrentRefs);
+    assert.equal(uniqueRefs.size, 5, 'All concurrent reference IDs must be strictly unique');
+    for (const ref of concurrentRefs) {
+      assert.match(ref, /^SCCS-2026-\d{3,}$/);
+    }
+
+    // Cleanup test student
+    await Student.deleteMany({ email: unverifiedEmail });
+  });
 });

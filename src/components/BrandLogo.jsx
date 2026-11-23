@@ -53,6 +53,10 @@ export function BrandLogo({
           <img 
             src={imageUrl} 
             alt={accessibleName}
+            width={size}
+            height={size}
+            loading="lazy"
+            decoding="async"
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} 
           />
         ) : (

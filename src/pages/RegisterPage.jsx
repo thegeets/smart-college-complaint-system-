@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
-import { UserPlus, AlertCircle, Info } from 'lucide-react';
+import { UserPlus, AlertCircle, ShieldCheck } from 'lucide-react';
 import { getSafeRedirectUrl } from '../utils/url';
 
 const SEMESTERS = [
@@ -92,150 +93,157 @@ export function RegisterPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
+    <div className="auth-cinematic-wrapper">
       <PublicNavbar />
 
-      <main style={{ flex: 1, padding: 'var(--space-10) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ maxWidth: '540px', width: '100%', margin: '0 auto' }}>
+      {/* Atmospheric ambient orbs */}
+      <div className="cinematic-hero-bg" aria-hidden="true">
+        <div className="hero-mesh-grid" />
+        <div className="ambient-orb ambient-orb-1" />
+        <div className="ambient-orb ambient-orb-2" />
+      </div>
+
+      <main style={{ flex: 1, padding: 'clamp(32px, 6vw, 64px) var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+        <motion.div 
+          style={{ maxWidth: '520px', width: '100%', margin: '0 auto' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-            <div style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '12px',
-              backgroundColor: '#EEF3FB',
-              color: '#101D35',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 'var(--space-3)'
-            }}>
-              <UserPlus size={26} color="#5278C8" />
-            </div>
+            <motion.div 
+              style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '14px',
+                backgroundColor: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                color: '#101D35',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 'var(--space-3)',
+                boxShadow: '0 8px 16px -4px rgba(82, 120, 200, 0.15)'
+              }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <UserPlus size={26} color="#356ACB" />
+            </motion.div>
 
-            <h1 style={{ fontSize: '1.65rem', fontWeight: '700', color: 'var(--color-heading)', marginBottom: 'var(--space-2)' }}>
-              {isNe ? 'विद्यार्थी खाता दर्ता' : 'Student Account Registration'}
+            <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-heading)', marginBottom: 'var(--space-2)', letterSpacing: '-0.02em' }}>
+              {isNe ? 'विद्यार्थी दर्ता' : 'Create Student Account'}
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', margin: 0 }}>
               {isNe
-                ? 'सोच कलेज अफ आईटी, पोखराको अनलाइन गुनासो व्यवस्थापन प्रणालीमा खाता सिर्जना गर्नुहोस्।'
-                : 'Create your personal account to lodge campus IT grievances and receive official college replies.'}
+                ? 'सोच कलेज अफ आईटीको गुनासो दर्ता तथा अनुगमन प्रणालीमा आबद्ध हुनुहोस्।'
+                : 'Register with your college details to lodge IT reports and monitor resolution milestones.'}
             </p>
           </div>
 
           {/* Form Card */}
-          <div className="card" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
-
-            {/* Verification Disclaimer Notice */}
-            <div style={{
-              padding: '10px 14px',
-              backgroundColor: '#F8FAFD',
-              border: '1px solid #E2E8F0',
-              borderRadius: '6px',
-              fontSize: '0.8125rem',
-              color: '#475569',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '8px',
-              marginBottom: 'var(--space-6)'
-            }}>
-              <Info size={16} color="#5278C8" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <span>
-                {isNe
-                  ? 'दर्तापछि इमेल स्वामित्व प्रमाणित गर्न कोड पठाइनेछ। इमेल प्रमाणीकरणले इमेल स्वामित्व मात्र पुष्टि गर्छ; कलेजको सदस्यता प्रशासनिक रूपमा रुजु गरिन्छ।'
-                  : 'Students register directly. A verification code confirms email ownership. Note: Email verification confirms email ownership only and does not automatically certify institutional enrollment.'}
-              </span>
-            </div>
-
+          <div className="auth-cinematic-card">
             {serverError && (
-              <div style={{
-                padding: '10px 14px',
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                borderRadius: '6px',
-                color: '#B91C1C',
-                fontSize: '0.8125rem',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '8px',
-                marginBottom: 'var(--space-4)'
-              }} role="alert">
+              <motion.div 
+                style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: '8px',
+                  color: '#B91C1C',
+                  fontSize: '0.8125rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  marginBottom: 'var(--space-4)'
+                }} 
+                role="alert"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>{serverError}</span>
-              </div>
+              </motion.div>
             )}
 
             <form onSubmit={handleSubmit} noValidate>
-              {/* Full Name & Student ID Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-                <div className="form-group">
-                  <label htmlFor="reg-name" className="form-label">
-                    {isNe ? 'पूरा नाम' : 'Full Name'} <span className="required">*</span>
-                  </label>
-                  <input
-                    id="reg-name"
-                    type="text"
-                    className={`form-input ${errors.name ? 'error' : ''}`}
-                    placeholder="e.g. Sujan Poudel"
-                    value={formData.name}
-                    onChange={(e) => {
-                      setFormData({ ...formData, name: e.target.value });
-                      if (errors.name) setErrors({ ...errors, name: null });
-                    }}
-                    required
-                    disabled={isLoading}
-                  />
-                  {errors.name && <span className="form-error-msg">{errors.name}</span>}
-                </div>
+              {/* Full Name */}
+              <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                <label htmlFor="reg-name" className="form-label" style={{ fontWeight: 600 }}>
+                  {isNe ? 'पूरा नाम' : 'Full Name'} <span className="required">*</span>
+                </label>
+                <input
+                  id="reg-name"
+                  type="text"
+                  className={`form-input ${errors.name ? 'error' : ''}`}
+                  placeholder="e.g. Ramesh Adhikari"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  style={{ borderRadius: '8px', height: '44px' }}
+                />
+                {errors.name && <span className="form-error" style={{ fontSize: '0.75rem', color: '#B91C1C', marginTop: '4px', display: 'block' }}>{errors.name}</span>}
+              </div>
 
+              {/* Student ID & Semester Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
                 <div className="form-group">
-                  <label htmlFor="reg-id" className="form-label">
-                    {isNe ? 'कलेज रोल नं / आइडी' : 'Student ID / Roll No'} <span className="required">*</span>
+                  <label htmlFor="reg-id" className="form-label" style={{ fontWeight: 600 }}>
+                    {isNe ? 'विद्यार्थी आइडी / रोल' : 'Student ID'} <span className="required">*</span>
                   </label>
                   <input
                     id="reg-id"
                     type="text"
                     className={`form-input ${errors.studentId ? 'error' : ''}`}
-                    placeholder="e.g. SOCH-2024-031"
+                    placeholder="e.g. SOCH-2024-012"
                     value={formData.studentId}
-                    onChange={(e) => {
-                      setFormData({ ...formData, studentId: e.target.value });
-                      if (errors.studentId) setErrors({ ...errors, studentId: null });
-                    }}
-                    required
-                    disabled={isLoading}
+                    onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                    style={{ borderRadius: '8px', height: '44px' }}
                   />
-                  {errors.studentId && <span className="form-error-msg">{errors.studentId}</span>}
+                  {errors.studentId && <span className="form-error" style={{ fontSize: '0.75rem', color: '#B91C1C', marginTop: '4px', display: 'block' }}>{errors.studentId}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="reg-semester" className="form-label" style={{ fontWeight: 600 }}>
+                    {isNe ? 'सेमेस्टर' : 'Semester'} <span className="required">*</span>
+                  </label>
+                  <select
+                    id="reg-semester"
+                    className="form-input"
+                    value={formData.semester}
+                    onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                    style={{ borderRadius: '8px', height: '44px' }}
+                  >
+                    {SEMESTERS.map((sem) => (
+                      <option key={sem} value={sem}>{sem}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* Email */}
+              {/* Email Address */}
               <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                <label htmlFor="reg-email" className="form-label">
-                  {isNe ? 'इमेल ठेगाना' : 'Email Address'} <span className="required">*</span>
+                <label htmlFor="reg-email" className="form-label" style={{ fontWeight: 600 }}>
+                  {isNe ? 'विद्यार्थी इमेल' : 'Email Address'} <span className="required">*</span>
                 </label>
                 <input
                   id="reg-email"
                   type="email"
                   className={`form-input ${errors.email ? 'error' : ''}`}
-                  placeholder="e.g. sujan@example.com"
+                  placeholder="e.g. ramesh.adhikari@example.com"
                   value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    if (errors.email) setErrors({ ...errors, email: null });
-                  }}
-                  autoComplete="email"
-                  required
-                  disabled={isLoading}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  style={{ borderRadius: '8px', height: '44px' }}
                 />
-                {errors.email && <span className="form-error-msg">{errors.email}</span>}
+                {errors.email && <span className="form-error" style={{ fontSize: '0.75rem', color: '#B91C1C', marginTop: '4px', display: 'block' }}>{errors.email}</span>}
               </div>
 
               {/* Password */}
               <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                <label htmlFor="reg-password" className="form-label">
-                  {isNe ? 'पासवर्ड (कम्तीमा ६ अक्षर)' : 'Password (min 6 characters)'} <span className="required">*</span>
+                <label htmlFor="reg-password" className="form-label" style={{ fontWeight: 600 }}>
+                  {isNe ? 'पासवर्ड (कम्तीमा ६ अक्षर)' : 'Password (min. 6 characters)'} <span className="required">*</span>
                 </label>
                 <input
                   id="reg-password"
@@ -243,56 +251,16 @@ export function RegisterPage() {
                   className={`form-input ${errors.password ? 'error' : ''}`}
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => {
-                    setFormData({ ...formData, password: e.target.value });
-                    if (errors.password) setErrors({ ...errors, password: null });
-                  }}
-                  autoComplete="new-password"
-                  required
-                  disabled={isLoading}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  style={{ borderRadius: '8px', height: '44px' }}
                 />
-                {errors.password && <span className="form-error-msg">{errors.password}</span>}
+                {errors.password && <span className="form-error" style={{ fontSize: '0.75rem', color: '#B91C1C', marginTop: '4px', display: 'block' }}>{errors.password}</span>}
               </div>
 
-              {/* Semester & Academic Program Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-                <div className="form-group">
-                  <label htmlFor="reg-semester" className="form-label">
-                    {isNe ? 'सेमेस्टर' : 'Semester'} <span className="required">*</span>
-                  </label>
-                  <select
-                    id="reg-semester"
-                    className="form-select"
-                    value={formData.semester}
-                    onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                    disabled={isLoading}
-                  >
-                    {SEMESTERS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="reg-program" className="form-label">
-                    {isNe ? 'शैक्षिक कार्यक्रम' : 'Program'}
-                  </label>
-                  <input
-                    id="reg-program"
-                    type="text"
-                    className="form-input"
-                    value="BSc CSIT"
-                    readOnly
-                    disabled
-                    style={{ backgroundColor: '#F8FAFC', color: '#475569', cursor: 'default' }}
-                  />
-                </div>
-              </div>
-
-              {/* Optional Phone */}
-              <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
-                <label htmlFor="reg-phone" className="form-label">
-                  {isNe ? 'सम्पर्क फोन (ऐच्छिक)' : 'Contact Phone (Optional)'}
+              {/* Phone (Optional) */}
+              <div className="form-group" style={{ marginBottom: 'var(--space-5)' }}>
+                <label htmlFor="reg-phone" className="form-label" style={{ fontWeight: 600 }}>
+                  {isNe ? 'सम्पर्क नम्बर (ऐच्छिक)' : 'Phone Number (Optional)'}
                 </label>
                 <input
                   id="reg-phone"
@@ -301,23 +269,33 @@ export function RegisterPage() {
                   placeholder="e.g. 9800000000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  disabled={isLoading}
+                  style={{ borderRadius: '8px', height: '44px' }}
                 />
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="btn btn-primary btn-md"
+                className="btn btn-primary btn-block"
                 disabled={isLoading}
-                style={{ width: '100%', height: '44px', fontSize: '0.9375rem' }}
+                style={{
+                  height: '46px',
+                  fontWeight: 600,
+                  fontSize: '0.9375rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(16, 29, 53, 0.15)'
+                }}
               >
                 {isLoading ? (
-                  <span>{isNe ? 'खाता सिर्जना हुँदैछ...' : 'Creating student account...'}</span>
+                  <span>{isNe ? 'दर्ता हुँदैछ...' : 'Registering Account...'}</span>
                 ) : (
                   <>
                     <UserPlus size={16} />
-                    <span>{isNe ? 'खाता सिर्जना गर्नुहोस्' : 'Register Student Account'}</span>
+                    <span>{isNe ? 'खाता सिर्जना गर्नुहोस्' : 'Create Verified Student Account'}</span>
                   </>
                 )}
               </button>
@@ -329,20 +307,34 @@ export function RegisterPage() {
               paddingTop: 'var(--space-4)',
               borderTop: '1px solid var(--color-border)',
               textAlign: 'center',
-              fontSize: '0.8125rem',
+              fontSize: '0.875rem',
               color: 'var(--color-muted)'
             }}>
-              <span>{isNe ? 'पहिले नै खाता छ?' : 'Already have a registered account?'} </span>
+              <span>{isNe ? 'पहिले नै खाता छ?' : 'Already have a student account?'} </span>
               <Link
-                to={`/login${redirectTarget !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`}
-                style={{ color: '#5278C8', fontWeight: '700' }}
+                to={`/login?redirect=${encodeURIComponent(redirectTarget)}`}
+                style={{ color: 'var(--color-royal-blue)', fontWeight: '600', textDecoration: 'none' }}
               >
-                {isNe ? 'यहाँ लगइन गर्नुहोस्' : 'Sign In'}
+                {isNe ? 'यहाँ लगइन गर्नुहोस्' : 'Sign In Here'}
               </Link>
+            </div>
+
+            {/* Verification Security Note */}
+            <div style={{
+              marginTop: 'var(--space-4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '0.75rem',
+              color: 'var(--color-muted)'
+            }}>
+              <ShieldCheck size={14} color="#5278C8" />
+              <span>Email Verification Required &bull; Encrypted Storage</span>
             </div>
           </div>
 
-        </div>
+        </motion.div>
       </main>
 
       <Footer />

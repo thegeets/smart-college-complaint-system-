@@ -53,6 +53,30 @@ export const loginRateLimiter = rateLimit({
 });
 
 /**
+ * Rate Limiter: Authenticated Student Complaint Submissions
+ * Enforces max 5 complaint submissions per hour per student.
+ */
+export const studentSubmissionRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
+  keyGenerator: (req) => {
+    if (req.student && req.student._id) {
+      return `student_${req.student._id.toString()}`;
+    }
+    return req.ip || '127.0.0.1';
+  },
+  skip: () => process.env.NODE_ENV === 'test' && !process.env.TEST_RATE_LIMIT,
+  message: {
+    success: false,
+    code: 'RATE_LIMIT_EXCEEDED',
+    message: 'Submission limit reached. You can submit up to 5 complaints per hour.',
+  },
+});
+
+/**
  * General API Limiter
  */
 export const generalApiLimiter = rateLimit({

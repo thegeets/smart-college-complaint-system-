@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { StatusBadge } from '../components/StatusBadge';
+import { AnimatedNumber } from '../components/AnimatedNumber';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
   PlusCircle,
@@ -258,53 +260,77 @@ export function MyComplaintsPage() {
 
           {/* Metric Summary Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
-            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #101D35' }}>
+            <motion.div 
+              className="card" 
+              style={{ padding: 'var(--space-5)', borderTop: '3px solid #101D35' }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.05 }}
+            >
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'कुल दर्ता उजुरी' : 'Total Complaints'}
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#101D35' }}>
-                {total}
+                <AnimatedNumber value={total} />
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
                 {isNe ? 'मेरो खातामा रेकर्ड' : 'Lodged under your account'}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #B45309' }}>
+            <motion.div 
+              className="card" 
+              style={{ padding: 'var(--space-5)', borderTop: '3px solid #B45309' }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'समीक्षा बाँकी' : 'Pending Review'}
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#B45309' }}>
-                {pendingCount}
+                <AnimatedNumber value={pendingCount} />
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
                 {isNe ? 'प्रशासनिक छानबिनमा' : 'Awaiting admin triage'}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #5278C8' }}>
+            <motion.div 
+              className="card" 
+              style={{ padding: 'var(--space-5)', borderTop: '3px solid #5278C8' }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+            >
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'कार्यप्रगतिमा' : 'In Progress'}
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#5278C8' }}>
-                {inProgressCount}
+                <AnimatedNumber value={inProgressCount} />
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
                 {isNe ? 'मर्मत तथा समाधान जारी' : 'Being repaired by technicians'}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="card" style={{ padding: 'var(--space-5)', borderTop: '3px solid #15803D' }}>
+            <motion.div 
+              className="card" 
+              style={{ padding: 'var(--space-5)', borderTop: '3px solid #15803D' }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
               <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {isNe ? 'समाधान सम्पन्न' : 'Resolved'}
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#15803D' }}>
-                {resolvedCount}
+                <AnimatedNumber value={resolvedCount} />
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '4px' }}>
                 {isNe ? 'सफलतापूर्वक बन्द भएका' : 'Closed cases'}
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Filter Bar */}
@@ -442,7 +468,7 @@ export function MyComplaintsPage() {
                       <tr key={c.id || c.reference}>
                         <td>
                           <span style={{ fontFamily: 'monospace', fontWeight: '700', color: '#101D35', fontSize: '0.875rem' }}>
-                            {c.reference}
+                            {c.referenceId || c.reference}
                           </span>
                         </td>
                         <td>
@@ -452,6 +478,11 @@ export function MyComplaintsPage() {
                           <div style={{ fontSize: '0.75rem', color: '#64748B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '380px' }}>
                             {c.description}
                           </div>
+                          {c.location && (
+                            <div style={{ fontSize: '0.6875rem', color: '#94A3B8', marginTop: '2px' }}>
+                              📍 {c.location} {c.pcNumber ? `• ${c.pcNumber}` : ''}
+                            </div>
+                          )}
                         </td>
                         <td>
                           <span style={{ fontSize: '0.8125rem', color: '#475569' }}>
@@ -459,7 +490,24 @@ export function MyComplaintsPage() {
                           </span>
                         </td>
                         <td>
-                          <StatusBadge status={c.status} />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                            <StatusBadge status={c.status} />
+                            {c.slaDueAt && c.status !== 'Resolved' && (
+                              <span
+                                style={{
+                                  fontSize: '0.6875rem',
+                                  fontWeight: 600,
+                                  color: new Date(c.slaDueAt) < new Date() ? '#DC2626' : '#2563EB',
+                                  backgroundColor: new Date(c.slaDueAt) < new Date() ? '#FEF2F2' : '#EFF6FF',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {new Date(c.slaDueAt) < new Date() ? 'SLA Overdue' : `Due in ~${Math.max(1, Math.round((new Date(c.slaDueAt) - new Date()) / (1000 * 60 * 60)))}h`}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td>
                           <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
@@ -491,19 +539,40 @@ export function MyComplaintsPage() {
                   <div key={c.id || c.reference} className="complaint-mobile-card">
                     <div className="complaint-card-topbar">
                       <span className="table-complaint-id">
-                        {c.reference}
+                        {c.referenceId || c.reference}
                       </span>
                       <StatusBadge status={c.status} />
                     </div>
 
                     <h4 className="complaint-card-title">
                       <Link
-                        to={`/student/complaints/${encodeURIComponent(c.reference)}`}
+                        to={`/student/complaints/${encodeURIComponent(c.referenceId || c.reference)}`}
                         className="complaint-card-title-link"
                       >
                         {c.title}
                       </Link>
                     </h4>
+
+                    {c.slaDueAt && c.status !== 'Resolved' && (
+                      <div style={{ margin: '4px 0 8px 0' }}>
+                        <span
+                          style={{
+                            fontSize: '0.6875rem',
+                            fontWeight: 600,
+                            color: new Date(c.slaDueAt) < new Date() ? '#DC2626' : '#2563EB',
+                            backgroundColor: new Date(c.slaDueAt) < new Date() ? '#FEF2F2' : '#EFF6FF',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            whiteSpace: 'nowrap',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          ⏱ {new Date(c.slaDueAt) < new Date() ? 'SLA Overdue' : `Target resolution in ~${Math.max(1, Math.round((new Date(c.slaDueAt) - new Date()) / (1000 * 60 * 60)))}h`}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="complaint-card-category-row">
                       <span style={{ fontSize: '0.8125rem', color: '#475569' }}>

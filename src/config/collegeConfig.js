@@ -2,7 +2,7 @@
  * College Branding & Official Contact Configuration
  * 
  * Central configuration file for institution identity, logo mark, and official contact channels.
- * To update branding or replace the placeholder logo, edit the fields below.
+ * Official campus support desk operational schedule: Sunday through Friday (Nepal standard academic week).
  */
 
 export const COLLEGE_CONFIG = {
@@ -29,13 +29,19 @@ export const COLLEGE_CONFIG = {
     replacementGuide: 'Official college logo asset stored in /public/college-logo.png and /src/assets/college-logo.png',
   },
 
-  // Contact Channels
+  // Contact Channels & Unified Desk Hours
   contact: {
     email: 'info@sochcollege.edu.np',
     phone: '061-574096',
     campusAddress: 'Ranipauwa, Pokhara, Nepal',
-    officeHours: 'Desk: Monday–Friday, 6:00 AM – 4:00 PM',
-    officeHoursNe: 'सहायता कक्ष: सोमबारदेखि शुक्रबार, बिहान ६ बजेदेखि अपराह्न ४ बजेसम्म',
+    // Confirmed operational schedule: Sunday through Friday (standard Nepal college operating week)
+    operatingDays: 'Sunday–Friday',
+    operatingDaysNe: 'आइतबारदेखि शुक्रबार',
+    officeHours: 'Sunday–Friday: 6:00 AM – 4:00 PM',
+    officeHoursNe: 'आइतबारदेखि शुक्रबार: बिहान ६:०० देखि अपराह्न ४:०० बजेसम्म',
+    // Unified institutional SLA commitment
+    targetSlaPhrase: 'Target response within 24–48 hours',
+    targetSlaPhraseNe: 'लक्षित सम्बोधन २४–४८ घण्टा भित्र',
   },
 
   isConfiguredWithOfficialDetails: true,

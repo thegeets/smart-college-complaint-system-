@@ -314,18 +314,30 @@ export function AppProvider({ children }) {
     return data.complaint;
   }, []);
 
-  const submitStudentComplaint = useCallback(async (formData, file) => {
+  const submitStudentComplaint = useCallback(async (formData, files = []) => {
     const body = new FormData();
     body.append('category', formData.category);
     body.append('title', formData.title);
     body.append('description', formData.description);
     body.append('priority', formData.priority || 'Medium');
-
-    if (file) {
-      body.append('attachment', file);
+    if (formData.location) {
+      body.append('location', formData.location);
+    }
+    if (formData.pcNumber) {
+      body.append('pcNumber', formData.pcNumber);
     }
 
-    const res = await fetch('/api/v1/student/complaints', {
+    // Support single file or array of up to 3 files
+    if (Array.isArray(files)) {
+      for (const f of files) {
+        if (f) body.append('attachments', f);
+      }
+    } else if (files) {
+      body.append('attachments', files);
+      body.append('attachment', files);
+    }
+
+    const res = await fetch('/api/complaints', {
       method: 'POST',
       credentials: 'include',
       body,
@@ -335,11 +347,12 @@ export function AppProvider({ children }) {
     if (!res.ok || !data.success) {
       const err = new Error(data.message || 'Failed to submit complaint.');
       err.errors = data.errors;
+      err.code = data.code;
       throw err;
     }
 
     showToast('Complaint lodged successfully.', 'success');
-    return data; // { success: true, message, complaint }
+    return data; // { success: true, message, referenceId, slaDueAt, complaint }
   }, [showToast]);
 
   const claimLegacyComplaint = useCallback(async (reference, trackingSecret) => {

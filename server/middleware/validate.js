@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { ALLOWED_CATEGORIES, ALLOWED_PROGRAMS } from '../models/Complaint.js';
+import { z } from 'zod';
+import { ALLOWED_CATEGORIES, ALLOWED_PROGRAMS, Complaint } from '../models/Complaint.js';
 
 /**
  * Recursively mutate object in-place to remove NoSQL query operator injection ($where, $gt, etc.).
@@ -180,4 +181,103 @@ export function validateObjectId(paramName = 'id') {
     }
     next();
   };
+}
+
+/**
+ * Zod schema for authenticated student complaint submissions.
+ */
+export const complaintSubmissionZodSchema = z.object({
+  category: z.enum(ALLOWED_CATEGORIES, {
+    errorMap: () => ({ message: 'Please select a valid IT issue category.' }),
+  }),
+  title: z
+    .string({ required_error: 'Complaint title is required.' })
+    .trim()
+    .min(5, { message: 'Title must be at least 5 characters.' })
+    .max(100, { message: 'Title cannot exceed 100 characters.' }),
+  description: z
+    .string({ required_error: 'Complaint description is required.' })
+    .trim()
+    .min(20, { message: 'Description must be at least 20 characters.' })
+    .max(1500, { message: 'Description cannot exceed 1500 characters.' }),
+  location: z
+    .string()
+    .trim()
+    .min(2, { message: 'Location must be at least 2 characters.' })
+    .max(100, { message: 'Location cannot exceed 100 characters.' })
+    .optional()
+    .default('General Campus'),
+  pcNumber: z
+    .string()
+    .trim()
+    .max(30, { message: 'PC/Workstation number cannot exceed 30 characters.' })
+    .optional()
+    .default(''),
+  priority: z
+    .enum(['Low', 'Medium', 'High', 'Urgent'], {
+      errorMap: () => ({ message: 'Priority must be Low, Medium, High, or Urgent.' }),
+    })
+    .optional()
+    .default('Medium'),
+});
+
+/**
+ * Middleware: validateComplaintSubmissionZod
+ * Enforces Zod schema on complaint submission payloads.
+ */
+export function validateComplaintSubmissionZod(req, res, next) {
+  const result = complaintSubmissionZodSchema.safeParse(req.body);
+  if (!result.success) {
+    const errors = {};
+    for (const issue of result.error.issues) {
+      const field = issue.path[0] || 'general';
+      if (!errors[field]) {
+        errors[field] = issue.message;
+      }
+    }
+    return res.status(400).json({
+      success: false,
+      code: 'VALIDATION_ERROR',
+      message: 'Validation failed for complaint submission.',
+      errors,
+    });
+  }
+
+  req.validatedComplaint = result.data;
+  next();
+}
+
+/**
+ * Middleware: duplicateSubmissionGuard
+ * Guards against double submissions (same student + title + category within 2 minutes).
+ */
+export async function duplicateSubmissionGuard(req, res, next) {
+  try {
+    const studentId = req.student?._id;
+    const { title, category } = req.body || {};
+    if (!studentId || !title || !category) {
+      return next();
+    }
+
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const existing = await Complaint.findOne({
+      studentId,
+      category,
+      title: typeof title === 'string' ? title.trim() : title,
+      createdAt: { $gte: twoMinutesAgo },
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        code: 'DUPLICATE_SUBMISSION',
+        message: 'A complaint with this category and title was submitted in the last 2 minutes. Please check your dashboard or wait before resubmitting.',
+        referenceId: existing.referenceId || existing.reference,
+      });
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 }

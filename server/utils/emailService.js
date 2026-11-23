@@ -197,3 +197,70 @@ Soch College of IT, Pokhara`;
 
   return sendEmail({ to, subject, text, html });
 }
+
+/**
+ * Send complaint submission confirmation email.
+ */
+export async function sendComplaintConfirmationEmail({
+  to,
+  studentName,
+  referenceId,
+  title,
+  category,
+  priority,
+  slaDueAt,
+}) {
+  const subject = `Complaint Registered [${referenceId}] — Soch College IT Service Desk`;
+  const formattedSla = slaDueAt ? new Date(slaDueAt).toLocaleString() : 'Within SLA target window';
+  const text = `Hello ${studentName || 'Student'},
+
+Your IT complaint has been registered with reference code: ${referenceId}
+
+Details:
+- Reference ID: ${referenceId}
+- Title: ${title}
+- Category: ${category}
+- Priority: ${priority}
+- Expected Resolution Target: ${formattedSla}
+
+You can track the progress of your grievance at any time by logging into the portal.
+
+— Central Grievance Redressal Cell & IT Service Desk
+Soch College of IT, Pokhara`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Complaint Registered</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8FAFC; margin: 0; padding: 24px; color: #1E293B;">
+  <div style="max-width: 560px; margin: 0 auto; background: #FFFFFF; border-radius: 8px; border: 1px solid #E2E8F0; padding: 32px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);">
+    <div style="border-bottom: 2px solid #15365B; padding-bottom: 16px; margin-bottom: 24px;">
+      <h2 style="color: #15365B; margin: 0; font-size: 20px; font-weight: 700;">Soch College of IT</h2>
+      <p style="color: #64748B; margin: 4px 0 0 0; font-size: 13px;">IT Service Desk & Grievance Portal</p>
+    </div>
+    <p style="font-size: 15px; line-height: 1.5; color: #334155;">Hello <strong>${studentName || 'Student'}</strong>,</p>
+    <p style="font-size: 14px; line-height: 1.6; color: #475569;">Your IT complaint has been successfully registered in our queue:</p>
+    <div style="text-align: center; margin: 24px 0; background-color: #EEF4F9; border: 1px solid #C8D7E6; border-radius: 8px; padding: 16px;">
+      <span style="font-family: monospace; font-size: 26px; font-weight: 700; color: #15365B; letter-spacing: 2px;">
+        ${referenceId}
+      </span>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #475569;">Target SLA: <strong>${formattedSla}</strong></p>
+    </div>
+    <div style="background-color: #F8FAFC; border-radius: 6px; padding: 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6;">
+      <p style="margin: 0 0 6px 0;"><strong>Category:</strong> ${category}</p>
+      <p style="margin: 0 0 6px 0;"><strong>Title:</strong> ${title}</p>
+      <p style="margin: 0;"><strong>Priority:</strong> ${priority}</p>
+    </div>
+    <p style="font-size: 13px; color: #64748B; line-height: 1.5;">You can monitor the live investigation and resolution stages directly from your student dashboard.</p>
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #E2E8F0; font-size: 12px; color: #94A3B8;">
+      <p style="margin: 0;">Central Grievance Redressal Cell &bull; Soch College of IT, Pokhara, Nepal</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return sendEmail({ to, subject, text, html });
+}

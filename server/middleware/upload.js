@@ -46,29 +46,80 @@ export const uploadAttachment = multer({
   fileFilter,
 }).single('attachment');
 
+export const uploadComplaintAttachments = multer({
+  storage,
+  limits: {
+    fileSize: ENV.MAX_FILE_SIZE_BYTES, // 5 MB
+    files: 3, // Max 3 files total
+  },
+  fileFilter,
+}).fields([
+  { name: 'attachments', maxCount: 3 },
+  { name: 'attachment', maxCount: 1 },
+]);
+
 /**
  * Middleware: verifyUploadedFileSignature
- * Inspects the actual magic bytes of the saved file to ensure it matches
- * declared type and is strictly JPG, PNG, or PDF (rejects disguised SVGs, HTML, EXEs).
+ * Inspects the actual magic bytes of the saved file(s) to ensure it matches
+ * declared type and is strictly JPG, PNG, PDF, or WEBP (rejects disguised SVGs, HTML, EXEs).
  */
 export async function verifyUploadedFileSignature(req, res, next) {
-  if (!req.file) {
-    return next(); // Attachment is optional
+  const filesToVerify = [];
+  if (req.file) {
+    filesToVerify.push(req.file);
+  }
+  if (Array.isArray(req.files) && req.files.length > 0) {
+    filesToVerify.push(...req.files);
+  } else if (req.files && typeof req.files === 'object') {
+    for (const key of Object.keys(req.files)) {
+      if (Array.isArray(req.files[key])) {
+        filesToVerify.push(...req.files[key]);
+      }
+    }
   }
 
-  const result = await validateFileSignature(req.file.path);
-  if (!result.valid) {
-    // Delete the dangerous or invalid file immediately
-    await safeDeleteFile(req.file.path);
-    req.file = null;
-    return res.status(400).json({
-      success: false,
-      code: 'INVALID_FILE_SIGNATURE',
-      message: result.reason,
-    });
+  if (filesToVerify.length === 0) {
+    return next(); // Attachments are optional
+  }
+
+  for (const file of filesToVerify) {
+    const result = await validateFileSignature(file.path);
+    if (!result.valid) {
+      // Delete all uploaded files on any signature error
+      for (const f of filesToVerify) {
+        await safeDeleteFile(f.path);
+      }
+      req.file = null;
+      req.files = [];
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_FILE_SIGNATURE',
+        message: result.reason,
+      });
+    }
   }
 
   next();
+}
+
+/**
+ * Helper to collect all uploaded files from req (supports req.file, req.files array, or req.files object).
+ */
+export function getUploadedFiles(req) {
+  const files = [];
+  if (req.file) {
+    files.push(req.file);
+  }
+  if (Array.isArray(req.files)) {
+    files.push(...req.files);
+  } else if (req.files && typeof req.files === 'object') {
+    for (const key of Object.keys(req.files)) {
+      if (Array.isArray(req.files[key])) {
+        files.push(...req.files[key]);
+      }
+    }
+  }
+  return files;
 }
 
 /**
