@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import {
   Save,
   CheckCircle2,
@@ -114,6 +115,10 @@ export function ProfilePage() {
     );
   }
 
+  if (!isStudentLoggedIn) {
+    return <Navigate to="/login?redirect=/student/profile" replace />;
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
       <PublicNavbar />
@@ -129,8 +134,8 @@ export function ProfilePage() {
               </h1>
               <p style={{ fontSize: '0.875rem', color: '#64748B', margin: 0 }}>
                 {isNe
-                  ? 'आफ्नो व्यक्तिगत जानकारी, इमेल प्रमाणीकरण र खाता सेटिङहरू व्यवस्थापन गर्नुहोस्।'
-                  : 'Manage your contact information, email verification, and account settings.'}
+                  ? 'आफ्नो व्यक्तिगत जानकारी र खाता सेटिङहरू व्यवस्थापन गर्नुहोस्।'
+                  : 'Manage your contact information and account settings.'}
               </p>
             </div>
 
@@ -163,7 +168,7 @@ export function ProfilePage() {
               <span>
                 {isNe
                   ? 'विद्यार्थी खाता पूर्ण रूपमा सक्रिय छ।'
-                  : 'Your student account is active and verified.'}
+                  : 'Your student account is active.'}
               </span>
             </div>
           )}
@@ -396,4 +401,13 @@ export function ProfilePage() {
   );
 }
 
-export default ProfilePage;
+export default function ProfilePageWrapper() {
+  return (
+    <ErrorBoundary
+      title="Student Profile"
+      message="Unable to load your profile settings. Please refresh the page."
+    >
+      <ProfilePage />
+    </ErrorBoundary>
+  );
+}

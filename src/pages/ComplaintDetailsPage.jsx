@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { ComplaintTimeline } from '../components/ComplaintTimeline';
 import { ComplaintAttachments } from '../components/ComplaintAttachments';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import {
   ArrowLeft,
   Calendar,
@@ -68,6 +69,10 @@ export function ComplaintDetailsPage() {
     );
   }
 
+  if (!isStudentLoggedIn) {
+    return <Navigate to={`/login?redirect=/dashboard/complaints/${encodeURIComponent(id || '')}`} replace />;
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
       <PublicNavbar />
@@ -83,7 +88,7 @@ export function ComplaintDetailsPage() {
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <ArrowLeft size={14} />
-              <span>{isNe ? 'मेरो उजुरीहरूमा फर्कनुहोस्' : 'Back to My Complaints'}</span>
+              <span>{isNe ? 'ड्यासबोर्डमा फर्कनुहोस्' : 'Back to Dashboard'}</span>
             </Link>
 
             <button
@@ -280,4 +285,13 @@ export function ComplaintDetailsPage() {
   );
 }
 
-export default ComplaintDetailsPage;
+export default function ComplaintDetailsWrapper() {
+  return (
+    <ErrorBoundary
+      title="Complaint Details"
+      message="Unable to load this complaint ticket. Please refresh the page."
+    >
+      <ComplaintDetailsPage />
+    </ErrorBoundary>
+  );
+}

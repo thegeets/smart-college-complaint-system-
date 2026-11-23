@@ -12,10 +12,11 @@ const router = express.Router();
 /**
  * POST /api/v1/student/auth/register
  * Student self-registration (no admin approval required).
+ * Always returns structured JSON with appropriate HTTP status codes.
  */
-router.post('/register', async (req, res, next) => {
+router.post('/register', async (req, res) => {
   try {
-    const { name, studentId, email, password, semester, avatar, phone } = req.body;
+    const { name, studentId, email, password, semester, avatar, phone } = req.body || {};
 
     const errors = {};
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
@@ -38,13 +39,17 @@ router.post('/register', async (req, res, next) => {
       return res.status(400).json({
         success: false,
         code: 'VALIDATION_ERROR',
+        message: 'Please correct the highlighted form errors.',
         errors,
       });
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const existing = await Student.findOne({ email: cleanEmail });
-    if (existing) {
+    const cleanStudentId = studentId.trim();
+
+    // Check duplicate email
+    const existingEmail = await Student.findOne({ email: cleanEmail });
+    if (existingEmail) {
       return res.status(409).json({
         success: false,
         code: 'EMAIL_ALREADY_EXISTS',
@@ -52,11 +57,21 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
+    // Check duplicate student ID
+    const existingId = await Student.findOne({ studentId: cleanStudentId });
+    if (existingId) {
+      return res.status(409).json({
+        success: false,
+        code: 'STUDENT_ID_ALREADY_EXISTS',
+        message: 'A student account with this Student ID already exists. Please sign in.',
+      });
+    }
+
     const passwordHash = await hashPassword(password);
 
     const student = new Student({
       name: name.trim(),
-      studentId: studentId.trim(),
+      studentId: cleanStudentId,
       email: cleanEmail,
       passwordHash,
       semester: semester || '1st Semester',
@@ -82,7 +97,33 @@ router.post('/register', async (req, res, next) => {
       csrfToken: req.session.csrfToken,
     });
   } catch (error) {
-    next(error);
+    logger.error(`[Student Registration Error] ${error.message}`, { stack: error.stack });
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'field';
+      const label = field === 'studentId' ? 'Student ID' : field === 'email' ? 'email address' : field;
+      return res.status(409).json({
+        success: false,
+        code: 'DUPLICATE_KEY',
+        message: `An account with this ${label} already exists.`,
+      });
+    }
+
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors || {}).map((e) => e.message);
+      return res.status(400).json({
+        success: false,
+        code: 'VALIDATION_ERROR',
+        message: messages[0] || 'Validation failed.',
+        errors: messages,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      code: 'REGISTRATION_ERROR',
+      message: error.message || 'Server is not reachable, please try again',
+    });
   }
 });
 

@@ -153,17 +153,40 @@ export function AppProvider({ children }) {
 
   // Real Student Registration
   const registerStudent = useCallback(async (formData) => {
-    const res = await fetch('/api/v1/student/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(formData),
-    });
+    let res;
+    try {
+      res = await fetch('/api/v1/student/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+    } catch (networkErr) {
+      throw new Error('Server is not reachable, please try again', { cause: networkErr });
+    }
 
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      const err = new Error(data.message || 'Registration failed.');
-      err.errors = data.errors;
+    let data = null;
+    let rawText = '';
+    try {
+      rawText = await res.text();
+      data = rawText ? JSON.parse(rawText) : null;
+    } catch {
+      data = null;
+    }
+
+    if (!res.ok || !data?.success) {
+      const fallbackMsg =
+        res.status >= 500 || !res.ok
+          ? 'Server is not reachable, please try again'
+          : 'Registration failed. Please check your details.';
+
+      const message =
+        data?.message ||
+        (rawText && !rawText.trim().startsWith('<') ? rawText.trim() : fallbackMsg);
+
+      const err = new Error(message);
+      err.errors = data?.errors;
+      err.code = data?.code;
       throw err;
     }
 
@@ -171,6 +194,7 @@ export function AppProvider({ children }) {
       setIsStudentLoggedIn(true);
       setStudentUser(data.student);
       if (data.csrfToken) setCsrfToken(data.csrfToken);
+      setIsCheckingStudentSession(false);
     }
 
     showToast(data.message || 'Student account created successfully.', 'success');
@@ -265,6 +289,7 @@ export function AppProvider({ children }) {
     setIsStudentLoggedIn(true);
     setStudentUser(data.student);
     if (data.csrfToken) setCsrfToken(data.csrfToken);
+    setIsCheckingStudentSession(false);
     showToast(data.message || 'Welcome back to your dashboard.', 'success');
     return data;
   }, [showToast]);

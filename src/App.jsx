@@ -5,31 +5,34 @@ import { AppProvider, useApp } from './context/AppContext';
 import { MOTION_EASE } from './lib/motion';
 
 import { SkeletonLoader } from './components/SkeletonLoader';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
-// Code-split Lazy-Loaded Routes
-const LandingPage = React.lazy(() => import('./pages/LandingPage'));
-const SubmitComplaintPage = React.lazy(() => import('./pages/SubmitComplaintPage'));
-const TrackComplaintPage = React.lazy(() => import('./pages/TrackComplaintPage'));
-const LoginPage = React.lazy(() => import('./pages/LoginPage'));
-const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
-const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage'));
-const ForgotPasswordPage = React.lazy(() => import('./pages/ForgotPasswordPage'));
-const ResetPasswordPage = React.lazy(() => import('./pages/ResetPasswordPage'));
-const MyComplaintsPage = React.lazy(() => import('./pages/MyComplaintsPage'));
-const ComplaintDetailsPage = React.lazy(() => import('./pages/ComplaintDetailsPage'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+// Code-split Lazy-Loaded Routes with Automatic Deployment Drift Retry
+const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
+const SubmitComplaintPage = lazyWithRetry(() => import('./pages/SubmitComplaintPage'));
+const TrackComplaintPage = lazyWithRetry(() => import('./pages/TrackComplaintPage'));
+const LoginPage = lazyWithRetry(() => import('./pages/LoginPage'));
+const RegisterPage = lazyWithRetry(() => import('./pages/RegisterPage'));
+const VerifyEmailPage = lazyWithRetry(() => import('./pages/VerifyEmailPage'));
+const ForgotPasswordPage = lazyWithRetry(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage'));
+const StudentDashboard = lazyWithRetry(() => import('./pages/StudentDashboard'));
+const MyComplaintsPage = lazyWithRetry(() => import('./pages/MyComplaintsPage'));
+const ComplaintDetailsPage = lazyWithRetry(() => import('./pages/ComplaintDetailsPage'));
+const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'));
 
 // Admin Portal Pages (Protected by AdminLayout)
-const AdminLoginPage = React.lazy(() => import('./pages/AdminLoginPage'));
-const AdminLayout = React.lazy(() => import('./components/AdminLayout'));
-const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
-const AdminComplaintsPage = React.lazy(() => import('./pages/AdminComplaintsPage'));
-const AdminComplaintDetailPage = React.lazy(() => import('./pages/AdminComplaintDetailPage'));
-const ReportsAnalyticsPage = React.lazy(() => import('./pages/ReportsAnalyticsPage'));
-const AdminSettingsPage = React.lazy(() => import('./pages/AdminSettingsPage'));
-const AdminStaffPage = React.lazy(() => import('./pages/AdminStaffPage'));
-const AdminStudentsPage = React.lazy(() => import('./pages/AdminStudentsPage'));
-const StaffDashboard = React.lazy(() => import('./pages/StaffDashboard'));
+const AdminLoginPage = lazyWithRetry(() => import('./pages/AdminLoginPage'));
+const AdminLayout = lazyWithRetry(() => import('./components/AdminLayout'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'));
+const AdminComplaintsPage = lazyWithRetry(() => import('./pages/AdminComplaintsPage'));
+const AdminComplaintDetailPage = lazyWithRetry(() => import('./pages/AdminComplaintDetailPage'));
+const ReportsAnalyticsPage = lazyWithRetry(() => import('./pages/ReportsAnalyticsPage'));
+const AdminSettingsPage = lazyWithRetry(() => import('./pages/AdminSettingsPage'));
+const AdminStaffPage = lazyWithRetry(() => import('./pages/AdminStaffPage'));
+const AdminStudentsPage = lazyWithRetry(() => import('./pages/AdminStudentsPage'));
+const StaffDashboard = lazyWithRetry(() => import('./pages/StaffDashboard'));
 
 // Restrained Academic SkeletonLoader Page Fallback
 function PageFallback() {
@@ -105,7 +108,8 @@ function AnimatedRoutes() {
         style={{ display: 'flex', flexDirection: 'column' }}
       >
         <Suspense fallback={<PageFallback />}>
-          <Routes location={location}>
+          <ErrorBoundary>
+            <Routes location={location}>
             {/* Public Top-Level Pages */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/submit" element={<SubmitComplaintPage />} />
@@ -118,9 +122,10 @@ function AnimatedRoutes() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Authenticated Student Portal Routes */}
-            <Route path="/dashboard" element={<MyComplaintsPage />} />
+            <Route path="/dashboard" element={<StudentDashboard />} />
+            <Route path="/my-complaints" element={<MyComplaintsPage />} />
             <Route path="/dashboard/complaints/:id" element={<ComplaintDetailsPage />} />
-            <Route path="/student/complaints" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/student/complaints" element={<MyComplaintsPage />} />
             <Route path="/student/complaints/:id" element={<ComplaintDetailsPage />} />
             <Route path="/student/dashboard" element={<Navigate to="/dashboard" replace />} />
             <Route path="/student/profile" element={<ProfilePage />} />
@@ -152,7 +157,8 @@ function AnimatedRoutes() {
             {/* Catch-all fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Suspense>
+        </ErrorBoundary>
+      </Suspense>
       </m.div>
     </AnimatePresence>
   );

@@ -14,9 +14,9 @@ export function MobileBottomNav({ onOpenMenu }) {
   const isNe = language === 'ne';
 
   const navItems = [
-    { to: '/student', label: isNe ? 'ड्यासबोर्ड' : 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/dashboard', label: isNe ? 'ड्यासबोर्ड' : 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/submit', label: isNe ? 'दर्ता' : 'Lodge', icon: PlusCircle, isPrimaryAction: true },
-    { to: '/student/complaints', label: isNe ? 'गुनासोहरू' : 'Complaints', icon: ListFilter },
+    { to: '/my-complaints', label: isNe ? 'गुनासोहरू' : 'Complaints', icon: ListFilter },
     { to: '/track', label: isNe ? 'गुनासोको अवस्था' : 'Track Complaint', icon: Search },
   ];
 

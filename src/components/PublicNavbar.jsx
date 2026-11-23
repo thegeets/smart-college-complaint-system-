@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { m, AnimatePresence, useScroll } from 'framer-motion';
-import { Menu, X, User, LogIn, LogOut, FileText } from 'lucide-react';
+import { Menu, X, User, LogIn, LogOut, FileText, Bell, ArrowRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { BrandLogo } from './BrandLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -11,11 +11,35 @@ import { MOTION_EASE } from '../lib/motion';
 export function PublicNavbar() {
   const { language, isStudentLoggedIn, studentUser, logoutStudent } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef(null);
   const [scrollSection, setScrollSection] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isNe = language === 'ne';
+
+  // Helper for student initials
+  const getInitials = (name) => {
+    if (!name || typeof name !== 'string') return 'S';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  };
+
+  // Close notifications on outside click
+  useEffect(() => {
+    if (!notifOpen) return;
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [notifOpen]);
 
   // Scroll Progress Bar at the top of Navbar (direct hardware-accelerated transform)
   const { scrollYProgress } = useScroll();
@@ -191,129 +215,240 @@ export function PublicNavbar() {
           </Link>
         </div>
 
-        {/* Center: Main Navigation Links (Home, Categories, How It Works, FAQ, Contact) */}
+        {/* Center: Main Navigation Links */}
         <nav className="header-nav-column" aria-label={isNe ? 'मुख्य नेभिगेसन' : 'Main Navigation'}>
-          {/* Home Link */}
-          <Link 
-            to="/" 
-            className={`header-nav-link ${isHomeActive ? 'active' : ''}`}
-            aria-current={isHomeActive ? 'page' : undefined}
-            onClick={(e) => {
-              if (location.pathname === '/') {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setScrollSection('home');
-                if (location.hash) {
-                  navigate('/', { replace: true });
-                }
-              }
-            }}
-          >
-            <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
-            <span className="nav-hover-line" aria-hidden="true" />
-          </Link>
+          {isStudentLoggedIn ? (
+            /* Logged-In Student Links: Dashboard, My Complaints, Submit, FAQ */
+            <>
+              {/* Dashboard Link */}
+              <Link 
+                to="/dashboard" 
+                className={`header-nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+                aria-current={location.pathname === '/dashboard' ? 'page' : undefined}
+                onClick={closeMenu}
+              >
+                <span>{isNe ? 'ड्यासबोर्ड' : 'Dashboard'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </Link>
 
-          {/* Categories Link */}
-          <a 
-            href="/#categories" 
-            className={`header-nav-link ${isCategoriesActive ? 'active' : ''}`}
-            aria-current={isCategoriesActive ? 'section' : undefined}
-            onClick={(e) => {
-              if (location.pathname === '/') {
-                e.preventDefault();
-                document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' });
-                setScrollSection('categories');
-                navigate('/#categories', { replace: true });
-              }
-            }}
-          >
-            <span>{isNe ? 'विधाहरू' : 'Categories'}</span>
-            <span className="nav-hover-line" aria-hidden="true" />
-          </a>
+              {/* My Complaints Link */}
+              <Link 
+                to="/my-complaints" 
+                className={`header-nav-link ${location.pathname === '/my-complaints' || location.pathname.startsWith('/dashboard/complaints') || location.pathname.startsWith('/student/complaints') ? 'active' : ''}`}
+                aria-current={location.pathname === '/my-complaints' ? 'page' : undefined}
+                onClick={closeMenu}
+              >
+                <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </Link>
 
-          {/* How It Works Link */}
-          <a 
-            href="/#process" 
-            className={`header-nav-link ${isProcessActive ? 'active' : ''}`}
-            aria-current={isProcessActive ? 'section' : undefined}
-            onClick={(e) => {
-              if (location.pathname === '/') {
-                e.preventDefault();
-                document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' });
-                setScrollSection('process');
-                navigate('/#process', { replace: true });
-              }
-            }}
-          >
-            <span>{isNe ? 'कार्यप्रणाली' : 'How It Works'}</span>
-            <span className="nav-hover-line" aria-hidden="true" />
-          </a>
+              {/* Submit Link */}
+              <Link 
+                to="/submit" 
+                className={`header-nav-link ${location.pathname === '/submit' ? 'active' : ''}`}
+                aria-current={location.pathname === '/submit' ? 'page' : undefined}
+                onClick={closeMenu}
+              >
+                <span>{isNe ? 'उजुरी दर्ता' : 'Submit'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </Link>
 
-          {/* FAQ Link */}
-          <a 
-            href="/#faqs" 
-            className={`header-nav-link ${isFaqActive ? 'active' : ''}`}
-            aria-current={isFaqActive ? 'section' : undefined}
-            onClick={(e) => {
-              if (location.pathname === '/') {
-                e.preventDefault();
-                document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
-                setScrollSection('faqs');
-                navigate('/#faqs', { replace: true });
-              }
-            }}
-          >
-            <span>{isNe ? 'प्रश्नोत्तर' : 'FAQ'}</span>
-            <span className="nav-hover-line" aria-hidden="true" />
-          </a>
+              {/* FAQ Link */}
+              <a 
+                href="/#faqs" 
+                className={`header-nav-link ${isFaqActive ? 'active' : ''}`}
+                aria-current={isFaqActive ? 'section' : undefined}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                    setScrollSection('faqs');
+                    navigate('/#faqs', { replace: true });
+                  }
+                }}
+              >
+                <span>{isNe ? 'प्रश्नोत्तर' : 'FAQ'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </a>
+            </>
+          ) : (
+            /* Logged-Out Visitor Links: Home, Categories, How It Works, FAQ, Contact */
+            <>
+              <Link 
+                to="/" 
+                className={`header-nav-link ${isHomeActive ? 'active' : ''}`}
+                aria-current={isHomeActive ? 'page' : undefined}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setScrollSection('home');
+                    if (location.hash) {
+                      navigate('/', { replace: true });
+                    }
+                  }
+                }}
+              >
+                <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </Link>
 
-          {/* Contact Link */}
-          <a 
-            href="/#contact" 
-            className={`header-nav-link ${isContactActive ? 'active' : ''}`}
-            aria-current={isContactActive ? 'section' : undefined}
-            onClick={(e) => {
-              if (location.pathname === '/') {
-                e.preventDefault();
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                setScrollSection('contact');
-                navigate('/#contact', { replace: true });
-              }
-            }}
-          >
-            <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
-            <span className="nav-hover-line" aria-hidden="true" />
-          </a>
+              <a 
+                href="/#categories" 
+                className={`header-nav-link ${isCategoriesActive ? 'active' : ''}`}
+                aria-current={isCategoriesActive ? 'section' : undefined}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' });
+                    setScrollSection('categories');
+                    navigate('/#categories', { replace: true });
+                  }
+                }}
+              >
+                <span>{isNe ? 'विधाहरू' : 'Categories'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </a>
+
+              <a 
+                href="/#process" 
+                className={`header-nav-link ${isProcessActive ? 'active' : ''}`}
+                aria-current={isProcessActive ? 'section' : undefined}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' });
+                    setScrollSection('process');
+                    navigate('/#process', { replace: true });
+                  }
+                }}
+              >
+                <span>{isNe ? 'कार्यप्रणाली' : 'How It Works'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </a>
+
+              <a 
+                href="/#faqs" 
+                className={`header-nav-link ${isFaqActive ? 'active' : ''}`}
+                aria-current={isFaqActive ? 'section' : undefined}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                    setScrollSection('faqs');
+                    navigate('/#faqs', { replace: true });
+                  }
+                }}
+              >
+                <span>{isNe ? 'प्रश्नोत्तर' : 'FAQ'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </a>
+
+              <a 
+                href="/#contact" 
+                className={`header-nav-link ${isContactActive ? 'active' : ''}`}
+                aria-current={isContactActive ? 'section' : undefined}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    setScrollSection('contact');
+                    navigate('/#contact', { replace: true });
+                  }
+                }}
+              >
+                <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </a>
+            </>
+          )}
         </nav>
 
-        {/* Right: Actions (Language Switcher + Student Login or My Complaints / Profile / Logout) */}
+        {/* Right: Actions */}
         <div className="header-actions-column">
           <LanguageSwitcher />
 
           {isStudentLoggedIn ? (
-            /* Signed In Student Actions */
-            <div className="student-account-cluster">
-              <Link
-                to="/dashboard"
-                className={`header-primary-btn ${isComplaintsActive ? 'active' : ''}`}
-                title={isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}
-              >
-                <FileText size={15} aria-hidden="true" />
-                <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
-              </Link>
+            /* Signed In: Notification Bell + Avatar with Initials + Logout */
+            <div className="student-nav-cluster">
+              {/* Notification Bell */}
+              <div className="navbar-notification-wrapper" ref={notifRef}>
+                <button
+                  type="button"
+                  className={`navbar-bell-btn ${notifOpen ? 'open' : ''}`}
+                  onClick={() => setNotifOpen(!notifOpen)}
+                  aria-label={isNe ? 'सूचनाहरू' : 'Notifications'}
+                  title={isNe ? 'सूचनाहरू' : 'Notifications'}
+                  aria-expanded={notifOpen}
+                >
+                  <Bell size={18} aria-hidden="true" />
+                  <span className="navbar-bell-indicator" aria-hidden="true" />
+                </button>
 
+                {notifOpen && (
+                  <div className="navbar-notif-dropdown" role="region" aria-label="Notifications">
+                    <div className="notif-dropdown-header">
+                      <span className="notif-dropdown-title">
+                        {isNe ? 'सूचना केन्द्र' : 'IT Desk Notifications'}
+                      </span>
+                      <span className="notif-desk-status">
+                        {isNe ? 'सक्रिय' : 'Live'}
+                      </span>
+                    </div>
+
+                    <div className="notif-dropdown-body">
+                      <div className="notif-item">
+                        <div className="notif-item-dot active" />
+                        <div className="notif-item-text">
+                          <p className="notif-item-title">
+                            {isNe ? 'आईटी सहायता डेस्क खुला छ' : 'IT Redressal Desk Operating'}
+                          </p>
+                          <p className="notif-item-desc">
+                            {isNe ? 'समय: बिहान ६:०० – अपराह्न ४:००' : 'Sunday–Friday: 6:00 AM – 4:00 PM'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="notif-item">
+                        <div className="notif-item-dot info" />
+                        <div className="notif-item-text">
+                          <p className="notif-item-title">
+                            {isNe ? 'अनलाइन उजुरी ट्र्याकिङ' : 'Real-time Ticket Tracking'}
+                          </p>
+                          <p className="notif-item-desc">
+                            {isNe ? 'प्राविधिकको काम प्रत्यक्ष ड्यासबोर्डमा देखिन्छ।' : 'Live status updates on your dashboard.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="notif-dropdown-footer">
+                      <Link
+                        to="/my-complaints"
+                        onClick={() => setNotifOpen(false)}
+                        className="notif-footer-link"
+                      >
+                        <span>{isNe ? 'सबै उजुरी हेर्नुहोस्' : 'View all my complaints'}</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Avatar with initials */}
               <Link
                 to="/student/profile"
-                className={`header-profile-link ${isProfileActive ? 'active' : ''}`}
-                title={studentUser?.name}
+                className="header-avatar-link"
+                title={`${studentUser?.name || 'Student Profile'} (${studentUser?.studentId || ''})`}
                 aria-label={studentUser?.name || 'Profile'}
               >
-                <User size={15} aria-hidden="true" />
-                <span className="student-profile-name">
-                  {studentUser?.name ? studentUser.name.split(' ')[0] : 'Profile'}
-                </span>
+                <div className="header-student-avatar" aria-hidden="true">
+                  {getInitials(studentUser?.name)}
+                </div>
               </Link>
 
+              {/* Sign Out Button */}
               <button
                 type="button"
                 onClick={handleLogout}
@@ -321,7 +456,7 @@ export function PublicNavbar() {
                 title={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
                 aria-label={isNe ? 'लगआउट गर्नुहोस्' : 'Sign Out'}
               >
-                <LogOut size={15} aria-hidden="true" />
+                <LogOut size={16} aria-hidden="true" />
               </button>
             </div>
           ) : (
@@ -477,13 +612,29 @@ export function PublicNavbar() {
                 </Link>
 
                 {isStudentLoggedIn && (
-                  <Link 
-                    to="/dashboard" 
-                    className={`mobile-drawer-link ${isComplaintsActive ? 'active' : ''}`}
-                    onClick={closeMenu}
-                  >
-                    <span>{isNe ? 'मेरो उजुरीहरू (ड्यासबोर्ड)' : 'My Complaints'}</span>
-                  </Link>
+                  <>
+                    <Link 
+                      to="/dashboard" 
+                      className={`mobile-drawer-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+                      onClick={closeMenu}
+                    >
+                      <span>{isNe ? 'ड्यासबोर्ड' : 'Dashboard'}</span>
+                    </Link>
+                    <Link 
+                      to="/my-complaints" 
+                      className={`mobile-drawer-link ${location.pathname === '/my-complaints' || location.pathname.startsWith('/dashboard/complaints') ? 'active' : ''}`}
+                      onClick={closeMenu}
+                    >
+                      <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
+                    </Link>
+                    <Link 
+                      to="/submit" 
+                      className={`mobile-drawer-link ${location.pathname === '/submit' ? 'active' : ''}`}
+                      onClick={closeMenu}
+                    >
+                      <span>{isNe ? 'उजुरी दर्ता' : 'Submit'}</span>
+                    </Link>
+                  </>
                 )}
               </nav>
 
@@ -498,7 +649,7 @@ export function PublicNavbar() {
                       style={{ justifyContent: 'center' }}
                     >
                       <FileText size={16} />
-                      <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
+                      <span>{isNe ? 'ड्यासबोर्ड' : 'Dashboard'}</span>
                     </Link>
                     <Link 
                       to="/student/profile" 

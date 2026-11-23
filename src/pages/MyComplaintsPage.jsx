@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { StatusBadge } from '../components/StatusBadge';
 import { AnimatedNumber } from '../components/AnimatedNumber';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
   PlusCircle,
@@ -15,7 +16,8 @@ import {
   ExternalLink,
   AlertCircle,
   Link2,
-  X
+  X,
+  LayoutDashboard
 } from 'lucide-react';
 
 export function MyComplaintsPage() {
@@ -161,6 +163,10 @@ export function MyComplaintsPage() {
     );
   }
 
+  if (!isStudentLoggedIn) {
+    return <Navigate to="/login?redirect=/dashboard" replace />;
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
       <PublicNavbar />
@@ -198,7 +204,7 @@ export function MyComplaintsPage() {
                 marginBottom: '8px'
               }}>
                 <FileText size={12} color="#5278C8" />
-                <span>{isNe ? 'विद्यार्थी गुनासो व्यवस्थापन' : 'STUDENT COMPLAINT DASHBOARD'}</span>
+                <span>{isNe ? 'विद्यार्थी उजुरी अभिलेख' : 'MY COMPLAINTS & GRIEVANCE HISTORY'}</span>
               </div>
               <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-navy)', margin: '0 0 4px' }}>
                 {isNe ? 'नमस्ते,' : 'Welcome back,'} {studentUser?.name}
@@ -209,6 +215,11 @@ export function MyComplaintsPage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <Link to="/dashboard" className="btn btn-secondary btn-md" title="Go to Student Dashboard">
+                <LayoutDashboard size={16} />
+                <span>{isNe ? 'ड्यासबोर्ड' : 'Dashboard'}</span>
+              </Link>
+
               <button
                 type="button"
                 onClick={() => setShowClaimModal(true)}
@@ -683,4 +694,13 @@ export function MyComplaintsPage() {
   );
 }
 
-export default MyComplaintsPage;
+export default function MyComplaintsWrapper() {
+  return (
+    <ErrorBoundary
+      title="My Complaints"
+      message="Unable to load your complaint list. Please refresh the page."
+    >
+      <MyComplaintsPage />
+    </ErrorBoundary>
+  );
+}
