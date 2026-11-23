@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { ENV } from '../config/env.js';
 
 /**
@@ -38,14 +38,21 @@ export const trackingRateLimiter = rateLimit({
 /**
  * Rate Limiter: Admin & Student Login Attempts
  * Mitigates brute-force credential stuffing.
- * 20 attempts per 15 minutes by default for college environment.
+ * Successful logins do not count. Limit is per IP + email so a campus NAT
+ * does not lock every student after a few failed tries.
  */
 export const loginRateLimiter = rateLimit({
   windowMs: ENV.RATE_LIMIT_WINDOW_MS, // 15 minutes
-  max: ENV.RATE_LIMIT_MAX_LOGINS, // 20 attempts
+  max: ENV.RATE_LIMIT_MAX_LOGINS,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { trustProxy: false },
+  skipSuccessfulRequests: true,
+  validate: { trustProxy: false, keyGeneratorIpFallback: false },
+  keyGenerator: (req) => {
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const ip = ipKeyGenerator(req.ip || req.socket?.remoteAddress || '127.0.0.1');
+    return email ? `login:${ip}:${email}` : `login:${ip}`;
+  },
   skip: () => process.env.NODE_ENV === 'test' && !process.env.TEST_RATE_LIMIT,
   handler: (req, res, _next, options) => {
     res.status(options.statusCode).json({

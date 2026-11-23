@@ -162,7 +162,10 @@ export function AppProvider({ children }) {
         body: JSON.stringify(formData),
       });
     } catch (networkErr) {
-      throw new Error('Server is not reachable, please try again', { cause: networkErr });
+      throw new Error(
+        'API server is not running. Keep this page on Vite, and start the backend with npm run server (port 5000).',
+        { cause: networkErr }
+      );
     }
 
     let data = null;
@@ -175,10 +178,10 @@ export function AppProvider({ children }) {
     }
 
     if (!res.ok || !data?.success) {
-      const fallbackMsg =
-        res.status >= 500 || !res.ok
-          ? 'Server is not reachable, please try again'
-          : 'Registration failed. Please check your details.';
+      const backendDown = res.status >= 500 && (!data || (rawText && rawText.trim().startsWith('<')));
+      const fallbackMsg = backendDown
+        ? 'API server is not running. Start it with npm run server, then try again.'
+        : 'Registration failed. Please check your details.';
 
       const message =
         data?.message ||
@@ -378,7 +381,7 @@ export function AppProvider({ children }) {
       throw new Error(data.message || 'Failed to load complaints.');
     }
 
-    return data.complaints;
+    return Array.isArray(data.complaints) ? data.complaints : [];
   }, []);
 
   const fetchStudentComplaintById = useCallback(async (id) => {

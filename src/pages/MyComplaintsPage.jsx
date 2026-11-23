@@ -7,7 +7,6 @@ import { Footer } from '../components/Footer';
 import { StatusBadge } from '../components/StatusBadge';
 import { AnimatedNumber } from '../components/AnimatedNumber';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
   PlusCircle,
   FileText,
@@ -29,6 +28,7 @@ export function MyComplaintsPage() {
     claimLegacyComplaint,
     language,
     getCategoryLabel,
+    categories,
   } = useApp();
 
   const isNe = language === 'ne';
@@ -87,10 +87,11 @@ export function MyComplaintsPage() {
         category: selectedCategory,
         search: searchQuery,
       });
-      setComplaints(data);
+      setComplaints(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to load student complaints:', err);
       setErrorMsg(err.message || 'Failed to load your complaints.');
+      setComplaints([]);
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +107,7 @@ export function MyComplaintsPage() {
       })
         .then((data) => {
           if (isMounted) {
-            setComplaints(data);
+            setComplaints(Array.isArray(data) ? data : []);
             setIsLoading(false);
           }
         })
@@ -147,10 +148,11 @@ export function MyComplaintsPage() {
   };
 
   // Metrics calculation
-  const total = complaints.length;
-  const pendingCount = complaints.filter((c) => c.status === 'Submitted' || c.status === 'Under Review').length;
-  const inProgressCount = complaints.filter((c) => c.status === 'In Progress').length;
-  const resolvedCount = complaints.filter((c) => c.status === 'Resolved').length;
+  const safeComplaints = Array.isArray(complaints) ? complaints : [];
+  const total = safeComplaints.length;
+  const pendingCount = safeComplaints.filter((c) => c.status === 'Submitted' || c.status === 'Under Review').length;
+  const inProgressCount = safeComplaints.filter((c) => c.status === 'In Progress').length;
+  const resolvedCount = safeComplaints.filter((c) => c.status === 'Resolved').length;
 
   if (isCheckingStudentSession) {
     return (
@@ -339,9 +341,9 @@ export function MyComplaintsPage() {
                   aria-label={isNe ? 'विधा अनुसार फिल्टर गर्नुहोस्' : 'Filter by category'}
                 >
                   <option value="All">{isNe ? 'सबै विधा' : 'All Categories'}</option>
-                  {COLLEGE_CONFIG.categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {isNe ? cat.nameNe : cat.name}
+                  {(categories || []).map((cat) => (
+                    <option key={cat} value={cat}>
+                      {getCategoryLabel(cat)}
                     </option>
                   ))}
                 </select>
@@ -399,7 +401,7 @@ export function MyComplaintsPage() {
               <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 10px', color: '#5278C8' }} />
               <p style={{ margin: 0, fontSize: '0.875rem' }}>Loading your complaints from database...</p>
             </div>
-          ) : complaints.length === 0 ? (
+          ) : safeComplaints.length === 0 ? (
             <div className="card" style={{ padding: '48px 20px', textAlign: 'center' }}>
               <div style={{
                 width: '56px',
@@ -443,7 +445,7 @@ export function MyComplaintsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {complaints.map((c) => (
+                    {safeComplaints.map((c) => (
                       <tr key={c.id || c.reference}>
                         <td>
                           <span style={{ fontFamily: 'monospace', fontWeight: '700', color: '#101D35', fontSize: '0.875rem' }}>
@@ -514,7 +516,7 @@ export function MyComplaintsPage() {
 
               {/* Mobile Card View (<= 768px) */}
               <div className="complaint-table-mobile">
-                {complaints.map((c) => (
+                {safeComplaints.map((c) => (
                   <div key={c.id || c.reference} className="complaint-mobile-card">
                     <div className="complaint-card-topbar">
                       <span className="table-complaint-id">

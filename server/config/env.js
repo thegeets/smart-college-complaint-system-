@@ -134,13 +134,13 @@ export function validateEnv() {
     NODE_ENV: process.env.NODE_ENV || 'development',
     MONGODB_URI: validatedMongoUri,
     SESSION_SECRET: process.env.SESSION_SECRET || 'dev-only-secret-do-not-use-in-production-min-32-chars',
-    CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174',
     UPLOAD_DIR: process.env.UPLOAD_DIR || 'server/uploads/complaints',
     MAX_FILE_SIZE_BYTES: parseInt(process.env.MAX_FILE_SIZE_BYTES || '5242880', 10), // 5MB
     RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 min
     RATE_LIMIT_MAX_SUBMISSIONS: parseInt(process.env.RATE_LIMIT_MAX_SUBMISSIONS || '10', 10),
     RATE_LIMIT_MAX_TRACKING: parseInt(process.env.RATE_LIMIT_MAX_TRACKING || '30', 10),
-    RATE_LIMIT_MAX_LOGINS: parseInt(process.env.RATE_LIMIT_MAX_LOGINS || '20', 10),
+    RATE_LIMIT_MAX_LOGINS: parseInt(process.env.RATE_LIMIT_MAX_LOGINS || '80', 10),
     COOKIE_SAME_SITE: cookieSameSite,
     COOKIE_SECURE: cookieSecure,
   };

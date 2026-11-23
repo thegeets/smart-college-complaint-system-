@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { StatusBadge, PriorityBadge, CategoryBadge } from '../components/StatusBadge';
 import { AdminComplaintDetailView } from '../components/AdminComplaintDetailView';
-import { COLLEGE_CONFIG } from '../config/collegeConfig';
 import {
   Search,
   Filter,
@@ -47,6 +46,7 @@ export function AdminComplaintsPage() {
     statusList,
     language,
     showToast,
+    categories,
   } = useApp();
 
   const navigate = useNavigate();
@@ -484,8 +484,8 @@ export function AdminComplaintsPage() {
               style={{ fontSize: '0.8125rem', height: '36px' }}
             >
               <option value="All">{isNe ? 'सबै विधा (Category: All)' : 'All Categories'}</option>
-              {COLLEGE_CONFIG.categories.map((c) => (
-                <option key={c.name} value={c.name}>{c.name}</option>
+              {(categories || []).map((c) => (
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
