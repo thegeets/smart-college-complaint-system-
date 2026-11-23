@@ -529,8 +529,7 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(regRes.status, 201);
     assert.equal(regRes.body.success, true);
     assert.equal(regRes.body.student.email, 'student.alpha@sochcollege.edu.np');
-    assert.equal(regRes.body.student.isEmailVerified, false);
-    assert.ok(regRes.body.verificationToken);
+    assert.equal(regRes.body.student.isEmailVerified, true);
     studentAId = regRes.body.student.id;
 
     // 22c. Rejects duplicate email registration
@@ -547,28 +546,12 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(dupRes.body.code, 'EMAIL_ALREADY_EXISTS');
   });
 
-  // 23. Student Email Verification
-  await t.test('POST /api/v1/student/auth/verify-email validates token and activates verified session', async () => {
-    // Fetch student from DB to get verificationToken
-    const studentDoc = await Student.findById(studentAId).select('+emailVerificationToken');
-    assert.ok(studentDoc.emailVerificationToken);
-
-    // 23a. Rejects wrong token
-    const wrongTokenRes = await request(app)
-      .post('/api/v1/student/auth/verify-email')
-      .send({
-        email: 'student.alpha@sochcollege.edu.np',
-        token: '000000',
-      });
-    assert.equal(wrongTokenRes.status, 400);
-    assert.equal(wrongTokenRes.body.code, 'INVALID_TOKEN');
-
-    // 23b. Verifies with correct token
+  // 23. Immediate Student Activation & Verification Endpoint Compatibility
+  await t.test('POST /api/v1/student/auth/verify-email returns success and student can log in directly without verification code', async () => {
     const verifyRes = await request(app)
       .post('/api/v1/student/auth/verify-email')
       .send({
         email: 'student.alpha@sochcollege.edu.np',
-        token: studentDoc.emailVerificationToken,
       });
 
     assert.equal(verifyRes.status, 200);
@@ -674,7 +657,7 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
 
   // 27. Cross-Student Ownership Isolation (Student A vs Student B)
   await t.test('Cross-Student Ownership Isolation: Student B CANNOT access Student A complaints or attachments', async () => {
-    // 27a. Register and verify Student B
+    // 27a. Register Student B (active immediately)
     const regB = await request(app)
       .post('/api/v1/student/auth/register')
       .send({
@@ -687,15 +670,7 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(regB.status, 201);
     studentBId = regB.body.student.id;
 
-    const studentBDoc = await Student.findById(studentBId).select('+emailVerificationToken');
-    const verifyB = await request(app)
-      .post('/api/v1/student/auth/verify-email')
-      .send({
-        email: 'student.beta@sochcollege.edu.np',
-        token: studentBDoc.emailVerificationToken,
-      });
-    assert.equal(verifyB.status, 200);
-    const cookiesB = verifyB.headers['set-cookie'];
+    const cookiesB = regB.headers['set-cookie'];
     assert.ok(cookiesB);
     studentBSessionCookie = cookiesB.find((c) => c.startsWith('sccs_admin_sid') || c.startsWith('sccs_'));
     assert.ok(studentBSessionCookie);
@@ -910,8 +885,8 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(getSafeRedirectUrl(undefined, '/dashboard'), '/dashboard');
   });
 
-  // 34. Production Email Safety: Token Exposure & Blocker Reporting
-  await t.test('Production Email Safety: Rejects unconfigured email dispatch and never returns verificationToken in production', async () => {
+  // 34. Outbound Email Safety: Unconfigured Email Handling
+  await t.test('Outbound Email Safety: Unconfigured email service allows registration without verification codes', async () => {
     const originalNodeEnv = process.env.NODE_ENV;
     const originalSmtpHost = process.env.SMTP_HOST;
     const originalSmtpPort = process.env.SMTP_PORT;
@@ -919,7 +894,6 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     const originalSmtpPass = process.env.SMTP_PASS;
 
     try {
-      // 34a. Under production with NO email service configured, registration reports blocker with 503
       process.env.NODE_ENV = 'production';
       delete process.env.SMTP_HOST;
       delete process.env.SMTP_PORT;
@@ -937,21 +911,30 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
           semester: '1st Semester',
         });
 
-      assert.equal(unconfiguredRes.status, 503);
-      assert.equal(unconfiguredRes.body.code, 'EMAIL_SERVICE_NOT_CONFIGURED');
-      assert.equal(unconfiguredRes.body.verificationToken, undefined, 'Verification token must NEVER be returned in production');
+      assert.equal(unconfiguredRes.status, 201);
+      assert.equal(unconfiguredRes.body.success, true);
+      assert.equal(unconfiguredRes.body.student.isActive, true);
+      assert.equal(unconfiguredRes.body.verificationToken, undefined, 'Verification token must not be generated');
+
+      // Outbound email is still required for password reset
+      const forgotRes = await request(app)
+        .post('/api/v1/student/auth/forgot-password')
+        .send({ email: 'prod.student@sochcollege.edu.np' });
+      assert.equal(forgotRes.status, 503);
+      assert.equal(forgotRes.body.code, 'EMAIL_SERVICE_NOT_CONFIGURED');
     } finally {
       process.env.NODE_ENV = originalNodeEnv;
       if (originalSmtpHost) process.env.SMTP_HOST = originalSmtpHost; else delete process.env.SMTP_HOST;
       if (originalSmtpPort) process.env.SMTP_PORT = originalSmtpPort; else delete process.env.SMTP_PORT;
       if (originalSmtpUser) process.env.SMTP_USER = originalSmtpUser; else delete process.env.SMTP_USER;
       if (originalSmtpPass) process.env.SMTP_PASS = originalSmtpPass; else delete process.env.SMTP_PASS;
+      await Student.deleteMany({ email: 'prod.student@sochcollege.edu.np' });
       setEmailTransporter(null);
     }
   });
 
-  // 35. Outbound Email Delivery: Mock Transport Acceptance & Verification/Reset Flows
-  await t.test('Email Service: Mock transport records acceptance for verification and password reset without leaking secrets', async () => {
+  // 35. Outbound Email Delivery: Mock Transport for Password Reset
+  await t.test('Email Service: Mock transport records acceptance for password reset without leaking secrets', async () => {
     const sentMessages = [];
     const mockTransporter = {
       sendMail: async (mailOptions) => {
@@ -967,7 +950,7 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     const testEmail = 'email.test.student@sochcollege.edu.np';
 
     try {
-      // 35a. Registration dispatches verification email and reports ACCEPTED status
+      // 35a. Registration succeeds immediately without email code dispatch
       const regRes = await request(app)
         .post('/api/v1/student/auth/register')
         .send({
@@ -980,30 +963,19 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
 
       assert.equal(regRes.status, 201);
       assert.equal(regRes.body.success, true);
-      assert.equal(regRes.body.emailDelivery?.status, 'ACCEPTED');
-      assert.ok(regRes.body.emailDelivery?.messageId);
-      assert.equal(sentMessages.length, 1);
-      assert.equal(sentMessages[0].to, testEmail);
-      assert.match(sentMessages[0].subject, /Verify your email/);
+      assert.equal(regRes.body.student.isActive, true);
 
-      // 35b. Resend verification uses transport
-      const resendRes = await request(app)
-        .post('/api/v1/student/auth/resend-verification')
-        .send({ email: testEmail });
-
-      assert.equal(resendRes.status, 200);
-      assert.equal(resendRes.body.emailDelivery?.status, 'ACCEPTED');
-      assert.equal(sentMessages.length, 2);
-
-      // 35c. Forgot password dispatches reset code via transport
+      // 35b. Forgot password dispatches reset code via transport
       const forgotRes = await request(app)
         .post('/api/v1/student/auth/forgot-password')
         .send({ email: testEmail });
 
       assert.equal(forgotRes.status, 200);
       assert.equal(forgotRes.body.emailDelivery?.status, 'ACCEPTED');
-      assert.equal(sentMessages.length, 3);
-      assert.match(sentMessages[2].subject, /Password Reset Code/);
+      assert.equal(sentMessages.length, 1);
+      assert.equal(sentMessages[0].to, testEmail);
+      assert.match(sentMessages[0].subject, /Password Reset/);
+      assert.ok(forgotRes.body.resetToken);
     } finally {
       await Student.deleteMany({ email: testEmail });
       setEmailTransporter(null);
@@ -1022,43 +994,28 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     setEmailTransporter(failingTransporter);
     const failEmail = 'fail.test.student@sochcollege.edu.np';
 
+    // Register student to test forgot-password failure
+    await Student.deleteMany({ email: failEmail });
+    const pwHash = await hashPassword('Password123!');
+    await Student.create({
+      name: 'Fail Test Student',
+      studentId: 'SOCH-CSIT-FAIL-01',
+      email: failEmail,
+      passwordHash: pwHash,
+      isActive: true,
+      isEmailVerified: true,
+    });
+
     try {
-      // 36a. Under production, sending failure returns HTTP 502 Bad Gateway and rolls back student
+      // Under production, password reset sending failure returns HTTP 502
       process.env.NODE_ENV = 'production';
 
       const prodFailRes = await request(app)
-        .post('/api/v1/student/auth/register')
-        .send({
-          name: 'Fail Prod Student',
-          studentId: 'SOCH-CSIT-FAIL-PROD',
-          email: failEmail,
-          password: 'Password123!',
-          semester: '1st Semester',
-        });
+        .post('/api/v1/student/auth/forgot-password')
+        .send({ email: failEmail });
 
       assert.equal(prodFailRes.status, 502);
       assert.equal(prodFailRes.body.code, 'EMAIL_SEND_FAILED');
-
-      // Verify orphaned unverified student was rolled back
-      const orphaned = await Student.findOne({ email: failEmail });
-      assert.equal(orphaned, null, 'Orphaned student must be cleaned up on delivery failure in production');
-
-      // 36b. Under development, failure is reported in emailDelivery status without crashing
-      process.env.NODE_ENV = 'development';
-
-      const devFailRes = await request(app)
-        .post('/api/v1/student/auth/register')
-        .send({
-          name: 'Fail Dev Student',
-          studentId: 'SOCH-CSIT-FAIL-DEV',
-          email: failEmail,
-          password: 'Password123!',
-          semester: '1st Semester',
-        });
-
-      assert.equal(devFailRes.status, 201);
-      assert.equal(devFailRes.body.emailDelivery?.status, 'SEND_FAILED');
-      assert.ok(devFailRes.body.emailDelivery?.error);
     } finally {
       process.env.NODE_ENV = originalNodeEnv;
       await Student.deleteMany({ email: failEmail });
@@ -1080,38 +1037,34 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     assert.equal(unauthRes.status, 401);
     assert.equal(unauthRes.body.success, false);
 
-    // 37b. Unverified student rejected with 403
-    const unverifiedEmail = 'unverified.submitter@sochcollege.edu.np';
-    await request(app)
+    // 37b. Newly registered student is immediately active and can submit complaints
+    const activeNewEmail = 'active.submitter@sochcollege.edu.np';
+    await Student.deleteMany({ $or: [{ email: activeNewEmail }, { studentId: 'SOCH-CSIT-ACT-01' }] });
+    const activeRegRes = await request(app)
       .post('/api/v1/student/auth/register')
       .send({
-        name: 'Unverified Student',
-        studentId: 'SOCH-CSIT-UNVER-01',
-        email: unverifiedEmail,
+        name: 'Active Student',
+        studentId: 'SOCH-CSIT-ACT-01',
+        email: activeNewEmail,
         password: 'Password123!',
         semester: '2nd Semester',
       });
+    assert.equal(activeRegRes.status, 201);
+    assert.equal(activeRegRes.body.student.isActive, true);
+    assert.equal(activeRegRes.body.student.isEmailVerified, true);
+    const activeCookie = activeRegRes.headers['set-cookie'];
 
-    const unverifiedLoginRes = await request(app)
-      .post('/api/v1/student/auth/login')
-      .send({
-        email: unverifiedEmail,
-        password: 'Password123!',
-      });
-    assert.equal(unverifiedLoginRes.status, 200);
-    const unverifiedCookie = unverifiedLoginRes.headers['set-cookie'];
-
-    const unverifiedSubmitRes = await request(app)
+    const activeSubmitRes = await request(app)
       .post('/api/complaints')
-      .set('Cookie', unverifiedCookie)
+      .set('Cookie', activeCookie)
       .send({
         category: 'Computer Lab & Workstations',
-        title: 'Unverified email attempt',
-        description: 'This submission should be blocked until email ownership is confirmed.',
+        title: 'Immediate submission test',
+        description: 'This submission succeeds immediately without email verification code barrier.',
         location: 'Lab 1',
       });
-    assert.equal(unverifiedSubmitRes.status, 403);
-    assert.equal(unverifiedSubmitRes.body.code, 'EMAIL_NOT_VERIFIED');
+    assert.equal(activeSubmitRes.status, 201);
+    assert.equal(activeSubmitRes.body.success, true);
 
     // 37c. Verified student login
     const verifiedLoginRes = await request(app)
@@ -1222,7 +1175,7 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
     }
 
     // Cleanup test student
-    await Student.deleteMany({ email: unverifiedEmail });
+    await Student.deleteMany({ email: 'active.submitter@sochcollege.edu.np' });
   });
 
   // 38. Comprehensive Complaint Attachment Access Control (GET /api/v1/complaints/:id/attachments/:filename)
@@ -1330,5 +1283,218 @@ test('Smart College Complaint System API Integration Tests', async (t) => {
 
     // Cleanup test admin
     await Admin.deleteMany({ email: 'attachment.admin@sochcollege.edu.np' });
+  });
+
+  // 39. Admin Analytics Endpoint (GET /api/v1/admin/reports/analytics)
+  await t.test('Admin Analytics: returns summary, time series, category and priority distributions, funnel, and workload', async () => {
+    // Authenticate admin
+    await Admin.deleteMany({ email: 'analytics.admin@sochcollege.edu.np' });
+    const pwHash = await hashPassword('AdminPass123!');
+    await Admin.create({
+      name: 'Analytics Admin',
+      email: 'analytics.admin@sochcollege.edu.np',
+      passwordHash: pwHash,
+      role: 'Admin',
+      isActive: true,
+    });
+
+    const loginRes = await request(app)
+      .post('/api/v1/admin/auth/login')
+      .send({ email: 'analytics.admin@sochcollege.edu.np', password: 'AdminPass123!' });
+    assert.equal(loginRes.status, 200);
+    const cookie = loginRes.headers['set-cookie']?.find((c) => c.startsWith('sccs_admin_sid'));
+    assert.ok(cookie);
+
+    const analyticsRes = await request(app)
+      .get('/api/v1/admin/reports/analytics?range=30d')
+      .set('Cookie', cookie);
+
+    assert.equal(analyticsRes.status, 200);
+    assert.ok(analyticsRes.body.success);
+    assert.ok(analyticsRes.body.summary);
+    assert.ok(Array.isArray(analyticsRes.body.volumeOverTime));
+    assert.ok(Array.isArray(analyticsRes.body.byCategory));
+    assert.ok(Array.isArray(analyticsRes.body.byPriority));
+    assert.ok(Array.isArray(analyticsRes.body.statusFunnel));
+    assert.ok(Array.isArray(analyticsRes.body.technicianWorkload));
+
+    await Admin.deleteMany({ email: 'analytics.admin@sochcollege.edu.np' });
+  });
+
+  // 40. Staff and Students Admin Directory Endpoints
+  await t.test('Staff & Students Endpoints: onboard staff, update status, list staff and students', async () => {
+    const pwHash = await hashPassword('AdminPass123!');
+    await Admin.deleteMany({ email: 'director.admin@sochcollege.edu.np' });
+    await Admin.create({
+      name: 'Director Admin',
+      email: 'director.admin@sochcollege.edu.np',
+      passwordHash: pwHash,
+      role: 'Admin',
+      isActive: true,
+    });
+
+    const loginRes = await request(app)
+      .post('/api/v1/admin/auth/login')
+      .send({ email: 'director.admin@sochcollege.edu.np', password: 'AdminPass123!' });
+    const cookie = loginRes.headers['set-cookie']?.find((c) => c.startsWith('sccs_admin_sid'));
+    const adminCsrf = loginRes.body.csrfToken;
+
+    // 1. List staff members
+    const staffListRes = await request(app)
+      .get('/api/v1/admin/complaints/staff')
+      .set('Cookie', cookie);
+    assert.equal(staffListRes.status, 200);
+    assert.ok(Array.isArray(staffListRes.body.staff));
+
+    // 2. Onboard new staff / technician
+    await Admin.deleteMany({ email: 'new.tech@sochcollege.edu.np' });
+    const createStaffRes = await request(app)
+      .post('/api/v1/admin/complaints/staff')
+      .set('Cookie', cookie)
+      .set('x-csrf-token', adminCsrf)
+      .send({
+        name: 'Bikash Network Tech',
+        email: 'new.tech@sochcollege.edu.np',
+        role: 'Technician',
+        specialization: 'Internet & Wi-Fi',
+        phone: '9801234567',
+        temporaryPassword: 'TempTechPassword123!',
+      });
+    assert.equal(createStaffRes.status, 201);
+    assert.ok(createStaffRes.body.success);
+    const newTechId = createStaffRes.body.staff.id;
+
+    // 3. Update staff active status
+    const toggleStatusRes = await request(app)
+      .patch(`/api/v1/admin/complaints/staff/${newTechId}/status`)
+      .set('Cookie', cookie)
+      .set('x-csrf-token', adminCsrf)
+      .send({ isActive: false });
+    assert.equal(toggleStatusRes.status, 200);
+    assert.equal(toggleStatusRes.body.staff.isActive, false);
+
+    // 4. List students directory
+    const studentsRes = await request(app)
+      .get('/api/v1/admin/complaints/students')
+      .set('Cookie', cookie);
+    assert.equal(studentsRes.status, 200);
+    assert.ok(Array.isArray(studentsRes.body.students));
+
+    // Clean up
+    await Admin.deleteMany({ email: { $in: ['director.admin@sochcollege.edu.np', 'new.tech@sochcollege.edu.np'] } });
+  });
+
+  // 41. Bulk Complaint Actions and Assignment
+  await t.test('Bulk Actions: bulk assign technician, bulk status update, and CSV export', async () => {
+    const pwHash = await hashPassword('AdminPass123!');
+    await Admin.deleteMany({ email: 'bulk.admin@sochcollege.edu.np' });
+    const bulkAdmin = await Admin.create({
+      name: 'Bulk Actions Admin',
+      email: 'bulk.admin@sochcollege.edu.np',
+      passwordHash: pwHash,
+      role: 'Admin',
+      isActive: true,
+    });
+
+    const loginRes = await request(app)
+      .post('/api/v1/admin/auth/login')
+      .send({ email: 'bulk.admin@sochcollege.edu.np', password: 'AdminPass123!' });
+    const cookie = loginRes.headers['set-cookie']?.find((c) => c.startsWith('sccs_admin_sid'));
+    const adminCsrf = loginRes.body.csrfToken;
+
+    // Clean up any previous test complaints
+    await Complaint.deleteMany({ reference: { $in: ['SCCS-2026-901', 'SCCS-2026-902'] } });
+
+    // Create 2 test complaints
+    const c1 = await Complaint.create({
+      reference: 'SCCS-2026-901',
+      title: 'Bulk Action Test Ticket 1',
+      description: 'Testing bulk technician assignment and status transition.',
+      category: 'Programming Tools & OS',
+      priority: 'Medium',
+      status: 'Submitted',
+      trackingSecretHash: 'dummyhash',
+      studentName: 'Test Student',
+      email: 'test.student@sochcollege.edu.np',
+    });
+    const c2 = await Complaint.create({
+      reference: 'SCCS-2026-902',
+      title: 'Bulk Action Test Ticket 2',
+      description: 'Testing bulk technician assignment and status transition 2.',
+      category: 'Programming Tools & OS',
+      priority: 'Low',
+      status: 'Submitted',
+      trackingSecretHash: 'dummyhash',
+      studentName: 'Test Student',
+      email: 'test.student@sochcollege.edu.np',
+    });
+
+    // Bulk assign to bulkAdmin
+    const bulkAssignRes = await request(app)
+      .post('/api/v1/admin/complaints/bulk/assign')
+      .set('Cookie', cookie)
+      .set('x-csrf-token', adminCsrf)
+      .send({
+        complaintIds: [c1._id.toString(), c2._id.toString()],
+        technicianId: bulkAdmin._id.toString(),
+      });
+    assert.equal(bulkAssignRes.status, 200);
+    assert.equal(bulkAssignRes.body.updatedCount, 2);
+
+    // Bulk update status to In Progress
+    const bulkStatusRes = await request(app)
+      .post('/api/v1/admin/complaints/bulk/status')
+      .set('Cookie', cookie)
+      .set('x-csrf-token', adminCsrf)
+      .send({
+        complaintIds: [c1._id.toString(), c2._id.toString()],
+        status: 'In Progress',
+        note: 'Assigned in bulk to engineering team.',
+      });
+    assert.equal(bulkStatusRes.status, 200);
+    assert.equal(bulkStatusRes.body.updatedCount, 2);
+
+    // CSV Export
+    const csvRes = await request(app)
+      .get('/api/v1/admin/complaints/export/csv')
+      .set('Cookie', cookie);
+    assert.equal(csvRes.status, 200);
+    assert.equal(csvRes.headers['content-type'], 'text/csv; charset=utf-8');
+    assert.ok(csvRes.text.includes('Reference ID,Title,Category'));
+
+    // Clean up
+    await Complaint.deleteMany({ _id: { $in: [c1._id, c2._id] } });
+    await Admin.deleteMany({ email: 'bulk.admin@sochcollege.edu.np' });
+  });
+
+  // 44. Rate Limiting: Login rate limiter returns 429 JSON payload with required message
+  await t.test('Rate Limiter: loginRateLimiter returns HTTP 429 with JSON payload and user-friendly message', async () => {
+    const express = (await import('express')).default;
+    const rateLimit = (await import('express-rate-limit')).default;
+    const miniApp = express();
+    miniApp.set('trust proxy', 1);
+
+    const testLimiter = rateLimit({
+      windowMs: 60 * 1000,
+      max: 1,
+      validate: { trustProxy: false },
+      handler: (req, res, _next, options) => {
+        res.status(options.statusCode).json({
+          success: false,
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many attempts, try again later',
+        });
+      },
+    });
+    miniApp.post('/test-login', testLimiter, (req, res) => res.json({ ok: true }));
+
+    const res1 = await request(miniApp).post('/test-login');
+    assert.equal(res1.status, 200);
+
+    const res2 = await request(miniApp).post('/test-login');
+    assert.equal(res2.status, 429);
+    assert.ok(res2.headers['content-type'].includes('application/json'));
+    assert.equal(res2.body.message, 'Too many attempts, try again later');
+    assert.equal(res2.body.code, 'RATE_LIMIT_EXCEEDED');
   });
 });

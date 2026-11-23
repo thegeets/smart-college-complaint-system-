@@ -27,6 +27,9 @@ const AdminComplaintsPage = React.lazy(() => import('./pages/AdminComplaintsPage
 const AdminComplaintDetailPage = React.lazy(() => import('./pages/AdminComplaintDetailPage'));
 const ReportsAnalyticsPage = React.lazy(() => import('./pages/ReportsAnalyticsPage'));
 const AdminSettingsPage = React.lazy(() => import('./pages/AdminSettingsPage'));
+const AdminStaffPage = React.lazy(() => import('./pages/AdminStaffPage'));
+const AdminStudentsPage = React.lazy(() => import('./pages/AdminStudentsPage'));
+const StaffDashboard = React.lazy(() => import('./pages/StaffDashboard'));
 
 // Restrained Academic SkeletonLoader Page Fallback
 function PageFallback() {
@@ -110,7 +113,7 @@ function AnimatedRoutes() {
             <Route path="/track" element={<TrackComplaintPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verify-email" element={<Navigate to="/dashboard" replace />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
 
@@ -132,8 +135,18 @@ function AnimatedRoutes() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="complaints" element={<AdminComplaintsPage />} />
               <Route path="complaints/:id" element={<AdminComplaintDetailPage />} />
+              <Route path="staff" element={<AdminStaffPage />} />
+              <Route path="technicians" element={<Navigate to="/admin/staff" replace />} />
+              <Route path="students" element={<AdminStudentsPage />} />
               <Route path="reports" element={<ReportsAnalyticsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
+              <Route path="desk" element={<StaffDashboard />} />
+            </Route>
+
+            {/* Staff Resolution Portal */}
+            <Route path="/staff" element={<AdminLayout />}>
+              <Route index element={<StaffDashboard />} />
+              <Route path="dashboard" element={<StaffDashboard />} />
             </Route>
 
             {/* Catch-all fallback */}

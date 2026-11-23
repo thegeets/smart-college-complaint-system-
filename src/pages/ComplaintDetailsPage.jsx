@@ -11,6 +11,8 @@ import {
   Calendar,
   Clock,
   MessageSquare,
+  FileText,
+  Download,
   AlertCircle,
   RefreshCw,
   Printer
@@ -72,7 +74,7 @@ export function ComplaintDetailsPage() {
 
       <main style={{ flex: 1, padding: 'var(--space-8) var(--space-4)' }}>
         <div style={{ maxWidth: '820px', width: '100%', margin: '0 auto' }}>
-          
+
           {/* Back Navigation Bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: '8px' }}>
             <Link

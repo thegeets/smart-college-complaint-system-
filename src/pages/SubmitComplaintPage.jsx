@@ -482,54 +482,6 @@ export function SubmitComplaintPage() {
               </Link>
             </div>
 
-            {/* Email Verification Warning Banner if student email not verified */}
-            {studentUser && !studentUser.isEmailVerified && (
-              <div
-                style={{
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid #FECACA',
-                  borderRadius: '10px',
-                  padding: '16px 20px',
-                  marginBottom: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <AlertCircle size={22} color="#DC2626" style={{ flexShrink: 0 }} />
-                  <div>
-                    <h4 style={{ margin: '0 0 2px 0', fontSize: '0.875rem', fontWeight: 700, color: '#991B1B' }}>
-                      {isNe ? 'इमेल स्वामित्व प्रमाणीकरण आवश्यक छ' : 'Email Verification Required'}
-                    </h4>
-                    <p style={{ margin: 0, fontSize: '0.8125rem', color: '#B91C1C' }}>
-                      {isNe
-                        ? 'उजुरी दर्ता गर्न पहिले आफ्नो कलेज इमेल ठेगाना पुष्टि गर्नुहोस्।'
-                        : 'To submit complaints and receive official notifications, please verify your email address.'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate('/verify-email')}
-                  style={{
-                    backgroundColor: '#DC2626',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '8px 16px',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {isNe ? 'इमेल पुष्टि गर्नुहोस्' : 'Verify Email'}
-                </button>
-              </div>
-            )}
-
             {/* =========================================================================
                 SUCCESS SCREEN: Rendered when submittedComplaint exists
                 ========================================================================= */}

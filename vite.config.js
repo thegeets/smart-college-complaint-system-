@@ -9,6 +9,9 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts'
+            }
             if (id.includes('framer-motion')) {
               return 'vendor-framer'
             }

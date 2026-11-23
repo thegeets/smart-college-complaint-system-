@@ -242,6 +242,18 @@ const ComplaintSchema = new mongoose.Schema(
       type: Date,
       index: true,
     },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Admin',
+      default: null,
+      index: true,
+    },
+    assignedStaff: {
+      id: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+      name: { type: String, default: '' },
+      email: { type: String, default: '' },
+      role: { type: String, default: '' },
+    },
     attachment: {
       type: AttachmentSchema,
       default: null,
@@ -260,9 +272,12 @@ const ComplaintSchema = new mongoose.Schema(
   }
 );
 
-// Compound Indexes
+// Compound and query performance indexes
 ComplaintSchema.index({ student: 1, status: 1 });
 ComplaintSchema.index({ studentId: 1, status: 1 });
+ComplaintSchema.index({ assignedTo: 1, status: 1 });
+ComplaintSchema.index({ status: 1, createdAt: -1 });
+ComplaintSchema.index({ priority: 1, slaDueAt: 1 });
 
 // Pre-validate hook to synchronize referenceId/reference, student/studentId, slaDueAt, attachments, and statusHistory
 ComplaintSchema.pre('validate', function () {
@@ -411,6 +426,8 @@ ComplaintSchema.methods.toStudentOwnerView = function () {
     status: this.status,
     priority: this.priority,
     slaDueAt: this.slaDueAt,
+    assignedTo: this.assignedTo || null,
+    assignedStaff: this.assignedStaff || null,
     program: this.program || this.student?.program || 'BSc CSIT',
     student: {
       name: this.student?.name,

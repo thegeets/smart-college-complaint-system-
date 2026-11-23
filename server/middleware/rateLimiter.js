@@ -36,19 +36,28 @@ export const trackingRateLimiter = rateLimit({
 });
 
 /**
- * Rate Limiter: Admin Login Attempts
+ * Rate Limiter: Admin & Student Login Attempts
  * Mitigates brute-force credential stuffing.
+ * 20 attempts per 15 minutes by default for college environment.
  */
 export const loginRateLimiter = rateLimit({
-  windowMs: ENV.RATE_LIMIT_WINDOW_MS,
-  max: ENV.RATE_LIMIT_MAX_LOGINS,
+  windowMs: ENV.RATE_LIMIT_WINDOW_MS, // 15 minutes
+  max: ENV.RATE_LIMIT_MAX_LOGINS, // 20 attempts
   standardHeaders: true,
   legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === 'test',
+  validate: { trustProxy: false },
+  skip: () => process.env.NODE_ENV === 'test' && !process.env.TEST_RATE_LIMIT,
+  handler: (req, res, _next, options) => {
+    res.status(options.statusCode).json({
+      success: false,
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many attempts, try again later',
+    });
+  },
   message: {
     success: false,
     code: 'RATE_LIMIT_EXCEEDED',
-    message: 'Too many sign-in attempts. For security, administrative login is temporarily throttled. Please try again in 15 minutes.',
+    message: 'Too many attempts, try again later',
   },
 });
 

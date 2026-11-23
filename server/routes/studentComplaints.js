@@ -7,8 +7,9 @@ import {
   uploadComplaintAttachments,
   getUploadedFiles,
   verifyUploadedFileSignature,
-  safeDeleteFile,
+  persistFilesToGridFS,
 } from '../middleware/upload.js';
+import { deleteGridFSFiles } from '../services/gridfsService.js';
 import { studentSubmissionRateLimiter } from '../middleware/rateLimiter.js';
 import {
   validateComplaintSubmissionZod,
@@ -131,6 +132,7 @@ router.post(
   duplicateSubmissionGuard,
   async (req, res, next) => {
     const uploadedFiles = getUploadedFiles(req);
+    let uploadedFileIds = [];
 
     try {
       const { category, title, description, location, pcNumber, priority } = req.validatedComplaint;
@@ -156,17 +158,12 @@ router.post(
         referenceId = await getNextComplaintReference();
       }
 
-      // 2. Build attachment metadata
-      const attachments = uploadedFiles.map((file) => ({
-        originalName: file.originalname,
-        filename: file.filename,
-        storageFilename: file.filename,
-        mimetype: file.mimetype,
-        mimeType: file.mimetype,
-        size: file.size,
-        path: file.path,
-        uploadedAt: new Date(),
-      }));
+      // 2. Persist attachment files to MongoDB GridFS
+      let attachments = [];
+      if (uploadedFiles.length > 0) {
+        attachments = await persistFilesToGridFS(uploadedFiles);
+        uploadedFileIds = attachments.map((a) => a.fileId);
+      }
 
       // 3. Compute SLA due date
       const isUrgent = priority === 'Urgent' || priority === 'High';
@@ -240,9 +237,9 @@ router.post(
         complaint: complaint.toStudentOwnerView(),
       });
     } catch (error) {
-      // Clean up uploaded files on error
-      for (const file of uploadedFiles) {
-        await safeDeleteFile(file.path);
+      // Clean up uploaded GridFS files on error
+      if (uploadedFileIds.length > 0) {
+        await deleteGridFSFiles(uploadedFileIds);
       }
       next(error);
     }
@@ -381,5 +378,9 @@ router.post('/claim-legacy', requireStudentAuth, async (req, res, next) => {
     next(error);
   }
 });
+
+router.get('/:complaintId/attachments/:fileId', streamComplaintAttachment);
+router.get('/:id/attachments/:filename', streamComplaintAttachment);
+router.get('/:id/attachment', streamComplaintAttachment);
 
 export default router;

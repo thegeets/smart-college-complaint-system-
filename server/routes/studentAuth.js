@@ -52,20 +52,7 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
-    const isProd = process.env.NODE_ENV === 'production';
-    const hasEmail = isEmailConfigured();
-
-    if (isProd && !hasEmail) {
-      return res.status(503).json({
-        success: false,
-        code: 'EMAIL_SERVICE_NOT_CONFIGURED',
-        message: 'Automated email delivery is not configured on this server. Registration cannot dispatch verification codes. Please contact campus IT administration.',
-      });
-    }
-
     const passwordHash = await hashPassword(password);
-    const verificationToken = generateNumericToken();
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     const student = new Student({
       name: name.trim(),
@@ -76,59 +63,24 @@ router.post('/register', async (req, res, next) => {
       program: 'BSc CSIT',
       avatar: avatar || '',
       phone: phone ? phone.trim() : '',
-      isEmailVerified: false,
-      emailVerificationToken: verificationToken,
-      emailVerificationExpires: verificationExpires,
+      isEmailVerified: true,
+      isActive: true,
     });
 
     await student.save();
 
-    let emailDelivery = null;
-    if (hasEmail) {
-      const sendResult = await sendVerificationEmail({
-        to: cleanEmail,
-        studentName: student.name,
-        token: verificationToken,
-      });
+    logger.info(`[Student Registration] New student registered: ${student.email} (${student.studentId}). Account active.`);
 
-      if (!sendResult.success) {
-        if (isProd) {
-          await Student.findByIdAndDelete(student._id);
-          return res.status(502).json({
-            success: false,
-            code: 'EMAIL_SEND_FAILED',
-            message: 'Campus email service failed to accept the verification email. Please try again later or contact IT support.',
-          });
-        }
-        logger.warn(`[Student Registration] Verification email could not be sent to ${cleanEmail}: ${sendResult.error}`);
-        emailDelivery = { status: 'SEND_FAILED', error: sendResult.error };
-      } else {
-        emailDelivery = { status: 'ACCEPTED', messageId: sendResult.messageId };
-      }
-    }
+    // Establish authenticated student session immediately
+    req.session.studentId = student._id.toString();
+    req.session.role = 'student';
 
-    if (isProd) {
-      logger.info(`[Student Registration] New student registered: ${student.email} (${student.studentId}). Verification code dispatched.`);
-    } else {
-      logger.info(`[Student Registration] New student registered: ${student.email} (${student.studentId}). Verification code generated.`);
-    }
-
-    const responsePayload = {
+    return res.status(201).json({
       success: true,
-      message: 'Student account created successfully. Please verify your email to activate full complaint services.',
+      message: 'Student account created successfully.',
       student: student.toSafeObject(),
-    };
-
-    if (emailDelivery) {
-      responsePayload.emailDelivery = emailDelivery;
-    }
-
-    // In production, NEVER expose verification tokens in API response
-    if (!isProd) {
-      responsePayload.verificationToken = verificationToken;
-    }
-
-    return res.status(201).json(responsePayload);
+      csrfToken: req.session.csrfToken,
+    });
   } catch (error) {
     next(error);
   }
@@ -140,47 +92,38 @@ router.post('/register', async (req, res, next) => {
  */
 router.post('/verify-email', async (req, res, next) => {
   try {
-    const { email, token } = req.body;
+    const { email } = req.body;
 
-    if (!email || !token) {
+    if (!email) {
       return res.status(400).json({
         success: false,
         code: 'MISSING_FIELDS',
-        message: 'Email and verification token are required.',
+        message: 'Email is required.',
       });
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const cleanToken = token.trim();
+    const student = await Student.findOne({ email: cleanEmail });
 
-    const student = await Student.findOne({
-      email: cleanEmail,
-      emailVerificationToken: cleanToken,
-      emailVerificationExpires: { $gt: new Date() },
-    }).select('+emailVerificationToken +emailVerificationExpires');
+    if (student) {
+      student.isEmailVerified = true;
+      student.isActive = true;
+      await student.save();
 
-    if (!student) {
-      return res.status(400).json({
-        success: false,
-        code: 'INVALID_TOKEN',
-        message: 'Verification code is invalid or has expired. Please request a new code.',
+      req.session.studentId = student._id.toString();
+      req.session.role = 'student';
+
+      return res.status(200).json({
+        success: true,
+        message: 'Email address verified successfully. Welcome to Soch College IT Complaint Portal.',
+        student: student.toSafeObject(),
+        csrfToken: req.session.csrfToken,
       });
     }
 
-    student.isEmailVerified = true;
-    student.emailVerificationToken = undefined;
-    student.emailVerificationExpires = undefined;
-    await student.save();
-
-    // Log the student in directly upon verification
-    req.session.studentId = student._id.toString();
-    req.session.role = 'student';
-
     return res.status(200).json({
       success: true,
-      message: 'Email address verified successfully. Welcome to Soch College IT Complaint Portal.',
-      student: student.toSafeObject(),
-      csrfToken: req.session.csrfToken,
+      message: 'Account is active.',
     });
   } catch (error) {
     next(error);

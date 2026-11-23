@@ -24,7 +24,7 @@ import studentComplaintsRouter from './routes/studentComplaints.js';
 export function createApp() {
   const app = express();
 
-  // 0. Enable reverse proxy trust (Render / Load Balancer / Cloudflare)
+  // 0. Enable reverse proxy trust (Vercel / Render / Load Balancer / Cloudflare)
   // Required so req.secure, X-Forwarded-Proto, and client IP are trusted for secure cookies & rate limiting
   app.set('trust proxy', 1);
 

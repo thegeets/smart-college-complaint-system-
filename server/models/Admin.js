@@ -36,8 +36,20 @@ const AdminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
+      enum: ['Admin', 'Staff', 'Technician'],
       default: 'Admin',
-      immutable: true, // Only Admin in this phase per requirements
+    },
+    specialization: {
+      type: String,
+      trim: true,
+      default: 'General IT Support',
+      maxlength: 120,
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: '',
+      maxlength: 20,
     },
     isActive: {
       type: Boolean,
@@ -61,6 +73,9 @@ AdminSchema.methods.toSafeObject = function () {
     title: this.title,
     department: this.department,
     role: this.role,
+    specialization: this.specialization || 'General IT Support',
+    phone: this.phone || '',
+    isActive: this.isActive,
     lastLoginAt: this.lastLoginAt,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,

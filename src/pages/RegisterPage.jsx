@@ -71,7 +71,7 @@ export function RegisterPage() {
     setServerError('');
 
     try {
-      const data = await registerStudent({
+      await registerStudent({
         name: formData.name.trim(),
         studentId: formData.studentId.trim(),
         email: formData.email.trim().toLowerCase(),
@@ -81,8 +81,8 @@ export function RegisterPage() {
         avatar: formData.avatar,
       });
 
-      // Navigate to email verification page with pre-filled email and code
-      navigate(`/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}&token=${encodeURIComponent(data.verificationToken || '')}&redirect=${encodeURIComponent(redirectTarget)}`);
+      // Account is immediately active; navigate directly to dashboard or intended target
+      navigate(redirectTarget || '/dashboard', { replace: true });
     } catch (err) {
       console.error('Registration failed:', err);
       setServerError(err.message || (isNe ? 'दर्ता असफल भयो।' : 'Registration failed.'));

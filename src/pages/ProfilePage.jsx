@@ -145,41 +145,8 @@ export function ProfilePage() {
             </button>
           </div>
 
-          {/* Email Verification Banner */}
-          {studentUser && !studentUser.isEmailVerified ? (
-            <div style={{
-              backgroundColor: '#FEF2F2',
-              border: '1px solid #FECACA',
-              borderRadius: '8px',
-              padding: '16px',
-              marginBottom: 'var(--space-6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '12px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <AlertCircle size={22} color="#DC2626" />
-                <div>
-                  <div style={{ fontSize: '0.9375rem', fontWeight: '700', color: '#991B1B' }}>
-                    {isNe ? 'इमेल स्वामित्व प्रमाणित भएको छैन' : 'Email Ownership Not Verified'}
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#7F1D1D' }}>
-                    {isNe ? 'नयाँ उजुरी दर्ता गर्न इमेल प्रमाणीकरण अनिवार्य छ।' : 'Verify your email address to enable lodging grievances.'}
-                  </div>
-                </div>
-              </div>
-
-              <Link
-                to={`/verify-email?email=${encodeURIComponent(studentUser.email)}`}
-                className="btn btn-sm"
-                style={{ backgroundColor: '#DC2626', color: '#FFFFFF', fontWeight: '700' }}
-              >
-                {isNe ? 'अहिले प्रमाणित गर्नुहोस्' : 'Verify Email'}
-              </Link>
-            </div>
-          ) : (
+          {/* Profile Status Banner */}
+          {studentUser && (
             <div style={{
               backgroundColor: '#F0FDFA',
               border: '1px solid #CCFBF1',
@@ -195,8 +162,8 @@ export function ProfilePage() {
               <CheckCircle2 size={18} />
               <span>
                 {isNe
-                  ? 'इमेल स्वामित्व सफलतापूर्वक प्रमाणित भइसकेको छ।'
-                  : 'Email ownership confirmed. Your student account is fully active.'}
+                  ? 'विद्यार्थी खाता पूर्ण रूपमा सक्रिय छ।'
+                  : 'Your student account is active and verified.'}
               </span>
             </div>
           )}

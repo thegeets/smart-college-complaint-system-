@@ -167,7 +167,13 @@ export function AppProvider({ children }) {
       throw err;
     }
 
-    showToast(data.message || 'Student account created.', 'success');
+    if (data.student) {
+      setIsStudentLoggedIn(true);
+      setStudentUser(data.student);
+      if (data.csrfToken) setCsrfToken(data.csrfToken);
+    }
+
+    showToast(data.message || 'Student account created successfully.', 'success');
     return data;
   }, [showToast]);
 
@@ -212,16 +218,48 @@ export function AppProvider({ children }) {
 
   // Real Student Login
   const loginStudent = useCallback(async (email, password) => {
-    const res = await fetch('/api/v1/student/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
+    let res;
+    try {
+      res = await fetch('/api/v1/student/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (networkErr) {
+      throw new Error(
+        'Unable to connect to the authentication server. Please ensure the backend server is running and accessible.',
+        { cause: networkErr }
+      );
+    }
 
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Invalid email or password.');
+    let data = null;
+    let rawText = '';
+    try {
+      rawText = await res.text();
+      data = rawText ? JSON.parse(rawText) : null;
+    } catch {
+      data = null;
+    }
+
+    if (!res.ok || !data?.success) {
+      if (res.status === 429) {
+        throw new Error(
+          data?.message ||
+          (rawText && !rawText.trim().startsWith('<') ? rawText.trim() : 'Too many attempts, try again later')
+        );
+      }
+      if (data?.message) {
+        throw new Error(data.message);
+      }
+      if (rawText && !rawText.trim().startsWith('<')) {
+        throw new Error(rawText.trim());
+      }
+      throw new Error(
+        res.status === 401
+          ? 'Invalid email or password.'
+          : 'Login failed. Please check your credentials.'
+      );
     }
 
     setIsStudentLoggedIn(true);
@@ -411,17 +449,33 @@ export function AppProvider({ children }) {
       );
     }
 
-    let data;
+    let data = null;
+    let rawText = '';
     try {
-      data = await res.json();
+      rawText = await res.text();
+      data = rawText ? JSON.parse(rawText) : null;
     } catch {
-      throw new Error(
-        `Server returned an invalid response (${res.status} ${res.statusText}). If deployed, please check backend proxy routing.`
-      );
+      data = null;
     }
 
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Login failed. Please check your credentials.');
+    if (!res.ok || !data?.success) {
+      if (res.status === 429) {
+        throw new Error(
+          data?.message ||
+          (rawText && !rawText.trim().startsWith('<') ? rawText.trim() : 'Too many attempts, try again later')
+        );
+      }
+      if (data?.message) {
+        throw new Error(data.message);
+      }
+      if (rawText && !rawText.trim().startsWith('<')) {
+        throw new Error(rawText.trim());
+      }
+      throw new Error(
+        res.status === 401
+          ? 'Invalid administrator credentials. Please check your email and password.'
+          : 'Login failed. Please check your credentials.'
+      );
     }
 
     setIsAdminLoggedIn(true);
@@ -548,8 +602,15 @@ export function AppProvider({ children }) {
     if (params.limit) query.set('limit', params.limit);
     if (params.status && params.status !== 'All') query.set('status', params.status);
     if (params.category && params.category !== 'All') query.set('category', params.category);
-    if (params.program && params.program !== 'All') query.set('program', params.program);
+    if (params.priority && params.priority !== 'All') query.set('priority', params.priority);
+    if (params.technician && params.technician !== 'all') query.set('technician', params.technician);
+    if (params.slaState && params.slaState !== 'all') query.set('slaState', params.slaState);
+    if (params.tab && params.tab !== 'all') query.set('tab', params.tab);
     if (params.search) query.set('search', params.search);
+    if (params.startDate) query.set('startDate', params.startDate);
+    if (params.endDate) query.set('endDate', params.endDate);
+    if (params.sortBy) query.set('sortBy', params.sortBy);
+    if (params.sortOrder) query.set('sortOrder', params.sortOrder);
 
     const res = await fetch(`/api/v1/admin/complaints?${query.toString()}`, {
       credentials: 'include',
@@ -563,6 +624,183 @@ export function AppProvider({ children }) {
     const data = await res.json();
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Failed to fetch complaints list.');
+    }
+
+    return data;
+  }, []);
+
+  const assignComplaintTechnician = useCallback(async (id, technicianId) => {
+    const res = await fetch(`/api/v1/admin/complaints/${id}/assign`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ technicianId }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to assign technician.');
+    }
+    showToast(data.message || 'Technician assignment updated.', 'success');
+    return data.complaint;
+  }, [csrfToken, showToast]);
+
+  const updateComplaintPriority = useCallback(async (id, priority) => {
+    const res = await fetch(`/api/v1/admin/complaints/${id}/priority`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ priority }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to update priority.');
+    }
+    showToast(data.message || 'Priority updated.', 'success');
+    return data.complaint;
+  }, [csrfToken, showToast]);
+
+  const bulkAssignComplaints = useCallback(async (complaintIds, technicianId) => {
+    const res = await fetch('/api/v1/admin/complaints/bulk/assign', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ complaintIds, technicianId }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Bulk assignment failed.');
+    }
+    showToast(data.message || 'Bulk assignment successful.', 'success');
+    return data;
+  }, [csrfToken, showToast]);
+
+  const bulkUpdateComplaintStatus = useCallback(async (complaintIds, status, note = '') => {
+    const res = await fetch('/api/v1/admin/complaints/bulk/status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ complaintIds, status, note }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Bulk status change failed.');
+    }
+    showToast(data.message || 'Bulk status updated.', 'success');
+    return data;
+  }, [csrfToken, showToast]);
+
+  const deleteComplaint = useCallback(async (id) => {
+    const res = await fetch(`/api/v1/admin/complaints/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to delete complaint record.');
+    }
+    showToast(data.message || 'Complaint deleted.', 'info');
+    return data;
+  }, [csrfToken, showToast]);
+
+  const fetchStaffMembers = useCallback(async () => {
+    const res = await fetch('/api/v1/admin/complaints/staff', {
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to fetch staff members.');
+    }
+    return data.staff || [];
+  }, []);
+
+  const createStaffMember = useCallback(async (staffData) => {
+    const res = await fetch('/api/v1/admin/complaints/staff', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify(staffData),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to onboard staff.');
+    }
+    showToast(data.message || 'New technician onboarded.', 'success');
+    return data.staff;
+  }, [csrfToken, showToast]);
+
+  const updateStaffStatus = useCallback(async (id, isActive) => {
+    const res = await fetch(`/api/v1/admin/complaints/staff/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken || '',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ isActive }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to update staff status.');
+    }
+    showToast(data.message || 'Staff status updated.', 'info');
+    return data.staff;
+  }, [csrfToken, showToast]);
+
+  const fetchStudentsList = useCallback(async (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.page) query.set('page', params.page);
+    if (params.limit) query.set('limit', params.limit);
+    if (params.search) query.set('search', params.search);
+
+    const res = await fetch(`/api/v1/admin/complaints/students?${query.toString()}`, {
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to load students list.');
+    }
+    return data;
+  }, []);
+
+  const fetchReportsAnalytics = useCallback(async (days = 30) => {
+    const res = await fetch(`/api/v1/admin/reports/analytics?days=${days}`, {
+      credentials: 'include',
+    });
+
+    if (res.status === 401) {
+      setIsAdminLoggedIn(false);
+      setAdminUser(null);
+    }
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to load analytics.');
     }
 
     return data;
@@ -780,6 +1018,16 @@ export function AppProvider({ children }) {
     addAdminResponse,
     addInternalNote,
     fetchReportsSummary,
+    fetchReportsAnalytics,
+    assignComplaintTechnician,
+    updateComplaintPriority,
+    bulkAssignComplaints,
+    bulkUpdateComplaintStatus,
+    deleteComplaint,
+    fetchStaffMembers,
+    createStaffMember,
+    updateStaffStatus,
+    fetchStudentsList,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

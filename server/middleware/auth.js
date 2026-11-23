@@ -88,13 +88,5 @@ export function requireEmailVerified(req, res, next) {
     });
   }
 
-  if (!req.student.isEmailVerified) {
-    return res.status(403).json({
-      success: false,
-      code: 'EMAIL_NOT_VERIFIED',
-      message: 'Please verify your email address to submit complaints and access full student services.',
-    });
-  }
-
   next();
 }

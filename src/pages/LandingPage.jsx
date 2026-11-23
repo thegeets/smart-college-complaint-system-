@@ -224,8 +224,8 @@ export function LandingPage() {
         ? 'के उजुरी दर्ता र ट्र्याक गर्न विद्यार्थी खाता आवश्यक पर्छ?'
         : 'Do I need a student account to submit or track a complaint?',
       a: isNe
-        ? 'हो। जवाफदेहिता, सुरक्षित ड्यासबोर्ड अनुगमन र आधिकारिक सूचना आदानप्रदानका लागि विद्यार्थीहरूले आफ्नो विद्यार्थी परिचयपत्र र इमेल मार्फत दर्ता गर्नुपर्दछ। दर्ता गरेपछि इमेल स्वामित्व पुष्टि गरी उजुरी दर्ता तथा "मेरो उजुरीहरू" ड्यासबोर्डबाट अनुगमन गर्न सकिन्छ।'
-        : 'Yes. To ensure accountability, reliable progress tracking, and authenticated privacy, students must register with their name, student ID, and semester. Email verification is required before lodging complaints or accessing personal history.',
+        ? 'हो। जवाफदेहिता, सुरक्षित ड्यासबोर्ड अनुगमन र आधिकारिक सूचना आदानप्रदानका लागि विद्यार्थीहरूले आफ्नो नाम, विद्यार्थी परिचयपत्र (Student ID) र सेमेस्टर प्रविष्ट गरी दर्ता गर्नुपर्दछ। दर्ता हुनासाथ खाता तुरुन्त सक्रिय हुन्छ र सिधै उजुरी दर्ता तथा "मेरो उजुरीहरू" ड्यासबोर्डबाट अनुगमन गर्न सकिन्छ।'
+        : 'Yes. To ensure accountability, reliable progress tracking, and authenticated privacy, students register with their name, student ID, and semester. Once registered, your account is immediately active to submit complaints and track resolutions directly from your dashboard.',
     },
     {
       q: isNe

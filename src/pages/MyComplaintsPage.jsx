@@ -226,42 +226,10 @@ export function MyComplaintsPage() {
             </div>
           </div>
 
-          {/* Email verification warning if unverified */}
-          {studentUser && !studentUser.isEmailVerified && (
-            <div style={{
-              backgroundColor: '#FFFBEB',
-              border: '1px solid #FDE68A',
-              borderRadius: '8px',
-              padding: '12px 16px',
-              marginBottom: 'var(--space-6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '10px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400E', fontSize: '0.875rem' }}>
-                <AlertCircle size={18} style={{ flexShrink: 0 }} />
-                <span>
-                  {isNe
-                    ? 'तपाईंको इमेल स्वामित्व अझै प्रमाणित भएको छैन। नयाँ उजुरी दर्ता गर्न इमेल प्रमाणीकरण आवश्यक छ।'
-                    : 'Your email ownership has not been confirmed yet. Please verify your email to lodge complaints.'}
-                </span>
-              </div>
-              <Link
-                to={`/verify-email?email=${encodeURIComponent(studentUser.email)}`}
-                className="btn btn-sm"
-                style={{ backgroundColor: '#D97706', color: '#FFFFFF', fontWeight: '700' }}
-              >
-                {isNe ? 'अहिले प्रमाणित गर्नुहोस्' : 'Verify Email Now'}
-              </Link>
-            </div>
-          )}
-
           {/* Metric Summary Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
-            <motion.div 
-              className="card" 
+            <motion.div
+              className="card"
               style={{ padding: 'var(--space-5)', borderTop: '3px solid #101D35' }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -278,8 +246,8 @@ export function MyComplaintsPage() {
               </div>
             </motion.div>
 
-            <motion.div 
-              className="card" 
+            <motion.div
+              className="card"
               style={{ padding: 'var(--space-5)', borderTop: '3px solid #B45309' }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -296,8 +264,8 @@ export function MyComplaintsPage() {
               </div>
             </motion.div>
 
-            <motion.div 
-              className="card" 
+            <motion.div
+              className="card"
               style={{ padding: 'var(--space-5)', borderTop: '3px solid #5278C8' }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -314,8 +282,8 @@ export function MyComplaintsPage() {
               </div>
             </motion.div>
 
-            <motion.div 
-              className="card" 
+            <motion.div
+              className="card"
               style={{ padding: 'var(--space-5)', borderTop: '3px solid #15803D' }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}

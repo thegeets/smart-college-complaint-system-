@@ -103,10 +103,10 @@ export function validateEnv() {
   const detectedProtocol = rawClean.startsWith('mongodb+srv://')
     ? 'mongodb+srv://'
     : rawClean.startsWith('mongodb://')
-    ? 'mongodb://'
-    : hasUri
-    ? 'invalid/non-mongodb'
-    : 'none';
+      ? 'mongodb://'
+      : hasUri
+        ? 'invalid/non-mongodb'
+        : 'none';
   console.log(`[Config] Database URI configured: ${hasUri} | Protocol: ${detectedProtocol}`);
 
   if (isTest) {
@@ -140,7 +140,7 @@ export function validateEnv() {
     RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 min
     RATE_LIMIT_MAX_SUBMISSIONS: parseInt(process.env.RATE_LIMIT_MAX_SUBMISSIONS || '10', 10),
     RATE_LIMIT_MAX_TRACKING: parseInt(process.env.RATE_LIMIT_MAX_TRACKING || '30', 10),
-    RATE_LIMIT_MAX_LOGINS: parseInt(process.env.RATE_LIMIT_MAX_LOGINS || '5', 10),
+    RATE_LIMIT_MAX_LOGINS: parseInt(process.env.RATE_LIMIT_MAX_LOGINS || '20', 10),
     COOKIE_SAME_SITE: cookieSameSite,
     COOKIE_SECURE: cookieSecure,
   };

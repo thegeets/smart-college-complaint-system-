@@ -1,6 +1,7 @@
 import express from 'express';
 import { Complaint } from '../models/Complaint.js';
-import { uploadAttachment, verifyUploadedFileSignature, safeDeleteFile } from '../middleware/upload.js';
+import { uploadAttachment, verifyUploadedFileSignature, persistFilesToGridFS } from '../middleware/upload.js';
+import { deleteGridFSFiles } from '../services/gridfsService.js';
 import { validateComplaintSubmission, validateTrackingInput } from '../middleware/validate.js';
 import { submissionRateLimiter, trackingRateLimiter } from '../middleware/rateLimiter.js';
 import { streamComplaintAttachment } from '../controllers/attachmentController.js';
@@ -24,12 +25,12 @@ router.post(
   verifyUploadedFileSignature,
   validateComplaintSubmission,
   async (req, res, next) => {
-    let uploadedFilePath = req.file ? req.file.path : null;
+    let uploadedFileIds = [];
 
     try {
       const sanitized = req.sanitizedComplaint;
 
-      // Generate unique reference (retry up to 3 times in rare collision event)
+      // Generate unique reference (retry up to 5 times in rare collision event)
       let reference;
       let isUnique = false;
       let attempts = 0;
@@ -52,19 +53,11 @@ router.post(
       const trackingSecret = generateTrackingSecret();
       const trackingSecretHash = await hashTrackingSecret(trackingSecret);
 
-      // Build attachment metadata if present
-      let attachmentData = null;
+      // Persist attachment to MongoDB GridFS if present
+      let attachments = [];
       if (req.file) {
-        attachmentData = {
-          originalName: req.file.originalname,
-          filename: req.file.filename,
-          storageFilename: req.file.filename,
-          mimetype: req.file.mimetype,
-          mimeType: req.file.mimetype,
-          size: req.file.size,
-          path: req.file.path,
-          uploadedAt: new Date(),
-        };
+        attachments = await persistFilesToGridFS([req.file]);
+        uploadedFileIds = attachments.map((a) => a.fileId);
       }
 
       const complaint = new Complaint({
@@ -77,7 +70,8 @@ router.post(
         description: sanitized.description,
         priority: sanitized.priority,
         status: 'Submitted',
-        attachment: attachmentData,
+        attachment: attachments[0] || null,
+        attachments,
         responses: [],
         internalNotes: [],
         timeline: [
@@ -102,9 +96,9 @@ router.post(
         submittedAt: complaint.createdAt,
       });
     } catch (error) {
-      // Clean up orphaned upload on any failure
-      if (uploadedFilePath) {
-        await safeDeleteFile(uploadedFilePath);
+      // Clean up orphaned GridFS files on any failure
+      if (uploadedFileIds.length > 0) {
+        await deleteGridFSFiles(uploadedFileIds);
       }
       next(error);
     }
@@ -151,9 +145,10 @@ router.post('/track', trackingRateLimiter, validateTrackingInput, async (req, re
 });
 
 /**
- * GET /api/v1/complaints/:id/attachments/:filename
- * Secure authenticated attachment streaming (owner student or staff/admin only).
+ * GET /api/v1/complaints/:complaintId/attachments/:fileId
+ * Secure authenticated attachment streaming from MongoDB GridFS.
  */
+router.get('/:complaintId/attachments/:fileId', streamComplaintAttachment);
 router.get('/:id/attachments/:filename', streamComplaintAttachment);
 router.get('/:id/attachment', streamComplaintAttachment);
 
