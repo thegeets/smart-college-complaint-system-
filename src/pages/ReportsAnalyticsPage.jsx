@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
+import { apiUrl } from '../config/api';
 import {
   AreaChart,
   Area,
@@ -112,7 +113,7 @@ export function ReportsAnalyticsPage() {
   }));
 
   const handleExportCsv = () => {
-    window.location.href = `/api/v1/admin/complaints/export/csv`;
+    window.location.href = apiUrl('/api/v1/admin/complaints/export/csv');
   };
 
   return (

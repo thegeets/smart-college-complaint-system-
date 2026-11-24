@@ -218,8 +218,25 @@ export function PublicNavbar() {
         {/* Center: Main Navigation Links */}
         <nav className="header-nav-column" aria-label={isNe ? 'मुख्य नेभिगेसन' : 'Main Navigation'}>
           {isStudentLoggedIn ? (
-            /* Logged-In Student Links: Dashboard, My Complaints, Submit, FAQ */
+            /* Logged-In Student Links: Home, Dashboard, My Complaints, Submit (Home placed before Dashboard, replacing FAQ) */
             <>
+              {/* Home Link */}
+              <Link 
+                to="/" 
+                className={`header-nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                aria-current={location.pathname === '/' ? 'page' : undefined}
+                onClick={() => {
+                  closeMenu();
+                  if (location.pathname === '/') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setScrollSection('home');
+                  }
+                }}
+              >
+                <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
+                <span className="nav-hover-line" aria-hidden="true" />
+              </Link>
+
               {/* Dashboard Link */}
               <Link 
                 to="/dashboard" 
@@ -252,24 +269,6 @@ export function PublicNavbar() {
                 <span>{isNe ? 'उजुरी दर्ता' : 'Submit'}</span>
                 <span className="nav-hover-line" aria-hidden="true" />
               </Link>
-
-              {/* FAQ Link */}
-              <a 
-                href="/#faqs" 
-                className={`header-nav-link ${isFaqActive ? 'active' : ''}`}
-                aria-current={isFaqActive ? 'section' : undefined}
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
-                    setScrollSection('faqs');
-                    navigate('/#faqs', { replace: true });
-                  }
-                }}
-              >
-                <span>{isNe ? 'प्रश्नोत्तर' : 'FAQ'}</span>
-                <span className="nav-hover-line" aria-hidden="true" />
-              </a>
             </>
           ) : (
             /* Logged-Out Visitor Links: Home, Categories, How It Works, FAQ, Contact */
@@ -436,15 +435,23 @@ export function PublicNavbar() {
                 )}
               </div>
 
-              {/* Profile Avatar with initials */}
+              {/* Profile Avatar with photo or initials */}
               <Link
                 to="/student/profile"
                 className="header-avatar-link"
                 title={`${studentUser?.name || 'Student Profile'} (${studentUser?.studentId || ''})`}
                 aria-label={studentUser?.name || 'Profile'}
               >
-                <div className="header-student-avatar" aria-hidden="true">
-                  {getInitials(studentUser?.name)}
+                <div className="header-student-avatar" aria-hidden="true" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {studentUser?.avatar ? (
+                    <img
+                      src={studentUser.avatar}
+                      alt={studentUser?.name || 'Student'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    getInitials(studentUser?.name)
+                  )}
                 </div>
               </Link>
 
@@ -533,86 +540,22 @@ export function PublicNavbar() {
               </div>
 
               <nav className="mobile-drawer-links" aria-label={isNe ? 'मोबाइल लिंकहरू' : 'Mobile Links'}>
-                <Link 
-                  to="/" 
-                  className={`mobile-drawer-link ${isHomeActive ? 'active' : ''}`}
-                  onClick={() => {
-                    closeMenu();
-                    if (location.pathname === '/') {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                      setScrollSection('home');
-                    }
-                  }}
-                >
-                  <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
-                </Link>
-
-                <a 
-                  href="/#categories" 
-                  className={`mobile-drawer-link ${isCategoriesActive ? 'active' : ''}`}
-                  onClick={() => {
-                    closeMenu();
-                    if (location.pathname === '/') {
-                      document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' });
-                      setScrollSection('categories');
-                    }
-                  }}
-                >
-                  <span>{isNe ? 'सेवा विधाहरू' : 'Categories'}</span>
-                </a>
-
-                <a 
-                  href="/#process" 
-                  className={`mobile-drawer-link ${isProcessActive ? 'active' : ''}`}
-                  onClick={() => {
-                    closeMenu();
-                    if (location.pathname === '/') {
-                      document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' });
-                      setScrollSection('process');
-                    }
-                  }}
-                >
-                  <span>{isNe ? 'समाधान प्रक्रिया' : 'How It Works'}</span>
-                </a>
-
-                <a 
-                  href="/#faqs" 
-                  className={`mobile-drawer-link ${isFaqActive ? 'active' : ''}`}
-                  onClick={() => {
-                    closeMenu();
-                    if (location.pathname === '/') {
-                      document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
-                      setScrollSection('faqs');
-                    }
-                  }}
-                >
-                  <span>{isNe ? 'बारम्बार सोधिने प्रश्नहरू' : 'FAQ'}</span>
-                </a>
-
-                <a 
-                  href="/#contact" 
-                  className={`mobile-drawer-link ${isContactActive ? 'active' : ''}`}
-                  onClick={() => {
-                    closeMenu();
-                    if (location.pathname === '/') {
-                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                      setScrollSection('contact');
-                    }
-                  }}
-                >
-                  <span>{isNe ? 'कलेज सम्पर्क डेस्क' : 'Contact'}</span>
-                </a>
-
-                <Link 
-                  to="/track" 
-                  className="mobile-drawer-link"
-                  onClick={closeMenu}
-                >
-                  <span>{isNe ? 'उजुरी स्थिति खोज्नुहोस्' : 'Track Status'}</span>
-                </Link>
-
-                {isStudentLoggedIn && (
+                {isStudentLoggedIn ? (
                   <>
+                    <Link 
+                      to="/" 
+                      className={`mobile-drawer-link ${location.pathname === '/' ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          setScrollSection('home');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
+                    </Link>
+
                     <Link 
                       to="/dashboard" 
                       className={`mobile-drawer-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
@@ -620,19 +563,131 @@ export function PublicNavbar() {
                     >
                       <span>{isNe ? 'ड्यासबोर्ड' : 'Dashboard'}</span>
                     </Link>
+
                     <Link 
                       to="/my-complaints" 
-                      className={`mobile-drawer-link ${location.pathname === '/my-complaints' || location.pathname.startsWith('/dashboard/complaints') ? 'active' : ''}`}
+                      className={`mobile-drawer-link ${location.pathname === '/my-complaints' || location.pathname.startsWith('/dashboard/complaints') || location.pathname.startsWith('/student/complaints') ? 'active' : ''}`}
                       onClick={closeMenu}
                     >
                       <span>{isNe ? 'मेरो उजुरीहरू' : 'My Complaints'}</span>
                     </Link>
+
                     <Link 
                       to="/submit" 
                       className={`mobile-drawer-link ${location.pathname === '/submit' ? 'active' : ''}`}
                       onClick={closeMenu}
                     >
                       <span>{isNe ? 'उजुरी दर्ता' : 'Submit'}</span>
+                    </Link>
+
+                    <Link 
+                      to="/student/profile" 
+                      className={`mobile-drawer-link ${location.pathname === '/student/profile' ? 'active' : ''}`}
+                      onClick={closeMenu}
+                    >
+                      <span>{isNe ? 'विद्यार्थी प्रोफाइल' : 'Student Profile'}</span>
+                    </Link>
+
+                    <Link 
+                      to="/track" 
+                      className="mobile-drawer-link"
+                      onClick={closeMenu}
+                    >
+                      <span>{isNe ? 'उजुरी स्थिति खोज्नुहोस्' : 'Track Status'}</span>
+                    </Link>
+
+                    <a 
+                      href="/#contact" 
+                      className={`mobile-drawer-link ${isContactActive ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                          setScrollSection('contact');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'कलेज सम्पर्क डेस्क' : 'Contact'}</span>
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      to="/" 
+                      className={`mobile-drawer-link ${isHomeActive ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          setScrollSection('home');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'गृहपृष्ठ' : 'Home'}</span>
+                    </Link>
+
+                    <a 
+                      href="/#categories" 
+                      className={`mobile-drawer-link ${isCategoriesActive ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' });
+                          setScrollSection('categories');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'सेवा विधाहरू' : 'Categories'}</span>
+                    </a>
+
+                    <a 
+                      href="/#process" 
+                      className={`mobile-drawer-link ${isProcessActive ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' });
+                          setScrollSection('process');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'समाधान प्रक्रिया' : 'How It Works'}</span>
+                    </a>
+
+                    <a 
+                      href="/#faqs" 
+                      className={`mobile-drawer-link ${isFaqActive ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                          setScrollSection('faqs');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'बारम्बार सोधिने प्रश्नहरू' : 'FAQ'}</span>
+                    </a>
+
+                    <a 
+                      href="/#contact" 
+                      className={`mobile-drawer-link ${isContactActive ? 'active' : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        if (location.pathname === '/') {
+                          document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                          setScrollSection('contact');
+                        }
+                      }}
+                    >
+                      <span>{isNe ? 'कलेज सम्पर्क डेस्क' : 'Contact'}</span>
+                    </a>
+
+                    <Link 
+                      to="/track" 
+                      className="mobile-drawer-link"
+                      onClick={closeMenu}
+                    >
+                      <span>{isNe ? 'उजुरी स्थिति खोज्नुहोस्' : 'Track Status'}</span>
                     </Link>
                   </>
                 )}

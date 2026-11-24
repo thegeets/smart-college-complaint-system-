@@ -711,8 +711,16 @@ export function StudentDashboard() {
 
                 <div className="profile-widget-body">
                   <div className="profile-hero-row">
-                    <div className="profile-avatar-circle" aria-hidden="true">
-                      {getInitials(studentUser?.name)}
+                    <div className="profile-avatar-circle" aria-hidden="true" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {studentUser?.avatar ? (
+                        <img
+                          src={studentUser.avatar}
+                          alt={studentUser?.name || 'Student'}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        getInitials(studentUser?.name)
+                      )}
                     </div>
                     <div className="profile-name-group">
                       <h4 className="profile-full-name">

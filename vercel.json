@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/",
@@ -27,7 +26,7 @@
       "destination": "https://smart-college-complaint-system-4f8d.onrender.com/api/$1"
     },
     {
-      "source": "/((?!assets/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

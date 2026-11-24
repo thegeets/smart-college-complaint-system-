@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { TRANSLATIONS } from '../config/translations';
+import { apiUrl } from '../config/api';
 
 const AppContext = createContext(null);
 
@@ -85,7 +86,7 @@ export function AppProvider({ children }) {
   const checkAdminSession = useCallback(async () => {
     setIsCheckingSession(true);
     try {
-      const res = await fetch('/api/v1/admin/auth/me', {
+      const res = await fetch(apiUrl('/api/v1/admin/auth/me'), {
         credentials: 'include',
       });
       if (res.ok) {
@@ -119,7 +120,7 @@ export function AppProvider({ children }) {
   const checkStudentSession = useCallback(async () => {
     setIsCheckingStudentSession(true);
     try {
-      const res = await fetch('/api/v1/student/auth/me', {
+      const res = await fetch(apiUrl('/api/v1/student/auth/me'), {
         credentials: 'include',
       });
       if (res.ok) {
@@ -155,7 +156,7 @@ export function AppProvider({ children }) {
   const registerStudent = useCallback(async (formData) => {
     let res;
     try {
-      res = await fetch('/api/v1/student/auth/register', {
+      res = await fetch(apiUrl('/api/v1/student/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -206,7 +207,7 @@ export function AppProvider({ children }) {
 
   // Real Student Email Verification
   const verifyStudentEmail = useCallback(async (email, token) => {
-    const res = await fetch('/api/v1/student/auth/verify-email', {
+    const res = await fetch(apiUrl('/api/v1/student/auth/verify-email'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -227,7 +228,7 @@ export function AppProvider({ children }) {
 
   // Resend Student Verification Code
   const resendStudentVerification = useCallback(async (email) => {
-    const res = await fetch('/api/v1/student/auth/resend-verification', {
+    const res = await fetch(apiUrl('/api/v1/student/auth/resend-verification'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -247,7 +248,7 @@ export function AppProvider({ children }) {
   const loginStudent = useCallback(async (email, password) => {
     let res;
     try {
-      res = await fetch('/api/v1/student/auth/login', {
+      res = await fetch(apiUrl('/api/v1/student/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -300,7 +301,7 @@ export function AppProvider({ children }) {
   // Real Student Logout
   const logoutStudent = useCallback(async () => {
     try {
-      await fetch('/api/v1/student/auth/logout', {
+      await fetch(apiUrl('/api/v1/student/auth/logout'), {
         method: 'POST',
         credentials: 'include',
       });
@@ -315,7 +316,7 @@ export function AppProvider({ children }) {
 
   // Real Student Profile Update
   const updateStudentProfile = useCallback(async (profileData) => {
-    const res = await fetch('/api/v1/student/auth/profile', {
+    const res = await fetch(apiUrl('/api/v1/student/auth/profile'), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -334,7 +335,7 @@ export function AppProvider({ children }) {
 
   // Forgot / Reset Password
   const forgotStudentPassword = useCallback(async (email) => {
-    const res = await fetch('/api/v1/student/auth/forgot-password', {
+    const res = await fetch(apiUrl('/api/v1/student/auth/forgot-password'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -347,7 +348,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const resetStudentPassword = useCallback(async (email, token, newPassword) => {
-    const res = await fetch('/api/v1/student/auth/reset-password', {
+    const res = await fetch(apiUrl('/api/v1/student/auth/reset-password'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, token, newPassword }),
@@ -367,7 +368,7 @@ export function AppProvider({ children }) {
     if (params.category && params.category !== 'All') query.set('category', params.category);
     if (params.search) query.set('search', params.search);
 
-    const res = await fetch(`/api/v1/student/complaints?${query.toString()}`, {
+    const res = await fetch(apiUrl(`/api/v1/student/complaints?${query.toString()}`), {
       credentials: 'include',
     });
 
@@ -385,7 +386,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const fetchStudentComplaintById = useCallback(async (id) => {
-    const res = await fetch(`/api/v1/student/complaints/${id}`, {
+    const res = await fetch(apiUrl(`/api/v1/student/complaints/${id}`), {
       credentials: 'include',
     });
 
@@ -425,7 +426,7 @@ export function AppProvider({ children }) {
       body.append('attachment', files);
     }
 
-    const res = await fetch('/api/complaints', {
+    const res = await fetch(apiUrl('/api/complaints'), {
       method: 'POST',
       credentials: 'include',
       body,
@@ -444,7 +445,7 @@ export function AppProvider({ children }) {
   }, [showToast]);
 
   const claimLegacyComplaint = useCallback(async (reference, trackingSecret) => {
-    const res = await fetch('/api/v1/student/complaints/claim-legacy', {
+    const res = await fetch(apiUrl('/api/v1/student/complaints/claim-legacy'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -464,7 +465,7 @@ export function AppProvider({ children }) {
   const loginAdmin = useCallback(async (email, password) => {
     let res;
     try {
-      res = await fetch('/api/v1/admin/auth/login', {
+      res = await fetch(apiUrl('/api/v1/admin/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -516,7 +517,7 @@ export function AppProvider({ children }) {
   // Real Admin Logout
   const logoutAdmin = useCallback(async () => {
     try {
-      await fetch('/api/v1/admin/auth/logout', {
+      await fetch(apiUrl('/api/v1/admin/auth/logout'), {
         method: 'POST',
         credentials: 'include',
       });
@@ -532,7 +533,7 @@ export function AppProvider({ children }) {
 
   // Real Admin Password Change
   const changeAdminPassword = useCallback(async (currentPassword, newPassword, confirmPassword) => {
-    const res = await fetch('/api/v1/admin/auth/password', {
+    const res = await fetch(apiUrl('/api/v1/admin/auth/password'), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -556,7 +557,7 @@ export function AppProvider({ children }) {
 
   // Real Admin Profile Update
   const updateAdminProfile = useCallback(async ({ name, email, title }) => {
-    const res = await fetch('/api/v1/admin/auth/profile', {
+    const res = await fetch(apiUrl('/api/v1/admin/auth/profile'), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -592,7 +593,7 @@ export function AppProvider({ children }) {
       body.append('attachment', file);
     }
 
-    const res = await fetch('/api/v1/complaints', {
+    const res = await fetch(apiUrl('/api/v1/complaints'), {
       method: 'POST',
       body,
     });
@@ -609,7 +610,7 @@ export function AppProvider({ children }) {
 
   // Legacy Private Complaint Tracking (preserved)
   const trackComplaint = useCallback(async (reference, trackingSecret) => {
-    const res = await fetch('/api/v1/complaints/track', {
+    const res = await fetch(apiUrl('/api/v1/complaints/track'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reference, trackingSecret }),
@@ -640,7 +641,7 @@ export function AppProvider({ children }) {
     if (params.sortBy) query.set('sortBy', params.sortBy);
     if (params.sortOrder) query.set('sortOrder', params.sortOrder);
 
-    const res = await fetch(`/api/v1/admin/complaints?${query.toString()}`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints?${query.toString()}`), {
       credentials: 'include',
     });
 
@@ -658,7 +659,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const assignComplaintTechnician = useCallback(async (id, technicianId) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}/assign`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}/assign`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -677,7 +678,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const updateComplaintPriority = useCallback(async (id, priority) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}/priority`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}/priority`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -696,7 +697,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const bulkAssignComplaints = useCallback(async (complaintIds, technicianId) => {
-    const res = await fetch('/api/v1/admin/complaints/bulk/assign', {
+    const res = await fetch(apiUrl('/api/v1/admin/complaints/bulk/assign'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -715,7 +716,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const bulkUpdateComplaintStatus = useCallback(async (complaintIds, status, note = '') => {
-    const res = await fetch('/api/v1/admin/complaints/bulk/status', {
+    const res = await fetch(apiUrl('/api/v1/admin/complaints/bulk/status'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -734,7 +735,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const deleteComplaint = useCallback(async (id) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}`), {
       method: 'DELETE',
       headers: {
         'x-csrf-token': csrfToken || '',
@@ -751,7 +752,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const fetchStaffMembers = useCallback(async () => {
-    const res = await fetch('/api/v1/admin/complaints/staff', {
+    const res = await fetch(apiUrl('/api/v1/admin/complaints/staff'), {
       credentials: 'include',
     });
     const data = await res.json();
@@ -762,7 +763,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const createStaffMember = useCallback(async (staffData) => {
-    const res = await fetch('/api/v1/admin/complaints/staff', {
+    const res = await fetch(apiUrl('/api/v1/admin/complaints/staff'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -781,7 +782,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const updateStaffStatus = useCallback(async (id, isActive) => {
-    const res = await fetch(`/api/v1/admin/complaints/staff/${id}/status`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/staff/${id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -805,7 +806,7 @@ export function AppProvider({ children }) {
     if (params.limit) query.set('limit', params.limit);
     if (params.search) query.set('search', params.search);
 
-    const res = await fetch(`/api/v1/admin/complaints/students?${query.toString()}`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/students?${query.toString()}`), {
       credentials: 'include',
     });
 
@@ -817,7 +818,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const fetchReportsAnalytics = useCallback(async (days = 30) => {
-    const res = await fetch(`/api/v1/admin/reports/analytics?days=${days}`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/reports/analytics?days=${days}`), {
       credentials: 'include',
     });
 
@@ -835,7 +836,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const fetchAdminComplaintById = useCallback(async (id) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}`), {
       credentials: 'include',
     });
 
@@ -853,7 +854,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const updateComplaintStatus = useCallback(async (id, newStatus, reason = '') => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}/status`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -877,7 +878,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const addAdminResponse = useCallback(async (id, message) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}/responses`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}/responses`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -901,7 +902,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const addInternalNote = useCallback(async (id, note) => {
-    const res = await fetch(`/api/v1/admin/complaints/${id}/internal-notes`, {
+    const res = await fetch(apiUrl(`/api/v1/admin/complaints/${id}/internal-notes`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -925,7 +926,7 @@ export function AppProvider({ children }) {
   }, [csrfToken, showToast]);
 
   const fetchReportsSummary = useCallback(async () => {
-    const res = await fetch('/api/v1/admin/reports/summary', {
+    const res = await fetch(apiUrl('/api/v1/admin/reports/summary'), {
       credentials: 'include',
     });
 

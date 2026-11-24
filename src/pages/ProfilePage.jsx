@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
@@ -9,8 +9,12 @@ import {
   CheckCircle2,
   AlertCircle,
   LogOut,
-  Link2
+  Link2,
+  Camera,
+  Trash2,
+  User
 } from 'lucide-react';
+import { processAvatarFile } from '../utils/imageUtils';
 
 const SEMESTERS = [
   '1st Semester',
@@ -48,14 +52,48 @@ export function ProfilePage() {
   const [name, setName] = useState(studentUser?.name || '');
   const [semester, setSemester] = useState(studentUser?.semester || '1st Semester');
   const [phone, setPhone] = useState(studentUser?.phone || '');
+  const [avatar, setAvatar] = useState(studentUser?.avatar || '');
+  const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef(null);
 
   if (studentUser !== prevUser) {
     setPrevUser(studentUser);
     setName(studentUser?.name || '');
     setSemester(studentUser?.semester || '1st Semester');
     setPhone(studentUser?.phone || '');
+    setAvatar(studentUser?.avatar || '');
   }
+
+  const handlePhotoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPhotoError('');
+    setIsProcessingPhoto(true);
+
+    try {
+      const optimizedDataUrl = await processAvatarFile(file);
+      setAvatar(optimizedDataUrl);
+    } catch (err) {
+      console.error('Avatar processing error:', err);
+      setPhotoError(err.message || 'Could not process selected image.');
+    } finally {
+      setIsProcessingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setAvatar('');
+    setPhotoError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Claim legacy state
   const [legacyRef, setLegacyRef] = useState('');
@@ -75,6 +113,7 @@ export function ProfilePage() {
         name: name.trim(),
         semester,
         phone: phone.trim(),
+        avatar,
       });
     } catch (err) {
       showToast(err.message || 'Failed to update profile.', 'error');
@@ -180,6 +219,117 @@ export function ProfilePage() {
             </h2>
 
             <form onSubmit={handleSaveProfile}>
+              {/* Profile Photo Management */}
+              <div style={{ marginBottom: 'var(--space-6)', paddingBottom: 'var(--space-5)', borderBottom: '1px solid var(--color-border)' }}>
+                <label className="form-label" style={{ fontWeight: 600, display: 'block', marginBottom: '10px' }}>
+                  {isNe ? 'विद्यार्थी प्रोफाइल फोटो' : 'Profile Photo'}
+                </label>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                  {/* Photo Preview Frame */}
+                  <div
+                    style={{
+                      width: '76px',
+                      height: '76px',
+                      borderRadius: '50%',
+                      backgroundColor: '#EFF6FF',
+                      border: '2px solid #BFDBFE',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 12px rgba(16, 29, 53, 0.08)'
+                    }}
+                  >
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={name || 'Student Avatar'}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{ color: '#356ACB', fontWeight: 800, fontSize: '1.4rem' }}>
+                        {name ? name.slice(0, 2).toUpperCase() : <User size={32} color="#94A3B8" />}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      onChange={handlePhotoSelect}
+                      style={{ display: 'none' }}
+                      id="profile-avatar-input"
+                    />
+
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isProcessingPhoto || isSaving}
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.8125rem',
+                          padding: '7px 14px',
+                          borderRadius: '6px'
+                        }}
+                      >
+                        <Camera size={14} />
+                        <span>
+                          {isProcessingPhoto
+                            ? (isNe ? 'प्रशोधन हुँदैछ...' : 'Processing...')
+                            : avatar
+                            ? (isNe ? 'फोटो परिवर्तन गर्नुहोस्' : 'Change Photo')
+                            : (isNe ? 'फोटो अपलोड गर्नुहोस्' : 'Upload Photo')}
+                        </span>
+                      </button>
+
+                      {avatar && (
+                        <button
+                          type="button"
+                          onClick={handleRemovePhoto}
+                          disabled={isSaving}
+                          className="btn btn-outline btn-sm"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.8125rem',
+                            padding: '7px 12px',
+                            color: '#B91C1C',
+                            borderColor: '#FECACA',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          <Trash2 size={13} />
+                          <span>{isNe ? 'फोटो हटाउनुहोस्' : 'Remove Photo'}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', display: 'block' }}>
+                      {isNe
+                        ? 'JPG, PNG वा WebP (अधिकतम ५ MB, स्वतः क्रप र अप्टिमाइज गरिन्छ)'
+                        : 'JPG, PNG or WebP (max 5 MB, automatically cropped & optimized)'}
+                    </span>
+
+                    {photoError && (
+                      <span style={{ fontSize: '0.75rem', color: '#B91C1C', marginTop: '4px', display: 'block' }}>
+                        {photoError}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
                 {/* Full Name */}
                 <div className="form-group">

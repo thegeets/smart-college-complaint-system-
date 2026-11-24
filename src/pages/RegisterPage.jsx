@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { m } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { Footer } from '../components/Footer';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { UserPlus, AlertCircle, ShieldCheck } from 'lucide-react';
+import { UserPlus, AlertCircle, ShieldCheck, Camera, Upload, Trash2, User } from 'lucide-react';
 import { getSafeRedirectUrl } from '../utils/url';
+import { processAvatarFile } from '../utils/imageUtils';
 
 const SEMESTERS = [
   '1st Semester',
@@ -47,7 +48,39 @@ export function RegisterPage() {
 
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
+  const [photoError, setPhotoError] = useState('');
+  const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handlePhotoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPhotoError('');
+    setIsProcessingPhoto(true);
+
+    try {
+      const optimizedDataUrl = await processAvatarFile(file);
+      setFormData((prev) => ({ ...prev, avatar: optimizedDataUrl }));
+    } catch (err) {
+      console.error('Avatar processing error:', err);
+      setPhotoError(err.message || 'Could not process selected image.');
+    } finally {
+      setIsProcessingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData((prev) => ({ ...prev, avatar: '' }));
+    setPhotoError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const validate = () => {
     const errs = {};
@@ -181,6 +214,116 @@ export function RegisterPage() {
               )}
 
               <form onSubmit={handleSubmit} noValidate>
+                {/* Student Profile Photo Upload (Optional) */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-5)' }}>
+                  <label className="form-label" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                    {isNe ? 'विद्यार्थी फोटो (ऐच्छिक)' : 'Student Profile Photo (Optional)'}
+                  </label>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    {/* Avatar Circle Frame */}
+                    <div
+                      style={{
+                        width: '68px',
+                        height: '68px',
+                        borderRadius: '50%',
+                        backgroundColor: '#F1F5F9',
+                        border: '2px dashed #94A3B8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        flexShrink: 0,
+                        boxShadow: '0 2px 8px rgba(16, 29, 53, 0.06)'
+                      }}
+                    >
+                      {formData.avatar ? (
+                        <img
+                          src={formData.avatar}
+                          alt="Profile Preview"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{ color: '#64748B', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <User size={28} color="#94A3B8" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions and Helper */}
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        onChange={handlePhotoSelect}
+                        style={{ display: 'none' }}
+                        id="reg-avatar-input"
+                      />
+
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isProcessingPhoto}
+                          className="btn btn-secondary btn-sm"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.8125rem',
+                            padding: '6px 12px',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          <Camera size={14} />
+                          <span>
+                            {isProcessingPhoto
+                              ? (isNe ? 'प्रशोधन हुँदैछ...' : 'Processing...')
+                              : formData.avatar
+                              ? (isNe ? 'फोटो परिवर्तन गर्नुहोस्' : 'Change Photo')
+                              : (isNe ? 'फोटो छान्नुहोस्' : 'Upload Photo')}
+                          </span>
+                        </button>
+
+                        {formData.avatar && (
+                          <button
+                            type="button"
+                            onClick={handleRemovePhoto}
+                            className="btn btn-outline btn-sm"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '0.8125rem',
+                              padding: '6px 10px',
+                              color: '#B91C1C',
+                              borderColor: '#FECACA',
+                              borderRadius: '6px'
+                            }}
+                          >
+                            <Trash2 size={13} />
+                            <span>{isNe ? 'हटाउनुहोस्' : 'Remove'}</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', display: 'block' }}>
+                        {isNe
+                          ? 'JPG, PNG वा WebP (स्वचालित रूपमा उपयुक्त साइजमा मिलाइन्छ)'
+                          : 'JPG, PNG or WebP (auto-resized for crisp avatar display)'}
+                      </span>
+
+                      {photoError && (
+                        <span style={{ fontSize: '0.75rem', color: '#B91C1C', marginTop: '4px', display: 'block' }}>
+                          {photoError}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Full Name */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                   <label htmlFor="reg-name" className="form-label" style={{ fontWeight: 600 }}>

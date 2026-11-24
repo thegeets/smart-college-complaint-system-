@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { apiUrl } from '../config/api';
 import { StatusBadge, PriorityBadge, CategoryBadge } from '../components/StatusBadge';
 import { AdminComplaintDetailView } from '../components/AdminComplaintDetailView';
 import {
@@ -289,7 +290,7 @@ export function AdminComplaintsPage() {
       startDate: urlStartDate,
       endDate: urlEndDate,
     });
-    window.location.href = `/api/v1/admin/complaints/export/csv?${params.toString()}`;
+    window.location.href = apiUrl(`/api/v1/admin/complaints/export/csv?${params.toString()}`);
   };
 
   // Copy reference code

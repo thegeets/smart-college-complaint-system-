@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../config/api';
 import {
   Paperclip,
   Download,
@@ -60,7 +61,7 @@ export function ComplaintAttachments({ complaint, isNe = false, title = null }) 
   const getFileUrl = (att, isDownload = false) => {
     const fn = att.filename || att.storageFilename || att.originalName;
     const downloadQuery = isDownload ? '?download=1' : '';
-    return `/api/v1/complaints/${encodeURIComponent(complaintId)}/attachments/${encodeURIComponent(fn)}${downloadQuery}`;
+    return apiUrl(`/api/v1/complaints/${encodeURIComponent(complaintId)}/attachments/${encodeURIComponent(fn)}${downloadQuery}`);
   };
 
   const openLightbox = (imageAtt) => {
